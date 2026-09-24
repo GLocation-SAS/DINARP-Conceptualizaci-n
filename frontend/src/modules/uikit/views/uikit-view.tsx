@@ -47,7 +47,6 @@ import { ModalsOverlaysShowcase } from "../components/modals-overlays-showcase";
 import { DataManagementShowcase } from "../components/data-management-showcase";
 import { RiskAnalyticsShowcase } from "../components/risk-analytics-showcase";
 import { ReportsExportShowcase } from "../components/reports-export-showcase";
-import { ConversationalAssistantShowcase } from "../components/conversational-assistant-showcase";
 
 import { SystemPagesShowcase } from "../components/system-pages-showcase";
 import { LoginGeoportalShowcase } from "../components/login-geoportal-showcase";
@@ -67,7 +66,6 @@ const SECTION_COMPONENTS: Record<string, React.ComponentType<{ registerSection?:
   "modals-overlays": ModalsOverlaysShowcase,
   "data-management-category": DataManagementShowcase,
   "reports-export-category": ReportsExportShowcase,
-  "conversational-assistant-category": ConversationalAssistantShowcase,
 
   "system-pages-category": SystemPagesShowcase,
   "login-geoportal": LoginGeoportalShowcase,

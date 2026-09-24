@@ -138,21 +138,19 @@ export function RechazarSolicitudDialog({
           <Button
             type="button"
             variant="outline"
-            size="sm"
             disabled={isSubmitting}
             onClick={() => onOpenChange(false)}
-            className="text-xs font-semibold"
+            className="h-10 px-4 text-xs font-semibold rounded-full"
           >
             Cancelar
           </Button>
 
           <Button
             type="button"
-            variant="outline"
-            size="sm"
+            variant="danger"
             disabled={isSubmitting || isMotivoEmpty}
             onClick={handleReject}
-            className="text-xs font-semibold gap-1.5 shadow-xs border-border text-foreground hover:bg-muted"
+            className="h-10 px-4 text-xs font-semibold gap-1.5 shadow-xs"
           >
             {isSubmitting ? (
               <>

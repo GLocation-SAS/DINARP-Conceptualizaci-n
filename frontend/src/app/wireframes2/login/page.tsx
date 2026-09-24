@@ -4,7 +4,7 @@ import React from "react";
 import { getAssetPath } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { WireframeAuthLayout } from "../components/wireframe-auth-layout";
-import { DinarpAccessFlow } from "../../wireframes/components/dinarp-access-flow";
+import { DinarpWireframe2LoginFlow } from "../components/dinarp-wireframe2-login-flow";
 
 export default function Wireframe2LoginPage() {
   return (
@@ -28,8 +28,8 @@ export default function Wireframe2LoginPage() {
         </div>
       </div>
 
-      {/* ── Flujo Integral de Acceso y Seguridad DINARP ── */}
-      <DinarpAccessFlow dashboardRoute="/wireframes2/catalogo-interoperabilidad" />
+      {/* ── Flujo Integral de Acceso y Enrolamiento BPM DINARP ── */}
+      <DinarpWireframe2LoginFlow dashboardRoute="/wireframes2/catalogo-interoperabilidad" />
     </WireframeAuthLayout>
   );
 }

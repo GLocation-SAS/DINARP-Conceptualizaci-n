@@ -160,7 +160,7 @@ export default function PaquetesConsumoPage() {
                     <TableCell>{p.fuente}</TableCell>
                     <TableCell>{p.campos}</TableCell>
                     <TableCell>
-                      <Badge tone="neutral" appearance="outline" className="bg-background">
+                      <Badge tone="success" appearance="soft" size="sm">
                         {p.estado}
                       </Badge>
                     </TableCell>

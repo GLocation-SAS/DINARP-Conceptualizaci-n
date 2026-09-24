@@ -262,8 +262,8 @@ export default function AccesoInteroperabilidadPage() {
     switch (estado) {
       case "Acceso generado":
         return (
-          <Badge tone="success" appearance="soft" size="sm" className="gap-1 font-semibold border border-emerald-500/30 text-emerald-700 dark:text-emerald-300 bg-emerald-500/10">
-            <ShieldCheck className="size-3 text-emerald-600 dark:text-emerald-400" />
+          <Badge tone="success" appearance="soft" size="sm" className="gap-1 font-semibold">
+            <ShieldCheck className="size-3" />
             <span>Acceso generado</span>
           </Badge>
         );
@@ -271,8 +271,8 @@ export default function AccesoInteroperabilidadPage() {
       case "Pago validado":
       case "Pago verificado":
         return (
-          <Badge tone="neutral" appearance="soft" size="sm" className="gap-1 font-semibold border border-border text-foreground">
-            <CheckCircle2 className="size-3 text-foreground" />
+          <Badge tone="success" appearance="soft" size="sm" className="gap-1 font-semibold">
+            <CheckCircle2 className="size-3" />
             <span>{estado}</span>
           </Badge>
         );
@@ -282,31 +282,32 @@ export default function AccesoInteroperabilidadPage() {
       case "Reenviada":
       case "Reenviada para aprobación":
         return (
-          <Badge tone="neutral" appearance="soft" size="sm" className="gap-1 font-semibold border border-border text-foreground">
-            <Clock className="size-3 text-muted-foreground" />
+          <Badge tone="info" appearance="soft" size="sm" className="gap-1 font-semibold">
+            <Clock className="size-3" />
             <span>{estado}</span>
           </Badge>
         );
       case "Pendiente de pago":
       case "Pendiente de validación de pago":
       case "Pago en validación":
+      case "Pago pendiente":
         return (
-          <Badge tone="neutral" appearance="soft" size="sm" className="gap-1 font-semibold border border-border text-foreground">
-            <AlertTriangle className="size-3 text-muted-foreground" />
+          <Badge tone="warning" appearance="soft" size="sm" className="gap-1 font-semibold">
+            <AlertTriangle className="size-3" />
             <span>{estado}</span>
           </Badge>
         );
       case "Rechazada":
       case "Con observaciones":
         return (
-          <Badge tone="neutral" appearance="outline" size="sm" className="gap-1 font-semibold border-border text-foreground bg-background">
-            <X className="size-3 text-muted-foreground" />
+          <Badge tone="danger" appearance="soft" size="sm" className="gap-1 font-semibold">
+            <X className="size-3" />
             <span>{estado}</span>
           </Badge>
         );
       default:
         return (
-          <Badge tone="neutral" appearance="outline" size="sm" className="bg-background text-foreground">
+          <Badge tone="neutral" appearance="soft" size="sm">
             {estado}
           </Badge>
         );

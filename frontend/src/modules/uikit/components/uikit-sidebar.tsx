@@ -34,7 +34,6 @@ import {
   ToggleLeft,
   Layers,
   Bell,
-  MessageSquare,
   LogOut,
   Layout,
   Table as TableIcon,
@@ -235,23 +234,6 @@ export const UIKIT_SECTIONS: UIKitSection[] = [
       { id: "download-list", label: "Download Item & List" },
     ]
   },
-  {
-    id: "conversational-assistant-category",
-    label: "Asistente Conversacional (Conversational Assistant)",
-    icon: MessageSquare,
-    group: "data",
-    subItems: [
-      { id: "chat-launcher", label: "Chat Launcher" },
-      { id: "chat-panel", label: "Chat Panel & Messages" },
-      { id: "rich-result", label: "Source Item & Rich Result" },
-      { id: "chat-states", label: "Chat Empty & Error States" },
-      { id: "chat-assistant", label: "Chat Assistant" },
-      { id: "chat-intranet", label: "Chat Intranet" },
-    ]
-  },
-
-
-
 ];
 
 const GROUP_LABELS: Record<UIKitSection["group"], string> = {

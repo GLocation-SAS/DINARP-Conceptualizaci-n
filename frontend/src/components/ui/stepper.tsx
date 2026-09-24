@@ -18,6 +18,7 @@ export interface StepperProps {
   completedSteps?: number[];
   onStepClick?: (index: number) => void;
   orientation?: "horizontal" | "vertical";
+  variant?: "default" | "tabs-pill";
   stepPrefix?: string;
   size?: "default" | "sm";
   showBadge?: boolean;
@@ -30,6 +31,7 @@ export function Stepper({
   completedSteps = [], 
   onStepClick,
   orientation = "horizontal",
+  variant = "default",
   stepPrefix = "Paso",
   size = "default",
   showBadge = true,
@@ -37,6 +39,56 @@ export function Stepper({
 }: StepperProps) {
   const isVertical = orientation === "vertical";
   const isSmall = size === "sm";
+
+  if (variant === "tabs-pill") {
+    return (
+      <div className={cn("w-auto", className)}>
+        <nav aria-label="Pasos" className="flex items-center gap-4 sm:gap-6 shrink-0">
+          {steps.map((step, index) => {
+            const isCompleted = completedSteps.includes(index) || index < activeStep;
+            const isActive = index === activeStep;
+            const isClickable = Boolean(onStepClick && (isCompleted || isActive));
+
+            return (
+              <button
+                key={step.id || index}
+                type="button"
+                onClick={() => isClickable && onStepClick?.(index)}
+                disabled={!isClickable}
+                aria-current={isActive ? "step" : undefined}
+                className={cn(
+                  "text-left transition-all select-none outline-none",
+                  isActive
+                    ? "bg-foreground text-background px-4 py-2 rounded-xl shadow-xs cursor-default"
+                    : isCompleted
+                    ? "text-muted-foreground hover:text-foreground cursor-pointer px-1 py-1"
+                    : "text-muted-foreground/60 cursor-not-allowed px-1 py-1",
+                  "focus-visible:ring-2 focus-visible:ring-ring focus-visible:rounded-xl"
+                )}
+              >
+                <span
+                  className={cn(
+                    "block text-xs font-bold leading-tight",
+                    isActive ? "text-background" : "text-muted-foreground"
+                  )}
+                >
+                  {index + 1}.
+                </span>
+                <span
+                  className={cn(
+                    "block text-sm font-bold tracking-tight leading-tight",
+                    isActive ? "text-background" : "text-muted-foreground"
+                  )}
+                >
+                  {step.title}
+                </span>
+              </button>
+            );
+          })}
+        </nav>
+      </div>
+    );
+  }
 
   return (
     <div className={cn("w-full", className)}>

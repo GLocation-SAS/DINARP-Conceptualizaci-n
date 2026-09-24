@@ -25,6 +25,9 @@ import {
   CreditCard,
   FileCheck2,
   X,
+  FileSignature,
+  FileSpreadsheet,
+  AlertCircle
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -77,38 +80,12 @@ import {
   useSolicitudesIngresoStore,
   type SolicitudIngreso,
   type EstadoSolicitudIngreso,
+  type TipoTramiteIngreso,
 } from "../data/gestion-ingresos-store";
 import { AprobarSolicitudDialog } from "./components/aprobar-solicitud-dialog";
 import { RechazarSolicitudDialog } from "./components/rechazar-solicitud-dialog";
 
 const ITEMS_PER_PAGE = 6;
-
-const REQUISITOS_DOCUMENTALES = [
-  {
-    id: "coordinador",
-    titulo: "Cambio de Coordinador institucional titular y/o suplente",
-    descripcion: "Oficio formal firmado electrónicamente por la máxima autoridad institucional.",
-    archivoDefecto: "Cambio_Coordinador_Institucional_Titular.pdf",
-    tamano: "1.4 MB",
-    autoridad: "Banco Central del Ecuador (BCE)",
-  },
-  {
-    id: "confidencialidad",
-    titulo: "Acuerdo de Uso y Confidencialidad",
-    descripcion: "Acuerdo suscrito de observancia estricta a la confidencialidad de la información.",
-    archivoDefecto: "Acuerdo_Uso_Confidencialidad_Firmado.pdf",
-    tamano: "890 KB",
-    autoridad: "Security Data S.A.",
-  },
-  {
-    id: "solicitud",
-    titulo: "Solicitud de acceso al DINARP",
-    descripcion: "Formulario oficial de petición y justificación técnica de interoperabilidad.",
-    archivoDefecto: "Solicitud_Oficial_Acceso_DINARP.pdf",
-    tamano: "1.1 MB",
-    autoridad: "Banco Central del Ecuador (BCE)",
-  },
-];
 
 export default function GestionIngresosPage() {
   const currentUser = MOCK_USERS_BY_ROLE.DGR;
@@ -119,6 +96,9 @@ export default function GestionIngresosPage() {
     aprobarSolicitud,
     rechazarSolicitud,
   } = useSolicitudesIngresoStore();
+
+  // Filtro de proceso (Todos / Proceso A / Proceso B / Proceso C)
+  const [filterTramite, setFilterTramite] = useState<string>("TODOS");
 
   // Search & Filters
   const [searchQuery, setSearchQuery] = useState("");
@@ -171,7 +151,7 @@ export default function GestionIngresosPage() {
     return Array.from(set);
   }, [solicitudes]);
 
-  // KPIs
+  // KPIs globales
   const kpis = useMemo(() => {
     const pendientes = solicitudes.filter((s) => s.estado === "Pendiente").length;
     const aprobadas = solicitudes.filter((s) => s.estado === "Aprobada").length;
@@ -183,12 +163,18 @@ export default function GestionIngresosPage() {
   const filteredData = useMemo(() => {
     const q = searchQuery.toLowerCase().trim();
     let result = solicitudes.filter((item) => {
+      // Filtro de pestaña de trámite
+      if (filterTramite !== "TODOS" && item.tipoTramite !== filterTramite) {
+        return false;
+      }
+
       const matchesSearch =
         q === "" ||
         item.cedula.toLowerCase().includes(q) ||
         item.nombreCompleto.toLowerCase().includes(q) ||
         item.correo.toLowerCase().includes(q) ||
-        item.institucion.toLowerCase().includes(q);
+        item.institucion.toLowerCase().includes(q) ||
+        item.codigoDocumental.toLowerCase().includes(q);
 
       const matchesEstado =
         filterEstado === "Todos" || item.estado === filterEstado;
@@ -198,55 +184,56 @@ export default function GestionIngresosPage() {
 
       const matchesFecha = (() => {
         if (filterFecha === "Todas") return true;
-        const time = parseFechaSolicitud(item.fechaSolicitud);
-        const now = new Date(2026, 8, 23).getTime();
-        const diffDays = (now - time) / (1000 * 60 * 60 * 24);
-        if (filterFecha === "7dias") return diffDays <= 7 && diffDays >= 0;
-        if (filterFecha === "30dias") return diffDays <= 30 && diffDays >= 0;
+        const itemTime = parseFechaSolicitud(item.fechaSolicitud);
+        const now = Date.now();
+        if (filterFecha === "7dias") {
+          return now - itemTime <= 7 * 24 * 60 * 60 * 1000;
+        }
+        if (filterFecha === "30dias") {
+          return now - itemTime <= 30 * 24 * 60 * 60 * 1000;
+        }
         return true;
       })();
 
       return matchesSearch && matchesEstado && matchesInstitucion && matchesFecha;
     });
 
-    // Sorting según columnas de la tabla
+    // Sorting
     result.sort((a, b) => {
-      if (sortOrder === "fecha-desc") {
-        return parseFechaSolicitud(b.fechaSolicitud) - parseFechaSolicitud(a.fechaSolicitud);
+      switch (sortOrder) {
+        case "fecha-desc":
+          return parseFechaSolicitud(b.fechaSolicitud) - parseFechaSolicitud(a.fechaSolicitud);
+        case "fecha-asc":
+          return parseFechaSolicitud(a.fechaSolicitud) - parseFechaSolicitud(b.fechaSolicitud);
+        case "nombre-asc":
+          return a.nombreCompleto.localeCompare(b.nombreCompleto);
+        case "nombre-desc":
+          return b.nombreCompleto.localeCompare(a.nombreCompleto);
+        case "institucion-asc":
+          return a.institucion.localeCompare(b.institucion);
+        case "institucion-desc":
+          return b.institucion.localeCompare(a.institucion);
+        case "cedula-asc":
+          return a.cedula.localeCompare(b.cedula);
+        case "cedula-desc":
+          return b.cedula.localeCompare(a.cedula);
+        case "estado-prioridad": {
+          const priority: Record<EstadoSolicitudIngreso, number> = {
+            Pendiente: 1,
+            Aprobada: 2,
+            Rechazada: 3,
+          };
+          return priority[a.estado] - priority[b.estado];
+        }
+        default:
+          return 0;
       }
-      if (sortOrder === "fecha-asc") {
-        return parseFechaSolicitud(a.fechaSolicitud) - parseFechaSolicitud(b.fechaSolicitud);
-      }
-      if (sortOrder === "nombre-asc") {
-        return a.nombreCompleto.localeCompare(b.nombreCompleto);
-      }
-      if (sortOrder === "nombre-desc") {
-        return b.nombreCompleto.localeCompare(a.nombreCompleto);
-      }
-      if (sortOrder === "institucion-asc") {
-        return a.institucion.localeCompare(b.institucion);
-      }
-      if (sortOrder === "institucion-desc") {
-        return b.institucion.localeCompare(a.institucion);
-      }
-      if (sortOrder === "cedula-asc") {
-        return a.cedula.localeCompare(b.cedula);
-      }
-      if (sortOrder === "cedula-desc") {
-        return b.cedula.localeCompare(a.cedula);
-      }
-      if (sortOrder === "estado-prioridad") {
-        const priority: Record<string, number> = { Pendiente: 1, Aprobada: 2, Rechazada: 3 };
-        return (priority[a.estado] || 99) - (priority[b.estado] || 99);
-      }
-      return 0;
     });
 
     return result;
-  }, [solicitudes, searchQuery, filterEstado, filterInstitucion, filterFecha, sortOrder]);
+  }, [solicitudes, filterTramite, searchQuery, filterEstado, filterInstitucion, filterFecha, sortOrder]);
 
-  // Pagination
-  const totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE) || 1;
+  const totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE);
   const paginatedData = useMemo(() => {
     const start = (currentPage - 1) * ITEMS_PER_PAGE;
     return filteredData.slice(start, start + ITEMS_PER_PAGE);
@@ -257,90 +244,94 @@ export default function GestionIngresosPage() {
     setIsApproveOpen(true);
   };
 
+  const handleConfirmApprove = (sol: SolicitudIngreso) => {
+    aprobarSolicitud(sol.id);
+    if (selectedSolicitud && selectedSolicitud.id === sol.id) {
+      setSelectedSolicitud((prev) =>
+        prev
+          ? {
+              ...prev,
+              estado: "Aprobada",
+              fechaRevision: "Reciente",
+              revisor: "Dirección de Gestión y Registro",
+            }
+          : null
+      );
+    }
+  };
+
   const handleOpenReject = (sol: SolicitudIngreso) => {
     setSolicitudToReject(sol);
     setIsRejectOpen(true);
   };
 
-  const handleConfirmApprove = (sol: SolicitudIngreso) => {
-    aprobarSolicitud(sol.id, `${currentUser.name} (Dirección de Gestión y Registro)`);
-    if (selectedSolicitud && selectedSolicitud.id === sol.id) {
-      setSelectedSolicitud({
-        ...selectedSolicitud,
-        estado: "Aprobada",
-        revisor: `${currentUser.name} (Dirección de Gestión y Registro)`,
-        fechaRevision: "Ahora mismo",
-      });
-    }
-  };
-
   const handleConfirmReject = (sol: SolicitudIngreso, motivo: string) => {
-    rechazarSolicitud(sol.id, motivo, `${currentUser.name} (Dirección de Gestión y Registro)`);
+    rechazarSolicitud(sol.id, motivo);
     if (selectedSolicitud && selectedSolicitud.id === sol.id) {
-      setSelectedSolicitud({
-        ...selectedSolicitud,
-        estado: "Rechazada",
-        revisor: `${currentUser.name} (Dirección de Gestión y Registro)`,
-        motivoRechazo: motivo,
-        fechaRevision: "Ahora mismo",
-      });
+      setSelectedSolicitud((prev) =>
+        prev
+          ? {
+              ...prev,
+              estado: "Rechazada",
+              fechaRevision: "Reciente",
+              revisor: "Dirección de Gestión y Registro",
+              motivoRechazo: motivo,
+            }
+          : null
+      );
     }
   };
 
-  // State Badge Helper
   const renderEstadoBadge = (estado: EstadoSolicitudIngreso) => {
     switch (estado) {
+      case "Pendiente":
+        return (
+          <Badge tone="neutral" appearance="soft" size="sm" className="gap-1 border border-border text-foreground">
+            <span className="size-1.5 rounded-full bg-foreground" />
+            Pendiente
+          </Badge>
+        );
       case "Aprobada":
         return (
-          <Badge tone="neutral" appearance="soft" size="sm" className="font-semibold gap-1 text-xs border border-border text-foreground">
-            <CheckCircle2 className="size-3 text-foreground" />
+          <Badge tone="neutral" appearance="soft" size="sm" className="gap-1 border border-border text-foreground">
+            <span className="size-1.5 rounded-full bg-foreground" />
             Aprobada
           </Badge>
         );
       case "Rechazada":
         return (
-          <Badge tone="neutral" appearance="outline" size="sm" className="font-semibold gap-1 text-xs border-border text-foreground bg-background">
-            <XCircle className="size-3 text-muted-foreground" />
+          <Badge tone="neutral" appearance="soft" size="sm" className="gap-1 border border-border text-muted-foreground">
+            <span className="size-1.5 rounded-full bg-muted-foreground" />
             Rechazada
-          </Badge>
-        );
-      case "Pendiente":
-      default:
-        return (
-          <Badge tone="neutral" appearance="soft" size="sm" className="font-semibold gap-1 text-xs border border-border text-foreground">
-            <Clock className="size-3 text-muted-foreground" />
-            Pendiente
           </Badge>
         );
     }
   };
 
-  // Breadcrumbs based on current view (List vs Detail)
-  const breadcrumbItems = useMemo(() => {
-    if (!selectedSolicitud) {
-      return [
-        { label: "Acceso y seguridad" },
-        { label: "Gestión de ingresos" },
-      ];
-    }
-    return [
-      { label: "Acceso y seguridad" },
-      { label: "Gestión de ingresos", href: "/wireframes2/acceso-seguridad/gestion-ingresos" },
-      { label: `Detalle: ${selectedSolicitud.id}` },
-    ];
-  }, [selectedSolicitud]);
+  const renderTramiteBadge = (tipo: TipoTramiteIngreso, codigo: string) => {
+    return (
+      <Badge tone="neutral" appearance="soft" size="sm" className="font-mono text-[10px] border border-border">
+        {codigo}
+      </Badge>
+    );
+  };
 
   return (
     <WireframeDashboardLayout
-      activeMenu="gestion-ingresos"
-      currentRole="DGR"
-      currentUser={currentUser}
-      breadcrumbs={breadcrumbItems}
+      breadcrumbs={
+        selectedSolicitud
+          ? [
+              { label: "Acceso y Seguridad", href: "#" },
+              { label: "Gestión de ingresos (DINARP)", href: "/wireframes2/acceso-seguridad/gestion-ingresos" },
+              { label: `Trámite ${selectedSolicitud.id}` },
+            ]
+          : [
+              { label: "Acceso y Seguridad", href: "#" },
+              { label: "Gestión de ingresos (DINARP)", href: "/wireframes2/acceso-seguridad/gestion-ingresos" },
+            ]
+      }
     >
-      <main className="relative p-4 sm:p-6 lg:p-8 w-full space-y-6 sm:space-y-8 max-w-7xl mx-auto">
-        {/* Background subtle effect */}
-        <div className="absolute top-0 right-0 w-96 h-96 bg-radial from-muted/20 to-transparent pointer-events-none -z-10 blur-3xl opacity-60" />
-
+      <main className="space-y-6">
         {/* ══════════════════════════════════════════════════════════
             VISTA 1: DETALLE DE SOLICITUD (BREADCRUMB + APROBAR / RECHAZAR)
            ══════════════════════════════════════════════════════════ */}
@@ -352,22 +343,24 @@ export default function GestionIngresosPage() {
                 <Button
                   type="button"
                   variant="outline"
-                  size="sm"
                   onClick={() => setSelectedSolicitud(null)}
-                  className="h-9 px-3 gap-1.5 text-xs font-semibold rounded-xl"
+                  className="h-10 px-4 gap-1.5 text-xs font-semibold rounded-full border-border text-foreground hover:bg-muted"
                 >
-                  <ArrowLeft className="size-3.5" />
-                  <span>Volver al listado</span>
+                  <ArrowLeft className="size-4" />
+                  <span>Volver a la bandeja</span>
                 </Button>
                 <div>
                   <div className="flex items-center gap-2">
                     <h1 className="font-heading font-extrabold text-xl sm:text-2xl text-foreground">
-                      Solicitud {selectedSolicitud.id}
+                      Trámite {selectedSolicitud.id}
                     </h1>
+                    <Badge tone="neutral" appearance="soft" size="sm" className="border border-border font-mono">
+                      {selectedSolicitud.codigoDocumental}
+                    </Badge>
                     {renderEstadoBadge(selectedSolicitud.estado)}
                   </div>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    Registrada el {selectedSolicitud.fechaSolicitud} · {selectedSolicitud.institucion}
+                    {selectedSolicitud.tituloTramite} · Registrado el {selectedSolicitud.fechaSolicitud} · {selectedSolicitud.institucion}
                   </p>
                 </div>
               </div>
@@ -379,33 +372,31 @@ export default function GestionIngresosPage() {
                     <Button
                       type="button"
                       variant="outline"
-                      size="sm"
                       onClick={() => handleOpenReject(selectedSolicitud)}
-                      className="h-9 px-3.5 text-xs font-semibold gap-1.5 border-border text-foreground hover:bg-muted rounded-xl"
+                      className="h-10 px-4 text-xs font-semibold gap-2 border-border text-foreground hover:bg-muted rounded-full"
                     >
                       <XCircle className="size-4" />
-                      <span>Rechazar</span>
+                      <span>Rechazar trámite</span>
                     </Button>
                     <Button
                       type="button"
                       variant="primary"
-                      size="sm"
                       onClick={() => handleOpenApprove(selectedSolicitud)}
-                      className="h-9 px-3.5 text-xs font-semibold gap-1.5 bg-foreground text-background hover:bg-foreground/90 rounded-xl shadow-xs"
+                      className="h-10 px-4 text-xs font-semibold gap-2 shadow-xs"
                     >
                       <CheckCircle2 className="size-4" />
-                      <span>Aprobar acceso</span>
+                      <span>Aprobar trámite</span>
                     </Button>
                   </>
                 ) : selectedSolicitud.estado === "Aprobada" ? (
                   <Badge tone="neutral" appearance="soft" size="lg" className="gap-1.5 text-xs font-semibold py-1 px-3 border border-border text-foreground">
                     <CheckCircle2 className="size-3.5 text-foreground" />
-                    Acceso autorizado
+                    Trámite Aprobado
                   </Badge>
                 ) : (
                   <Badge tone="neutral" appearance="outline" size="lg" className="gap-1.5 text-xs font-semibold py-1 px-3 border-border text-foreground bg-background">
                     <XCircle className="size-3.5 text-muted-foreground" />
-                    Solicitud rechazada
+                    Trámite Rechazado
                   </Badge>
                 )}
               </div>
@@ -416,14 +407,15 @@ export default function GestionIngresosPage() {
               <div className="p-4 rounded-2xl bg-muted/40 border border-border text-foreground">
                 <div className="flex items-center gap-2 font-bold text-sm text-foreground">
                   <CheckCircle2 className="size-4 shrink-0 text-foreground" />
-                  <span>Acceso institucional concedido</span>
+                  <span>
+                    {selectedSolicitud.tipoTramite === "PROCESO_A_REGISTRO_INSTITUCION" && "Institución aprobada: Coordinadores prerregistrados e invitados al Proceso B"}
+                    {selectedSolicitud.tipoTramite === "PROCESO_B_ENROLAMIENTO_COORDINADOR" && "Acuerdo de Confidencialidad aprobado: Coordinador institucional ACTIVO"}
+                    {selectedSolicitud.tipoTramite === "PROCESO_C_CAMBIO_COORDINADOR" && "Cambio aprobado: Nuevo coordinador prerregistrado e invitado al Proceso B"}
+                  </span>
                 </div>
-                <p className="text-xs mt-1 leading-relaxed text-muted-foreground">
-                  El usuario fue validado y tiene credenciales activas en la plataforma.
-                </p>
                 <div className="pt-2 mt-2 border-t border-border/80 grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
                   <div>
-                    <span className="text-muted-foreground">Fecha de aprobación: </span>
+                    <span className="text-muted-foreground">Fecha de resolución: </span>
                     <strong className="text-foreground">{selectedSolicitud.fechaRevision || "Reciente"}</strong>
                   </div>
                   <div>
@@ -438,11 +430,11 @@ export default function GestionIngresosPage() {
               <div className="p-4 rounded-2xl bg-muted/40 border border-border text-foreground space-y-2">
                 <div className="flex items-center gap-2 font-bold text-sm text-foreground">
                   <XCircle className="size-4 shrink-0 text-muted-foreground" />
-                  <span>Solicitud denegada</span>
+                  <span>Trámite Denegado / Observado</span>
                 </div>
                 <div className="p-3 bg-surface rounded-xl border border-border text-xs">
                   <span className="font-semibold text-foreground block mb-1">
-                    Motivo registrado:
+                    Motivo registrado para notificación:
                   </span>
                   <p className="text-foreground leading-relaxed">
                     {selectedSolicitud.motivoRechazo || "No se especificó motivo de rechazo."}
@@ -450,7 +442,7 @@ export default function GestionIngresosPage() {
                 </div>
                 <div className="pt-2 border-t border-border/80 grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
                   <div>
-                    <span className="text-muted-foreground">Fecha de rechazo: </span>
+                    <span className="text-muted-foreground">Fecha de resolución: </span>
                     <strong className="text-foreground">{selectedSolicitud.fechaRevision || "Reciente"}</strong>
                   </div>
                   <div>
@@ -461,203 +453,409 @@ export default function GestionIngresosPage() {
               </div>
             )}
 
-            {selectedSolicitud.estado === "Pendiente" && (
-              <div className="p-3.5 rounded-2xl bg-muted/40 border border-border/80 flex items-start gap-2.5 text-xs text-muted-foreground">
-                <Clock className="size-4 text-foreground mt-0.5 shrink-0" />
-                <span>
-                  Esta solicitud se encuentra <strong className="text-foreground">pendiente de revisión</strong>. Verifica los datos personales y los 3 documentos habilitantes cargados por el usuario para decidir la aprobación o el rechazo.
-                </span>
-              </div>
-            )}
-
-            {/* Cuadrícula de Información */}
+            {/* ── CUADRÍCULA DE CONTENIDO ESPECÍFICO SEGÚN PROCESO ── */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Columna Izquierda: Datos y Documentos (2 cols) */}
+              {/* Columna Izquierda: Información del Anexo correspondiente (2 cols) */}
               <div className="lg:col-span-2 space-y-6">
-                {/* 1. Datos Personales e Institucionales */}
-                <div className="rounded-2xl border border-border/80 bg-surface p-5 space-y-4 shadow-2xs">
-                  <div className="flex items-center justify-between border-b border-border/60 pb-3">
-                    <h2 className="text-sm font-bold font-heading text-foreground flex items-center gap-2">
-                      <User className="size-4 text-primary" />
-                      1. Datos del Solicitante e Institución
-                    </h2>
-                    <Badge tone="neutral" appearance="soft" size="sm">
-                      Validado en Registro Civil
-                    </Badge>
-                  </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                    <div className="p-3 rounded-xl bg-muted/30 border border-border/60">
-                      <span className="text-muted-foreground text-[11px] block mb-1">Cédula de Identidad</span>
-                      <span className="font-mono font-bold text-foreground text-sm">{selectedSolicitud.cedula}</span>
+                {/* CASO PROCESO A: ANEXO A (ARP-R01) */}
+                {selectedSolicitud.anexoA && (
+                  <>
+                    <div className="rounded-2xl border border-border/80 bg-surface p-5 space-y-4 shadow-2xs">
+                      <div className="flex items-center justify-between border-b border-border/60 pb-3">
+                        <h2 className="text-sm font-bold font-heading text-foreground flex items-center gap-2">
+                          <Building2 className="size-4 text-foreground" />
+                          1. Datos de la Entidad y Representante Legal (Anexo A)
+                        </h2>
+                        <Badge tone="neutral" appearance="soft" size="sm">
+                          {selectedSolicitud.anexoA.entidadTipo === "Publica" ? "Pública" : "Privada"}
+                        </Badge>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                        <div className="p-3 rounded-xl bg-muted/30 border border-border/60">
+                          <span className="text-muted-foreground text-[11px] block mb-1">Nombre Entidad</span>
+                          <span className="font-bold text-foreground text-sm">{selectedSolicitud.anexoA.nombreEntidad}</span>
+                        </div>
+                        <div className="p-3 rounded-xl bg-muted/30 border border-border/60">
+                          <span className="text-muted-foreground text-[11px] block mb-1">RUC Entidad</span>
+                          <span className="font-mono font-bold text-foreground text-sm">{selectedSolicitud.anexoA.rucEntidad}</span>
+                        </div>
+                        <div className="p-3 rounded-xl bg-muted/30 border border-border/60 sm:col-span-2">
+                          <span className="text-muted-foreground text-[11px] block mb-1">Dirección</span>
+                          <span className="text-foreground font-semibold">{selectedSolicitud.anexoA.direccionEntidad}</span>
+                        </div>
+                        <div className="p-3 rounded-xl bg-muted/30 border border-border/60 sm:col-span-2">
+                          <span className="text-muted-foreground text-[11px] block mb-1">Objeto Social / Actividad</span>
+                          <span className="text-foreground">{selectedSolicitud.anexoA.objetoSocial}</span>
+                        </div>
+                        <div className="p-3 rounded-xl bg-muted/30 border border-border/60">
+                          <span className="text-muted-foreground text-[11px] block mb-1">Máxima Autoridad / Delegado</span>
+                          <span className="font-bold text-foreground">{selectedSolicitud.anexoA.representanteLegalNombre}</span>
+                          <span className="text-[11px] text-muted-foreground block">{selectedSolicitud.anexoA.representanteLegalCargo}</span>
+                        </div>
+                        <div className="p-3 rounded-xl bg-muted/30 border border-border/60">
+                          <span className="text-muted-foreground text-[11px] block mb-1">Delegación Expresa</span>
+                          <span className="font-semibold text-foreground">
+                            {selectedSolicitud.anexoA.esDelegado ? "Sí (Adjunta soporte)" : "No (Firma Máxima Autoridad)"}
+                          </span>
+                        </div>
+                      </div>
                     </div>
 
-                    <div className="p-3 rounded-xl bg-muted/30 border border-border/60">
-                      <span className="text-muted-foreground text-[11px] block mb-1">Nombre Completo</span>
-                      <span className="font-bold text-foreground text-sm">{selectedSolicitud.nombreCompleto}</span>
+                    {/* Coordinadores Designados para Prerregistro */}
+                    <div className="rounded-2xl border border-border/80 bg-surface p-5 space-y-4 shadow-2xs">
+                      <div className="flex items-center justify-between border-b border-border/60 pb-3">
+                        <h2 className="text-sm font-bold font-heading text-foreground flex items-center gap-2">
+                          <User className="size-4 text-foreground" />
+                          2. Coordinadores Institucionales Designados (Prerregistro)
+                        </h2>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                        {/* Titular */}
+                        <div className="p-4 rounded-xl border border-border bg-muted/20 space-y-2">
+                          <div className="flex justify-between items-center pb-1 border-b border-border/60">
+                            <span className="font-bold text-foreground">Coordinador TITULAR</span>
+                            <Badge tone="neutral" appearance="soft" size="sm">1.2 Anexo A</Badge>
+                          </div>
+                          <div>
+                            <span className="text-[11px] text-muted-foreground block">Nombre y Cédula:</span>
+                            <span className="font-semibold text-foreground">{selectedSolicitud.anexoA.titularNombreCompleto}</span>
+                            <span className="font-mono block text-muted-foreground">{selectedSolicitud.anexoA.titularCedula}</span>
+                          </div>
+                          <div>
+                            <span className="text-[11px] text-muted-foreground block">Cargo y Área:</span>
+                            <span className="text-foreground">{selectedSolicitud.anexoA.titularCargo} · {selectedSolicitud.anexoA.titularAreaUnidad}</span>
+                          </div>
+                          <div className="text-[11px] text-muted-foreground pt-1 border-t border-border/50">
+                            <span>Email: <strong className="text-foreground">{selectedSolicitud.anexoA.titularEmail}</strong></span><br />
+                            <span>Teléfono: {selectedSolicitud.anexoA.titularTelefonoFijo} · Móvil: {selectedSolicitud.anexoA.titularMovilInstitucional}</span>
+                          </div>
+                        </div>
+
+                        {/* Suplente */}
+                        <div className="p-4 rounded-xl border border-border bg-muted/20 space-y-2">
+                          <div className="flex justify-between items-center pb-1 border-b border-border/60">
+                            <span className="font-bold text-foreground">Coordinador SUPLENTE</span>
+                            <Badge tone="neutral" appearance="soft" size="sm">1.3 Anexo A</Badge>
+                          </div>
+                          <div>
+                            <span className="text-[11px] text-muted-foreground block">Nombre y Cédula:</span>
+                            <span className="font-semibold text-foreground">{selectedSolicitud.anexoA.suplenteNombreCompleto}</span>
+                            <span className="font-mono block text-muted-foreground">{selectedSolicitud.anexoA.suplenteCedula}</span>
+                          </div>
+                          <div>
+                            <span className="text-[11px] text-muted-foreground block">Cargo y Área:</span>
+                            <span className="text-foreground">{selectedSolicitud.anexoA.suplenteCargo} · {selectedSolicitud.anexoA.suplenteAreaUnidad}</span>
+                          </div>
+                          <div className="text-[11px] text-muted-foreground pt-1 border-t border-border/50">
+                            <span>Email: <strong className="text-foreground">{selectedSolicitud.anexoA.suplenteEmail}</strong></span><br />
+                            <span>Teléfono: {selectedSolicitud.anexoA.suplenteTelefonoFijo} · Móvil: {selectedSolicitud.anexoA.suplenteMovilInstitucional}</span>
+                          </div>
+                        </div>
+                      </div>
                     </div>
 
-                    <div className="p-3 rounded-xl bg-muted/30 border border-border/60">
-                      <span className="text-muted-foreground text-[11px] block mb-1 flex items-center gap-1">
-                        <Mail className="size-3 text-muted-foreground" />
-                        Correo Electrónico Institucional
-                      </span>
-                      <span className="font-semibold text-foreground break-all">{selectedSolicitud.correo}</span>
+                    {/* Herramientas y Procesos */}
+                    <div className="rounded-2xl border border-border/80 bg-surface p-5 space-y-4 shadow-2xs">
+                      <div className="border-b border-border/60 pb-3">
+                        <h2 className="text-sm font-bold font-heading text-foreground flex items-center gap-2">
+                          <FileCheck2 className="size-4 text-foreground" />
+                          3. Sección II: Servicios y Procesos de Uso
+                        </h2>
+                      </div>
+                      <div className="space-y-3 text-xs">
+                        <div className="flex flex-wrap gap-2">
+                          {selectedSolicitud.anexoA.serviciosHerramientas.map((s) => (
+                            <Badge key={s} tone="neutral" appearance="soft" size="sm" className="border border-border">
+                              <Check className="size-3 mr-1" />
+                              {s}
+                            </Badge>
+                          ))}
+                        </div>
+                        <div className="p-3 rounded-xl bg-muted/30 border border-border">
+                          <span className="text-muted-foreground text-[11px] block mb-1">Áreas de Aplicación:</span>
+                          <span className="text-foreground font-semibold">{selectedSolicitud.anexoA.areasUso}</span>
+                        </div>
+                        <div className="p-3 rounded-xl bg-muted/30 border border-border">
+                          <span className="text-muted-foreground text-[11px] block mb-1">Procesos Institucionales Sustantivos:</span>
+                          <p className="text-foreground leading-relaxed">{selectedSolicitud.anexoA.procesosUso}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {/* CASO PROCESO B: ANEXO B (ARP-R02) */}
+                {selectedSolicitud.anexoB && (
+                  <>
+                    <div className="rounded-2xl border border-border/80 bg-surface p-5 space-y-4 shadow-2xs">
+                      <div className="flex items-center justify-between border-b border-border/60 pb-3">
+                        <h2 className="text-sm font-bold font-heading text-foreground flex items-center gap-2">
+                          <FileSignature className="size-4 text-foreground" />
+                          1. Intervinientes del Acuerdo de Confidencialidad (Anexo B)
+                        </h2>
+                        <Badge tone="neutral" appearance="soft" size="sm">
+                          {selectedSolicitud.anexoB.rolAsignado}
+                        </Badge>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                        <div className="p-3 rounded-xl bg-muted/30 border border-border/60 sm:col-span-2">
+                          <span className="text-muted-foreground text-[11px] block mb-1">Entidad Solicitante</span>
+                          <span className="font-bold text-foreground text-sm">{selectedSolicitud.anexoB.nombreEntidad}</span>
+                          <span className="text-muted-foreground block text-[11px]">{selectedSolicitud.anexoB.domicilioEntidad}</span>
+                        </div>
+                        <div className="p-3 rounded-xl bg-muted/30 border border-border/60">
+                          <span className="text-muted-foreground text-[11px] block mb-1">Representante Legal compareciente</span>
+                          <span className="font-semibold text-foreground">{selectedSolicitud.anexoB.representanteLegalNombre}</span>
+                        </div>
+                        <div className="p-3 rounded-xl bg-muted/30 border border-border/60">
+                          <span className="text-muted-foreground text-[11px] block mb-1">Funcionario Compareciente</span>
+                          <span className="font-bold text-foreground">{selectedSolicitud.anexoB.funcionarioNombre}</span>
+                          <span className="font-mono text-muted-foreground block text-[11px]">{selectedSolicitud.anexoB.funcionarioCedula} · {selectedSolicitud.anexoB.funcionarioCargo}</span>
+                        </div>
+                        <div className="p-3 rounded-xl bg-muted/30 border border-border/60 sm:col-span-2">
+                          <span className="text-muted-foreground text-[11px] block mb-1">Misión y Visión Institucional (Cláusula Segunda)</span>
+                          <p className="text-foreground leading-relaxed">{selectedSolicitud.anexoB.misionVisionInstitucional}</p>
+                        </div>
+                      </div>
                     </div>
 
-                    <div className="p-3 rounded-xl bg-muted/30 border border-border/60">
-                      <span className="text-muted-foreground text-[11px] block mb-1 flex items-center gap-1">
-                        <Building2 className="size-3 text-muted-foreground" />
-                        Institución Pública
-                      </span>
-                      <span className="font-semibold text-foreground">{selectedSolicitud.institucion}</span>
+                    <div className="rounded-2xl border border-border/80 bg-surface p-5 space-y-4 shadow-2xs">
+                      <div className="border-b border-border/60 pb-3">
+                        <h2 className="text-sm font-bold font-heading text-foreground flex items-center gap-2">
+                          <ShieldCheck className="size-4 text-foreground" />
+                          2. Firmas del Instrumento ARP-R02
+                        </h2>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                        <div className="p-3.5 rounded-xl border border-border bg-muted/20">
+                          <span className="font-bold text-foreground block">Firma Representante Legal:</span>
+                          <Badge tone="neutral" appearance="soft" size="sm" className="mt-1">
+                            <Check className="size-3 mr-1" />
+                            Firmado Digitalmente
+                          </Badge>
+                        </div>
+                        <div className="p-3.5 rounded-xl border border-border bg-muted/20">
+                          <span className="font-bold text-foreground block">Firma del Funcionario:</span>
+                          <Badge tone="neutral" appearance="soft" size="sm" className="mt-1">
+                            <Check className="size-3 mr-1" />
+                            Firmado Digitalmente
+                          </Badge>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
+                  </>
+                )}
 
-                {/* 2. Documentación Habilitante Requerida (Los 3 documentos obligatorios) */}
+                {/* CASO PROCESO C: ANEXO C (ARP-R03) */}
+                {selectedSolicitud.anexoC && (
+                  <>
+                    <div className="rounded-2xl border border-border/80 bg-surface p-5 space-y-4 shadow-2xs">
+                      <div className="flex items-center justify-between border-b border-border/60 pb-3">
+                        <h2 className="text-sm font-bold font-heading text-foreground flex items-center gap-2">
+                          <Building2 className="size-4 text-foreground" />
+                          1. Antecedentes del Cambio de Coordinador (Anexo C)
+                        </h2>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                        <div className="p-3 rounded-xl bg-muted/30 border border-border/60">
+                          <span className="text-muted-foreground text-[11px] block mb-1">Entidad</span>
+                          <span className="font-bold text-foreground text-sm">{selectedSolicitud.anexoC.nombreEntidad}</span>
+                        </div>
+                        <div className="p-3 rounded-xl bg-muted/30 border border-border/60">
+                          <span className="text-muted-foreground text-[11px] block mb-1">Autoridad Solicitante</span>
+                          <span className="font-bold text-foreground">{selectedSolicitud.anexoC.representanteLegalNombre}</span>
+                          <span className="text-[11px] text-muted-foreground block">
+                            {selectedSolicitud.anexoC.esDelegado ? "Firma bajo Delegación (Soporte adjunto)" : "Máxima Autoridad"}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="rounded-2xl border border-border/80 bg-surface p-5 space-y-4 shadow-2xs">
+                      <div className="border-b border-border/60 pb-3">
+                        <h2 className="text-sm font-bold font-heading text-foreground flex items-center gap-2">
+                          <User className="size-4 text-foreground" />
+                          2. Modificaciones Solicitadas (Cláusula Segunda y Tercera)
+                        </h2>
+                      </div>
+
+                      <div className="space-y-4 text-xs">
+                        {selectedSolicitud.anexoC.aplicaCambioTitular && (
+                          <div className="p-4 rounded-xl border border-border bg-muted/20 space-y-2">
+                            <div className="flex justify-between items-center pb-1 border-b border-border/60">
+                              <span className="font-bold text-foreground">Nuevo Coordinador Institucional TITULAR</span>
+                              <Badge tone="neutral" appearance="soft" size="sm">Cláusula Segunda</Badge>
+                            </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                              <div>
+                                <span className="text-[11px] text-muted-foreground block">Nombres y Cédula:</span>
+                                <span className="font-semibold text-foreground">{selectedSolicitud.anexoC.nuevoTitularNombre}</span>
+                                <span className="font-mono text-muted-foreground block">{selectedSolicitud.anexoC.nuevoTitularCedula}</span>
+                              </div>
+                              <div>
+                                <span className="text-[11px] text-muted-foreground block">Cargo y Correo:</span>
+                                <span className="text-foreground">{selectedSolicitud.anexoC.nuevoTitularCargo}</span>
+                                <span className="text-muted-foreground block">{selectedSolicitud.anexoC.nuevoTitularEmail}</span>
+                              </div>
+                              <div className="sm:col-span-2 pt-1 border-t border-border/50">
+                                <span className="text-[11px] text-muted-foreground block font-medium">Motivo del Cambio:</span>
+                                <p className="text-foreground">{selectedSolicitud.anexoC.nuevoTitularMotivo}</p>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {selectedSolicitud.anexoC.aplicaCambioSuplente && (
+                          <div className="p-4 rounded-xl border border-border bg-muted/20 space-y-2">
+                            <div className="flex justify-between items-center pb-1 border-b border-border/60">
+                              <span className="font-bold text-foreground">Nuevo Coordinador Institucional SUPLENTE</span>
+                              <Badge tone="neutral" appearance="soft" size="sm">Cláusula Segunda</Badge>
+                            </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                              <div>
+                                <span className="text-[11px] text-muted-foreground block">Nombres y Cédula:</span>
+                                <span className="font-semibold text-foreground">{selectedSolicitud.anexoC.nuevoSuplenteNombre}</span>
+                                <span className="font-mono text-muted-foreground block">{selectedSolicitud.anexoC.nuevoSuplenteCedula}</span>
+                              </div>
+                              <div>
+                                <span className="text-[11px] text-muted-foreground block">Cargo:</span>
+                                <span className="text-foreground">{selectedSolicitud.anexoC.nuevoSuplenteCargo}</span>
+                              </div>
+                              <div className="sm:col-span-2 pt-1 border-t border-border/50">
+                                <span className="text-[11px] text-muted-foreground block font-medium">Motivo del Cambio:</span>
+                                <p className="text-foreground">{selectedSolicitud.anexoC.nuevoSuplenteMotivo}</p>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {selectedSolicitud.anexoC.aplicaDesignacionInicialSuplente && (
+                          <div className="p-4 rounded-xl border border-border bg-muted/20 space-y-2">
+                            <div className="flex justify-between items-center pb-1 border-b border-border/60">
+                              <span className="font-bold text-foreground">Designación INICIAL de Coordinador Suplente</span>
+                              <Badge tone="neutral" appearance="soft" size="sm">Cláusula Tercera</Badge>
+                            </div>
+                            <p className="text-[11px] text-muted-foreground">
+                              Aplica porque la entidad no había designado un suplente en el trámite inicial.
+                            </p>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs pt-1">
+                              <div>
+                                <span className="text-[11px] text-muted-foreground block">Nombres y Cédula:</span>
+                                <span className="font-semibold text-foreground">{selectedSolicitud.anexoC.inicialSuplenteNombre}</span>
+                                <span className="font-mono text-muted-foreground block">{selectedSolicitud.anexoC.inicialSuplenteCedula}</span>
+                              </div>
+                              <div>
+                                <span className="text-[11px] text-muted-foreground block">Cargo y Correo:</span>
+                                <span className="text-foreground">{selectedSolicitud.anexoC.inicialSuplenteCargo}</span>
+                                <span className="text-muted-foreground block">{selectedSolicitud.anexoC.inicialSuplenteEmail}</span>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {/* Documentos Adjuntos y Expediente */}
                 <div className="rounded-2xl border border-border/80 bg-surface p-5 space-y-4 shadow-2xs">
                   <div className="flex items-center justify-between border-b border-border/60 pb-3">
                     <div>
                       <h2 className="text-sm font-bold font-heading text-foreground flex items-center gap-2">
-                        <FileCheck2 className="size-4 text-foreground" />
-                        2. Documentos Habilitantes Cargados
+                        <FileText className="size-4 text-foreground" />
+                        Expediente Documental Habilitante
                       </h2>
-                      <p className="text-[11px] text-muted-foreground mt-0.5">
-                        Los 3 documentos obligatorios suscritos y enviados en formato PDF.
-                      </p>
                     </div>
-                    <Badge tone="neutral" appearance="soft" size="sm" className="font-semibold gap-1 border border-border text-foreground">
-                      <Check className="size-3" />
-                      3 de 3 completados
+                    <Badge tone="neutral" appearance="soft" size="sm" className="border border-border">
+                      {selectedSolicitud.documentos.length} documento(s)
                     </Badge>
                   </div>
 
                   <div className="space-y-3">
-                    {REQUISITOS_DOCUMENTALES.map((doc, idx) => {
-                      const docFileName =
-                        selectedSolicitud.documentos && selectedSolicitud.documentos[idx]
-                          ? selectedSolicitud.documentos[idx]
-                          : doc.archivoDefecto;
-
-                      return (
-                        <div
-                          key={doc.id}
-                          className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-xl border border-border/80 bg-muted/20 hover:bg-muted/40 transition-colors"
-                        >
-                          <div className="flex items-start gap-3 min-w-0">
-                            <div className="size-9 rounded-lg bg-muted text-foreground border border-border flex items-center justify-center shrink-0 mt-0.5">
-                              <FileText className="size-4" />
-                            </div>
-                            <div className="min-w-0">
-                              <div className="flex items-center gap-2 flex-wrap">
-                                <span className="font-bold text-xs text-foreground">
-                                  {idx + 1}. {doc.titulo}
-                                </span>
-                                <Badge tone="neutral" appearance="soft" size="sm" className="text-[10px] h-4.5 px-1.5 gap-1 border border-border text-foreground">
-                                  <Check className="size-2.5" />
-                                  Firma válida
-                                </Badge>
-                              </div>
-                              <p className="font-mono text-[11px] text-muted-foreground truncate mt-0.5">
-                                {docFileName} · {doc.tamano}
-                              </p>
-                            </div>
+                    {selectedSolicitud.documentos.map((docName, idx) => (
+                      <div
+                        key={idx}
+                        className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-xl border border-border/80 bg-muted/20 hover:bg-muted/40 transition-colors"
+                      >
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className="size-9 rounded-lg bg-muted text-foreground border border-border flex items-center justify-center shrink-0">
+                            <FileText className="size-4" />
                           </div>
-
-                          <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
-                            <Button
-                              type="button"
-                              variant="outline"
-                              size="sm"
-                              onClick={() =>
-                                setPreviewDoc({
-                                  titulo: doc.titulo,
-                                  archivo: docFileName,
-                                  tamano: doc.tamano,
-                                  autoridad: doc.autoridad,
-                                })
-                              }
-                              className="h-8 px-2.5 text-xs font-semibold gap-1.5"
-                            >
-                              <Eye className="size-3.5" />
-                              <span>Ver documento</span>
-                            </Button>
+                          <div className="min-w-0">
+                            <span className="font-mono font-bold text-xs text-foreground truncate block">
+                              {docName}
+                            </span>
+                            <span className="text-[11px] text-muted-foreground">
+                              Firma electrónica verificada · Formato PDF
+                            </span>
                           </div>
                         </div>
-                      );
-                    })}
-                  </div>
-                </div>
 
-                {/* 3. Requisitos de Seguridad Verificados */}
-                <div className="rounded-2xl border border-border/80 bg-surface p-5 space-y-4 shadow-2xs">
-                  <div className="flex items-center justify-between border-b border-border/60 pb-3">
-                    <h2 className="text-sm font-bold font-heading text-foreground flex items-center gap-2">
-                      <ShieldCheck className="size-4 text-foreground" />
-                      3. Parámetros de Credenciales Registradas
-                    </h2>
-                    <Badge tone="neutral" appearance="soft" size="sm" className="border border-border text-foreground">
-                      Checklist Aprobado
-                    </Badge>
-                  </div>
-
-                  <p className="text-xs text-muted-foreground leading-relaxed">
-                    La contraseña registrada por el usuario durante el paso 2 de prerregistro cumple los estándares criptográficos institucionales:
-                  </p>
-
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                    {[
-                      "Mínimo 8 caracteres",
-                      "Una letra mayúscula",
-                      "Un dígito numérico",
-                      "Un carácter especial",
-                    ].map((rule) => (
-                      <div
-                        key={rule}
-                        className="flex items-center gap-1.5 p-2 rounded-lg bg-muted/30 border border-border text-foreground text-[11px] font-semibold"
-                      >
-                        <Check className="size-3 text-foreground shrink-0" />
-                        <span>{rule}</span>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() =>
+                            setPreviewDoc({
+                              titulo: docName,
+                              archivo: docName,
+                              tamano: "1.2 MB",
+                              autoridad: "BCE / Security Data S.A.",
+                            })
+                          }
+                          className="h-8 px-2.5 text-xs font-semibold gap-1.5 shrink-0"
+                        >
+                          <Eye className="size-3.5" />
+                          <span>Ver archivo</span>
+                        </Button>
                       </div>
                     ))}
                   </div>
                 </div>
               </div>
 
-              {/* Columna Derecha: Decisión y Auditoría (1 col) */}
+              {/* Columna Derecha: Dictamen BPM y Auditoría (1 col) */}
               <div className="space-y-6">
-                {/* Caja de Decisión Rápida (únicamente si está pendiente de revisión) */}
                 {selectedSolicitud.estado === "Pendiente" && (
                   <div className="rounded-2xl border border-border/80 bg-surface p-5 space-y-4 shadow-2xs">
                     <h3 className="text-sm font-bold font-heading text-foreground">
-                      Dictamen de Autorización
+                      Resolución DGR (BPM)
                     </h3>
 
                     <div className="space-y-3">
                       <p className="text-xs text-muted-foreground leading-relaxed">
-                        Como funcionario de la Dirección de Gestión y Registro, confirma la pertinencia de la institución y autoriza o deniega el acceso:
+                        {selectedSolicitud.tipoTramite === "PROCESO_A_REGISTRO_INSTITUCION" &&
+                          "Al aprobar, la institución queda registrada y los coordinadores quedarán PRERREGISTRADOS con envío de invitación a Proceso B."}
+                        {selectedSolicitud.tipoTramite === "PROCESO_B_ENROLAMIENTO_COORDINADOR" &&
+                          "Al aprobar, el coordinador queda ACTIVO definitivamente para iniciar sesión."}
+                        {selectedSolicitud.tipoTramite === "PROCESO_C_CAMBIO_COORDINADOR" &&
+                          "Al aprobar, el coordinador saliente se desvincula y el entrante queda PRERREGISTRADO para pasar al Proceso B."}
                       </p>
 
-                      <div className="flex flex-col gap-2 pt-1">
+                      <div className="flex flex-col gap-2.5 pt-1">
                         <Button
                           type="button"
                           variant="primary"
                           onClick={() => handleOpenApprove(selectedSolicitud)}
-                          className="w-full bg-foreground hover:bg-foreground/90 text-background font-semibold text-xs h-10 gap-2 rounded-xl shadow-xs"
+                          className="w-full font-semibold text-xs h-11 gap-2 shadow-xs"
                         >
                           <CheckCircle2 className="size-4" />
-                          <span>Aprobar acceso institucional</span>
+                          <span>Aprobar este trámite</span>
                         </Button>
 
                         <Button
                           type="button"
                           variant="outline"
                           onClick={() => handleOpenReject(selectedSolicitud)}
-                          className="w-full border-border text-foreground hover:bg-muted font-semibold text-xs h-10 gap-2 rounded-xl"
+                          className="w-full border-border text-foreground hover:bg-muted font-semibold text-xs h-11 gap-2 rounded-full"
                         >
                           <XCircle className="size-4" />
-                          <span>Rechazar solicitud</span>
+                          <span>Rechazar (con observaciones)</span>
                         </Button>
                       </div>
                     </div>
@@ -667,37 +865,34 @@ export default function GestionIngresosPage() {
                 {/* Trazabilidad del trámite */}
                 <div className="rounded-2xl border border-border/80 bg-surface p-5 space-y-4 shadow-2xs">
                   <h3 className="text-sm font-bold font-heading text-foreground">
-                    Trazabilidad del Trámite
+                    Reglas BPM del Trámite
                   </h3>
 
                   <div className="space-y-4 relative before:absolute before:inset-0 before:left-3.5 before:w-0.5 before:bg-border/60">
-                    {/* Hito 1 */}
                     <div className="relative flex items-start gap-3 text-xs">
                       <span className="size-7 rounded-full bg-muted text-foreground flex items-center justify-center shrink-0 border border-border">
                         <Check className="size-3.5" />
                       </span>
                       <div>
-                        <p className="font-bold text-foreground">1. Prerregistro completado</p>
+                        <p className="font-bold text-foreground">1. Recepción de Instrumento</p>
                         <p className="text-[11px] text-muted-foreground mt-0.5">
-                          Datos y contraseña registrados el {selectedSolicitud.fechaSolicitud}.
+                          Formulario {selectedSolicitud.codigoDocumental} ingresado el {selectedSolicitud.fechaSolicitud}.
                         </p>
                       </div>
                     </div>
 
-                    {/* Hito 2 */}
                     <div className="relative flex items-start gap-3 text-xs">
                       <span className="size-7 rounded-full bg-muted text-foreground flex items-center justify-center shrink-0 border border-border">
                         <Check className="size-3.5" />
                       </span>
                       <div>
-                        <p className="font-bold text-foreground">2. Carga de 3 documentos</p>
+                        <p className="font-bold text-foreground">2. Verificación de Firmas</p>
                         <p className="text-[11px] text-muted-foreground mt-0.5">
-                          Coordinador, Confidencialidad y Solicitud adjuntados con firma.
+                          Suscripción electrónica de las partes confirmada.
                         </p>
                       </div>
                     </div>
 
-                    {/* Hito 3 */}
                     <div className="relative flex items-start gap-3 text-xs">
                       <span className="size-7 rounded-full flex items-center justify-center shrink-0 border border-border bg-muted text-foreground">
                         {selectedSolicitud.estado === "Aprobada" ? (
@@ -710,15 +905,12 @@ export default function GestionIngresosPage() {
                       </span>
                       <div>
                         <p className="font-bold text-foreground">
-                          3. Dictamen DGR:{" "}
-                          <span className="text-foreground font-semibold">
-                            {selectedSolicitud.estado}
-                          </span>
+                          3. Estado: <span className="font-semibold">{selectedSolicitud.estado}</span>
                         </p>
                         <p className="text-[11px] text-muted-foreground mt-0.5">
                           {selectedSolicitud.estado === "Pendiente"
-                            ? "En espera de tu decisión o revisión."
-                            : `Revisado por ${selectedSolicitud.revisor || "DGR"}.`}
+                            ? "Pendiente de dictamen DGR."
+                            : `Resuelto por ${selectedSolicitud.revisor || "DGR"}.`}
                         </p>
                       </div>
                     </div>
@@ -729,22 +921,69 @@ export default function GestionIngresosPage() {
           </div>
         ) : (
           /* ══════════════════════════════════════════════════════════
-              VISTA 2: LISTADO DE SOLICITUDES (TABLA CON ACCIÓN "GESTIONAR")
+              VISTA 2: LISTADO DE TRÁMITES (FILTROS POR PROCESO + TABLA)
              ══════════════════════════════════════════════════════════ */
           <div className="border border-border/80 rounded-2xl bg-card p-6 sm:p-8 flex flex-col gap-6 shadow-xs">
             {/* ── 1. Encabezado Principal ── */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <Badge tone="neutral" appearance="soft" size="sm" className="border border-border">
+                    Dirección de Gestión y Registro · DINARP
+                  </Badge>
+                </div>
                 <h1 className="font-heading font-extrabold text-2xl sm:text-3xl tracking-tight text-foreground">
-                  Gestión de ingresos
+                  Bandeja de Acceso Institucional y Coordinadores
                 </h1>
                 <p className="text-xs sm:text-sm text-muted-foreground max-w-3xl leading-relaxed font-normal">
-                  Revisa y gestiona las solicitudes de acceso a la plataforma enviadas por los usuarios.
+                  Control unificado de Solicitudes de Acceso (Anexo A), Acuerdos de Confidencialidad (Anexo B) y Cambios de Coordinador (Anexo C).
                 </p>
+              </div>
+
+              <div className="flex items-center gap-2.5 self-start sm:self-auto">
+                <Button asChild variant="outline" className="h-11 px-4 text-xs font-semibold gap-1.5 rounded-full border-border/80 bg-surface shadow-xs hover:bg-muted/40">
+                  <Link href="/wireframes2/registro-institucion">
+                    <span>+ Solicitud Anexo A</span>
+                  </Link>
+                </Button>
+                <Button asChild variant="primary" className="h-11 px-4 text-xs font-semibold gap-1.5 rounded-full shadow-xs">
+                  <Link href="/wireframes2/cambio-coordinador">
+                    <span>+ Cambio Anexo C</span>
+                  </Link>
+                </Button>
               </div>
             </div>
 
-            {/* ── 2. Resumen Superior (KPIs) ── */}
+            {/* ── 2. Pestañas de Proceso BPM ── */}
+            <div className="flex flex-wrap gap-2 p-1.5 bg-muted/40 rounded-xl border border-border/80">
+              {[
+                { id: "TODOS", label: "Todos los Procesos", count: solicitudes.length },
+                { id: "PROCESO_A_REGISTRO_INSTITUCION", label: "Proceso A (Registro / ARP-R01)", count: solicitudes.filter(s => s.tipoTramite === "PROCESO_A_REGISTRO_INSTITUCION").length },
+                { id: "PROCESO_B_ENROLAMIENTO_COORDINADOR", label: "Proceso B (Enrolamiento / ARP-R02)", count: solicitudes.filter(s => s.tipoTramite === "PROCESO_B_ENROLAMIENTO_COORDINADOR").length },
+                { id: "PROCESO_C_CAMBIO_COORDINADOR", label: "Proceso C (Cambio / ARP-R03)", count: solicitudes.filter(s => s.tipoTramite === "PROCESO_C_CAMBIO_COORDINADOR").length },
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => {
+                    setFilterTramite(tab.id);
+                    setCurrentPage(1);
+                  }}
+                  className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all flex items-center gap-2 ${
+                    filterTramite === tab.id
+                      ? "bg-background text-foreground shadow-xs border border-border"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <span>{tab.label}</span>
+                  <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-muted font-mono">
+                    {tab.count}
+                  </span>
+                </button>
+              ))}
+            </div>
+
+            {/* ── 3. Resumen Superior (KPIs) ── */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
               {/* Pendientes */}
               <Card
@@ -754,13 +993,6 @@ export default function GestionIngresosPage() {
                 onClick={() => {
                   setFilterEstado(filterEstado === "Pendiente" ? "Todos" : "Pendiente");
                   setCurrentPage(1);
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    setFilterEstado(filterEstado === "Pendiente" ? "Todos" : "Pendiente");
-                    setCurrentPage(1);
-                  }
                 }}
                 className={`cursor-pointer transition-all border ${
                   filterEstado === "Pendiente"
@@ -776,7 +1008,7 @@ export default function GestionIngresosPage() {
                   Pendientes
                 </span>
                 <span className="text-[11px] text-muted-foreground font-normal">
-                  por revisar
+                  por revisar en DGR
                 </span>
                 <CardDecorativeIcon>
                   <Clock className="size-24 text-muted-foreground" />
@@ -792,13 +1024,6 @@ export default function GestionIngresosPage() {
                   setFilterEstado(filterEstado === "Aprobada" ? "Todos" : "Aprobada");
                   setCurrentPage(1);
                 }}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    setFilterEstado(filterEstado === "Aprobada" ? "Todos" : "Aprobada");
-                    setCurrentPage(1);
-                  }
-                }}
                 className={`cursor-pointer transition-all border ${
                   filterEstado === "Aprobada"
                     ? "bg-muted border-foreground ring-2 ring-foreground/20 shadow-sm"
@@ -813,7 +1038,7 @@ export default function GestionIngresosPage() {
                   Aprobadas
                 </span>
                 <span className="text-[11px] text-muted-foreground font-normal">
-                  autorizadas
+                  resueltas
                 </span>
                 <CardDecorativeIcon>
                   <CheckCircle2 className="size-24 text-muted-foreground" />
@@ -829,13 +1054,6 @@ export default function GestionIngresosPage() {
                   setFilterEstado(filterEstado === "Rechazada" ? "Todos" : "Rechazada");
                   setCurrentPage(1);
                 }}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    setFilterEstado(filterEstado === "Rechazada" ? "Todos" : "Rechazada");
-                    setCurrentPage(1);
-                  }
-                }}
                 className={`cursor-pointer transition-all border ${
                   filterEstado === "Rechazada"
                     ? "bg-muted border-foreground ring-2 ring-foreground/20 shadow-sm"
@@ -850,7 +1068,7 @@ export default function GestionIngresosPage() {
                   Rechazadas
                 </span>
                 <span className="text-[11px] text-muted-foreground font-normal">
-                  denegadas
+                  con observaciones
                 </span>
                 <CardDecorativeIcon>
                   <XCircle className="size-24 text-muted-foreground" />
@@ -858,15 +1076,12 @@ export default function GestionIngresosPage() {
               </Card>
             </div>
 
-            {/* ── Línea divisoria debajo de las cards ── */}
-            <div className="border-b border-border/80" />
-
-            {/* ── 3. Buscador y Filtros ── */}
+            {/* ── 4. Buscador y Filtros ── */}
             <div className="space-y-3">
               <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
                 <div className="w-full sm:max-w-md">
                   <Search
-                    placeholder="Buscar por cédula, nombre, correo o institución..."
+                    placeholder="Buscar por cédula, nombre, código, correo o entidad..."
                     value={searchQuery}
                     onChange={(e) => {
                       setSearchQuery(e.target.value);
@@ -878,7 +1093,6 @@ export default function GestionIngresosPage() {
                 </div>
 
                 <div className="flex items-center gap-2.5 w-full sm:w-auto justify-end">
-                  {/* Filtro Dropdown */}
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button
@@ -912,7 +1126,6 @@ export default function GestionIngresosPage() {
                       </div>
                       <DropdownMenuSeparator />
 
-                      {/* Filtrar por Estado */}
                       <DropdownMenuLabel className="text-[11px] font-semibold text-muted-foreground px-2 pt-1 uppercase tracking-wider">
                         Estado
                       </DropdownMenuLabel>
@@ -927,22 +1140,18 @@ export default function GestionIngresosPage() {
                           Todos los estados
                         </DropdownMenuRadioItem>
                         <DropdownMenuRadioItem value="Pendiente" className="text-xs">
-                          <span className="size-2 rounded-full bg-foreground mr-2 shrink-0" />
                           Pendiente
                         </DropdownMenuRadioItem>
                         <DropdownMenuRadioItem value="Aprobada" className="text-xs">
-                          <span className="size-2 rounded-full bg-foreground mr-2 shrink-0" />
                           Aprobada
                         </DropdownMenuRadioItem>
                         <DropdownMenuRadioItem value="Rechazada" className="text-xs">
-                          <span className="size-2 rounded-full border border-foreground mr-2 shrink-0" />
                           Rechazada
                         </DropdownMenuRadioItem>
                       </DropdownMenuRadioGroup>
 
                       <DropdownMenuSeparator />
 
-                      {/* Filtrar por Institución */}
                       <DropdownMenuLabel className="text-[11px] font-semibold text-muted-foreground px-2 pt-1 uppercase tracking-wider">
                         Institución
                       </DropdownMenuLabel>
@@ -964,40 +1173,15 @@ export default function GestionIngresosPage() {
                           ))}
                         </DropdownMenuRadioGroup>
                       </div>
-
-                      <DropdownMenuSeparator />
-
-                      {/* Filtrar por Fecha */}
-                      <DropdownMenuLabel className="text-[11px] font-semibold text-muted-foreground px-2 pt-1 uppercase tracking-wider">
-                        Fecha de solicitud
-                      </DropdownMenuLabel>
-                      <DropdownMenuRadioGroup
-                        value={filterFecha}
-                        onValueChange={(val) => {
-                          setFilterFecha(val);
-                          setCurrentPage(1);
-                        }}
-                      >
-                        <DropdownMenuRadioItem value="Todas" className="text-xs">
-                          Todas las fechas
-                        </DropdownMenuRadioItem>
-                        <DropdownMenuRadioItem value="7dias" className="text-xs">
-                          Últimos 7 días
-                        </DropdownMenuRadioItem>
-                        <DropdownMenuRadioItem value="30dias" className="text-xs">
-                          Últimos 30 días
-                        </DropdownMenuRadioItem>
-                      </DropdownMenuRadioGroup>
                     </DropdownMenuContent>
                   </DropdownMenu>
 
-                  {/* Ordenamiento Dropdown */}
+                  {/* Ordenamiento */}
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button
                         variant="outline"
                         className="h-11 px-4 text-xs font-semibold gap-2 border-border/80 bg-surface rounded-full hover:bg-muted/40 shrink-0 shadow-xs"
-                        aria-label="Ordenar solicitudes"
                       >
                         <ArrowUpDown className="size-3.5 text-muted-foreground" />
                         <span>Ordenar</span>
@@ -1005,13 +1189,9 @@ export default function GestionIngresosPage() {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-56 p-1">
                       <DropdownMenuLabel className="text-xs font-semibold px-2 py-1.5">
-                        Criterio de ordenación
+                        Criterio
                       </DropdownMenuLabel>
                       <DropdownMenuSeparator />
-
-                      <DropdownMenuLabel className="text-[11px] font-semibold text-muted-foreground px-2 pt-1 uppercase tracking-wider">
-                        Fecha de solicitud
-                      </DropdownMenuLabel>
                       <DropdownMenuRadioGroup
                         value={sortOrder}
                         onValueChange={(val) => setSortOrder(val as any)}
@@ -1022,68 +1202,12 @@ export default function GestionIngresosPage() {
                         <DropdownMenuRadioItem value="fecha-asc" className="text-xs">
                           Más antiguas primero
                         </DropdownMenuRadioItem>
-                      </DropdownMenuRadioGroup>
-
-                      <DropdownMenuSeparator />
-
-                      <DropdownMenuLabel className="text-[11px] font-semibold text-muted-foreground px-2 pt-1 uppercase tracking-wider">
-                        Usuario / Nombre
-                      </DropdownMenuLabel>
-                      <DropdownMenuRadioGroup
-                        value={sortOrder}
-                        onValueChange={(val) => setSortOrder(val as any)}
-                      >
                         <DropdownMenuRadioItem value="nombre-asc" className="text-xs">
                           Nombre (A - Z)
                         </DropdownMenuRadioItem>
-                        <DropdownMenuRadioItem value="nombre-desc" className="text-xs">
-                          Nombre (Z - A)
-                        </DropdownMenuRadioItem>
-                      </DropdownMenuRadioGroup>
-
-                      <DropdownMenuSeparator />
-
-                      <DropdownMenuLabel className="text-[11px] font-semibold text-muted-foreground px-2 pt-1 uppercase tracking-wider">
-                        Institución
-                      </DropdownMenuLabel>
-                      <DropdownMenuRadioGroup
-                        value={sortOrder}
-                        onValueChange={(val) => setSortOrder(val as any)}
-                      >
                         <DropdownMenuRadioItem value="institucion-asc" className="text-xs">
                           Institución (A - Z)
                         </DropdownMenuRadioItem>
-                        <DropdownMenuRadioItem value="institucion-desc" className="text-xs">
-                          Institución (Z - A)
-                        </DropdownMenuRadioItem>
-                      </DropdownMenuRadioGroup>
-
-                      <DropdownMenuSeparator />
-
-                      <DropdownMenuLabel className="text-[11px] font-semibold text-muted-foreground px-2 pt-1 uppercase tracking-wider">
-                        Cédula
-                      </DropdownMenuLabel>
-                      <DropdownMenuRadioGroup
-                        value={sortOrder}
-                        onValueChange={(val) => setSortOrder(val as any)}
-                      >
-                        <DropdownMenuRadioItem value="cedula-asc" className="text-xs">
-                          Cédula (0 - 9)
-                        </DropdownMenuRadioItem>
-                        <DropdownMenuRadioItem value="cedula-desc" className="text-xs">
-                          Cédula (9 - 0)
-                        </DropdownMenuRadioItem>
-                      </DropdownMenuRadioGroup>
-
-                      <DropdownMenuSeparator />
-
-                      <DropdownMenuLabel className="text-[11px] font-semibold text-muted-foreground px-2 pt-1 uppercase tracking-wider">
-                        Estado
-                      </DropdownMenuLabel>
-                      <DropdownMenuRadioGroup
-                        value={sortOrder}
-                        onValueChange={(val) => setSortOrder(val as any)}
-                      >
                         <DropdownMenuRadioItem value="estado-prioridad" className="text-xs">
                           Pendientes primero
                         </DropdownMenuRadioItem>
@@ -1092,113 +1216,33 @@ export default function GestionIngresosPage() {
                   </DropdownMenu>
                 </div>
               </div>
-
-              {/* Filtros Activos Chips */}
-              {(Boolean(searchQuery) || filterEstado !== "Todos" || filterInstitucion !== "Todas" || filterFecha !== "Todas") && (
-                <div className="flex flex-wrap items-center gap-2 pt-1 text-xs">
-                  <span className="text-muted-foreground font-medium text-[11px]">Filtros aplicados:</span>
-                  {searchQuery && (
-                    <Badge tone="neutral" appearance="soft" size="sm" className="gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-normal normal-case">
-                      Búsqueda: &ldquo;{searchQuery}&rdquo;
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setSearchQuery("");
-                          setCurrentPage(1);
-                        }}
-                        className="ml-1 hover:text-foreground inline-flex items-center"
-                      >
-                        <X className="size-3" />
-                      </button>
-                    </Badge>
-                  )}
-                  {filterEstado !== "Todos" && (
-                    <Badge tone="neutral" appearance="soft" size="sm" className="gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-normal normal-case">
-                      Estado: {filterEstado}
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setFilterEstado("Todos");
-                          setCurrentPage(1);
-                        }}
-                        className="ml-1 hover:text-foreground inline-flex items-center"
-                      >
-                        <X className="size-3" />
-                      </button>
-                    </Badge>
-                  )}
-                  {filterInstitucion !== "Todas" && (
-                    <Badge tone="neutral" appearance="soft" size="sm" className="gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-normal normal-case max-w-[280px]">
-                      <span className="truncate">Institución: {filterInstitucion}</span>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setFilterInstitucion("Todas");
-                          setCurrentPage(1);
-                        }}
-                        className="ml-1 hover:text-foreground shrink-0 inline-flex items-center"
-                      >
-                        <X className="size-3" />
-                      </button>
-                    </Badge>
-                  )}
-                  {filterFecha !== "Todas" && (
-                    <Badge tone="neutral" appearance="soft" size="sm" className="gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-normal normal-case">
-                      Fecha: {filterFecha === "7dias" ? "Últimos 7 días" : "Últimos 30 días"}
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setFilterFecha("Todas");
-                          setCurrentPage(1);
-                        }}
-                        className="ml-1 hover:text-foreground inline-flex items-center"
-                      >
-                        <X className="size-3" />
-                      </button>
-                    </Badge>
-                  )}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSearchQuery("");
-                      setFilterEstado("Todos");
-                      setFilterInstitucion("Todas");
-                      setFilterFecha("Todas");
-                      setCurrentPage(1);
-                    }}
-                    className="text-[11px] text-primary hover:underline font-medium ml-1"
-                  >
-                    Limpiar todo
-                  </button>
-                </div>
-              )}
             </div>
 
-            {/* ── 4. Tabla de Solicitudes de Acceso ── */}
+            {/* ── 5. Tabla de Solicitudes y Trámites ── */}
             <div className="rounded-2xl border border-border/80 bg-surface overflow-hidden shadow-2xs">
               <Table className="w-full min-w-[1000px]">
                 <TableHeader>
                   <TableRow className="bg-muted/20 hover:bg-muted/20">
-                    <TableHead className="w-[12%] min-w-[110px] px-2.5 first:pl-4 font-bold text-xs uppercase tracking-wider text-muted-foreground whitespace-nowrap">
+                    <TableHead className="w-[10%] min-w-[90px] px-2.5 first:pl-4 font-bold text-xs uppercase tracking-wider text-muted-foreground whitespace-nowrap">
+                      ANEXO
+                    </TableHead>
+                    <TableHead className="w-[12%] min-w-[110px] px-2.5 font-bold text-xs uppercase tracking-wider text-muted-foreground whitespace-nowrap">
                       CÉDULA
                     </TableHead>
                     <TableHead className="w-[20%] min-w-[180px] px-2.5 font-bold text-xs uppercase tracking-wider text-muted-foreground whitespace-nowrap">
-                      USUARIO
+                      FUNCIONARIO / SOLICITANTE
                     </TableHead>
                     <TableHead className="w-[22%] min-w-[210px] px-2.5 font-bold text-xs uppercase tracking-wider text-muted-foreground whitespace-nowrap">
-                      CORREO INSTITUCIONAL
-                    </TableHead>
-                    <TableHead className="w-[18%] min-w-[180px] px-2.5 font-bold text-xs uppercase tracking-wider text-muted-foreground whitespace-nowrap">
                       INSTITUCIÓN
                     </TableHead>
                     <TableHead className="w-[12%] min-w-[130px] px-2.5 font-bold text-xs uppercase tracking-wider text-muted-foreground whitespace-nowrap">
-                      FECHA SOLICITUD
+                      FECHA TRÁMITE
                     </TableHead>
-                    <TableHead className="w-[10%] min-w-[110px] px-2.5 font-bold text-xs uppercase tracking-wider text-muted-foreground whitespace-nowrap">
+                    <TableHead className="w-[12%] min-w-[110px] px-2.5 font-bold text-xs uppercase tracking-wider text-muted-foreground whitespace-nowrap">
                       ESTADO
                     </TableHead>
                     <TableHead className="w-[6%] min-w-[70px] px-2.5 last:pr-4 text-right font-bold text-xs uppercase tracking-wider text-muted-foreground whitespace-nowrap">
-                      ACCIONES
+                      GESTIÓN
                     </TableHead>
                   </TableRow>
                 </TableHeader>
@@ -1211,27 +1255,11 @@ export default function GestionIngresosPage() {
                             <SearchIcon className="size-6" />
                           </div>
                           <h3 className="font-heading font-bold text-base text-foreground">
-                            No hay solicitudes de acceso
+                            No hay trámites registrados
                           </h3>
                           <p className="text-xs text-muted-foreground leading-relaxed">
-                            Las nuevas solicitudes realizadas desde el prerregistro aparecerán aquí para su revisión.
+                            No se encontraron trámites que coincidan con los filtros seleccionados.
                           </p>
-                          {(searchQuery || filterEstado !== "Todos" || filterInstitucion !== "Todas" || filterFecha !== "Todas") && (
-                            <Button
-                              type="button"
-                              variant="outline"
-                              size="sm"
-                              onClick={() => {
-                                setSearchQuery("");
-                                setFilterEstado("Todos");
-                                setFilterInstitucion("Todas");
-                                setFilterFecha("Todas");
-                              }}
-                              className="mt-2 text-xs font-semibold rounded-full"
-                            >
-                              Limpiar filtros
-                            </Button>
-                          )}
                         </div>
                       </TableCell>
                     </TableRow>
@@ -1242,12 +1270,17 @@ export default function GestionIngresosPage() {
                         className="cursor-pointer transition-colors hover:bg-muted/40"
                         onClick={() => setSelectedSolicitud(row)}
                       >
+                        {/* Anexo Código */}
+                        <TableCell className="px-2.5 first:pl-4 whitespace-nowrap">
+                          {renderTramiteBadge(row.tipoTramite, row.codigoDocumental)}
+                        </TableCell>
+
                         {/* Cédula */}
-                        <TableCell className="px-2.5 first:pl-4 font-mono text-xs font-semibold text-foreground whitespace-nowrap truncate">
+                        <TableCell className="px-2.5 font-mono text-xs font-semibold text-foreground whitespace-nowrap truncate">
                           {row.cedula}
                         </TableCell>
 
-                        {/* Usuario con Avatar */}
+                        {/* Usuario */}
                         <TableCell className="px-2.5 min-w-0">
                           <div className="flex items-center gap-2 min-w-0">
                             <div className="size-8 rounded-full bg-muted text-foreground font-bold text-xs flex items-center justify-center shrink-0 border border-border/80">
@@ -1258,17 +1291,10 @@ export default function GestionIngresosPage() {
                                 {row.nombreCompleto}
                               </span>
                               <span className="font-mono text-[10px] text-muted-foreground truncate">
-                                {row.id}
+                                {row.id} · {row.correo}
                               </span>
                             </div>
                           </div>
-                        </TableCell>
-
-                        {/* Correo institucional */}
-                        <TableCell className="px-2.5 text-muted-foreground text-xs font-medium min-w-0">
-                          <span className="truncate block" title={row.correo}>
-                            {row.correo}
-                          </span>
                         </TableCell>
 
                         {/* Institución */}
@@ -1278,7 +1304,7 @@ export default function GestionIngresosPage() {
                           </span>
                         </TableCell>
 
-                        {/* Fecha de solicitud */}
+                        {/* Fecha */}
                         <TableCell className="px-2.5 text-muted-foreground font-mono text-xs whitespace-nowrap min-w-0">
                           <span className="block truncate">{row.fechaSolicitud}</span>
                         </TableCell>
@@ -1288,7 +1314,7 @@ export default function GestionIngresosPage() {
                           {renderEstadoBadge(row.estado)}
                         </TableCell>
 
-                        {/* Columna Acciones */}
+                        {/* Acciones */}
                         <TableCell className="px-2.5 last:pr-4 text-right" onClick={(e) => e.stopPropagation()}>
                           <div className="flex items-center justify-end">
                             <Tooltip>
@@ -1302,12 +1328,12 @@ export default function GestionIngresosPage() {
                                     setSelectedSolicitud(row);
                                   }}
                                   className="size-8 rounded-lg border-border/80 text-foreground hover:bg-muted shadow-2xs"
-                                  aria-label={`Ver detalle de solicitud ${row.id}`}
+                                  aria-label={`Ver detalle de trámite ${row.id}`}
                                 >
                                   <Eye className="size-4" />
                                 </Button>
                               </TooltipTrigger>
-                              <TooltipContent side="top">Ver detalle</TooltipContent>
+                              <TooltipContent side="top">Revisar trámite</TooltipContent>
                             </Tooltip>
                           </div>
                         </TableCell>
@@ -1318,11 +1344,11 @@ export default function GestionIngresosPage() {
               </Table>
             </div>
 
-            {/* ── 5. Paginación Estandarizada ── */}
+            {/* ── 6. Paginación ── */}
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-1">
               <p className="text-xs text-muted-foreground font-medium order-2 sm:order-1">
                 Mostrando <span className="font-bold text-foreground">{paginatedData.length}</span> de{" "}
-                <span className="font-bold text-foreground">{filteredData.length}</span> solicitudes
+                <span className="font-bold text-foreground">{filteredData.length}</span> trámites
               </p>
 
               {totalPages > 1 && (
@@ -1379,21 +1405,21 @@ export default function GestionIngresosPage() {
             {previewDoc && (
               <>
                 <DialogHeader className="space-y-2">
-                  <div className="size-10 rounded-full bg-primary/10 text-primary flex items-center justify-center mb-1">
+                  <div className="size-10 rounded-full bg-muted text-foreground flex items-center justify-center mb-1 border border-border">
                     <FileText className="size-5" />
                   </div>
                   <DialogTitle className="text-base font-bold text-foreground">
                     {previewDoc.titulo}
                   </DialogTitle>
                   <DialogDescription className="text-xs text-muted-foreground">
-                    Documento habilitante reglamentario cargado por el solicitante en formato PDF.
+                    Documento habilitante suscrito remitido en formato PDF.
                   </DialogDescription>
                 </DialogHeader>
 
                 <div className="space-y-3 py-2 text-xs">
                   <div className="p-3 bg-muted/40 rounded-xl border border-border/70 space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="text-muted-foreground">Nombre del archivo:</span>
+                      <span className="text-muted-foreground">Archivo:</span>
                       <span className="font-mono font-bold text-foreground">{previewDoc.archivo}</span>
                     </div>
                     <div className="flex items-center justify-between">
@@ -1411,13 +1437,6 @@ export default function GestionIngresosPage() {
                       <span className="text-muted-foreground">Entidad certificadora:</span>
                       <span className="font-semibold text-foreground">{previewDoc.autoridad}</span>
                     </div>
-                  </div>
-
-                  <div className="p-3 bg-muted/40 rounded-xl border border-border text-foreground text-[11px] flex items-start gap-2">
-                    <ShieldCheck className="size-4 shrink-0 mt-0.5 text-foreground" />
-                    <span>
-                      La firma electrónica cumple con las especificaciones técnicas del esquema gubernamental de interoperabilidad y cuenta con estampa cronológica (timestamp).
-                    </span>
                   </div>
                 </div>
 

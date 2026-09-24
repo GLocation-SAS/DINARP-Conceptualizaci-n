@@ -885,6 +885,7 @@
   /* Main Actions (Primary and Secondary inherit from UI BRAND TOKENS) */
   --primary: var(--primitive-primary-400);
   --primary-foreground: var(--primitive-neutral-950);
+  --secondary: var(--primitive-secondary-300);
   --secondary-foreground: var(--primitive-neutral-50);
 
   /* Supporting States */

@@ -28,8 +28,50 @@ import {
   Check,
   X,
   Copy,
+  RotateCcw,
 } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+
+function interpolateColor(hex1: string, hex2: string, factor: number) {
+  const cleanHex1 = hex1.replace("#", "");
+  const cleanHex2 = hex2.replace("#", "");
+  const c1 = parseInt(cleanHex1.length === 3 ? cleanHex1.split("").map((x) => x + x).join("") : cleanHex1, 16);
+  const c2 = parseInt(cleanHex2.length === 3 ? cleanHex2.split("").map((x) => x + x).join("") : cleanHex2, 16);
+  const r1 = (c1 >> 16) & 255, g1 = (c1 >> 8) & 255, b1 = c1 & 255;
+  const r2 = (c2 >> 16) & 255, g2 = (c2 >> 8) & 255, b2 = c2 & 255;
+  const r = Math.round(r1 + factor * (r2 - r1));
+  const g = Math.round(g1 + factor * (g2 - g1));
+  const b = Math.round(b1 + factor * (b2 - b1));
+  return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase()}`;
+}
+
+function generateScaleFromBase(baseHex: string) {
+  return [
+    { level: "50", hex: interpolateColor("#FFFFFF", baseHex, 0.08) },
+    { level: "100", hex: interpolateColor("#FFFFFF", baseHex, 0.20) },
+    { level: "200", hex: interpolateColor("#FFFFFF", baseHex, 0.38) },
+    { level: "300", hex: interpolateColor("#FFFFFF", baseHex, 0.58) },
+    { level: "400", hex: interpolateColor("#FFFFFF", baseHex, 0.80) },
+    { level: "500", hex: baseHex.toUpperCase() },
+    { level: "600", hex: interpolateColor(baseHex, "#000000", 0.18) },
+    { level: "700", hex: interpolateColor(baseHex, "#000000", 0.35) },
+    { level: "800", hex: interpolateColor(baseHex, "#000000", 0.55) },
+    { level: "900", hex: interpolateColor(baseHex, "#000000", 0.75) },
+  ];
+}
+
+const COLOR_PRESETS = [
+  { name: "DINARP Púrpura", hex: "#4F318B" },
+  { name: "DINARP Secundario", hex: "#2D2D96" },
+  { name: "Azul Océano", hex: "#0284C7" },
+  { name: "Verde Esmeralda", hex: "#16A34A" },
+  { name: "Ámbar Dorado", hex: "#D97706" },
+  { name: "Rojo Carmesí", hex: "#DC2626" },
+  { name: "Teal Marino", hex: "#0D9488" },
+  { name: "Violeta Profundo", hex: "#7C3AED" },
+  { name: "Rosa Vibrante", hex: "#DB2777" },
+  { name: "Pizarra Neutro", hex: "#475569" },
+];
 
 function getContrastTextColor(hex: string): string {
   const cleanHex = hex.replace("#", "");
@@ -486,13 +528,20 @@ export function StyleGuide({
 }: {
   registerSection?: (id: string, el: HTMLElement | null) => void;
 }) {
+  const [scales, setScales] = useState(FULL_SCALES);
   const [activeScaleName, setActiveScaleName] = useState(FULL_SCALES[0].name);
   const activeScale =
-    FULL_SCALES.find((s) => s.name === activeScaleName) || FULL_SCALES[0];
+    scales.find((s) => s.name === activeScaleName) || scales[0];
   const [scaleViewMode, setScaleViewMode] = useState<"detail" | "matrix">("detail");
   const [simulatedColors, setSimulatedColors] = useState<
     Record<string, string>
   >({});
+  const [editingScale, setEditingScale] = useState<{
+    scaleName: string;
+    baseHex: string;
+    newBaseHex: string;
+    prefix: string;
+  } | null>(null);
   const [editingColor, setEditingColor] = useState<{
     name: string;
     hex: string;
@@ -521,6 +570,76 @@ export function StyleGuide({
     toast.success(`${label} copiada: ${text}`);
   };
 
+  const handleApplyScaleColor = (scaleName: string, newHex: string) => {
+    const generatedShades = generateScaleFromBase(newHex);
+
+    setScales((prev) =>
+      prev.map((s) => {
+        if (s.name.toLowerCase() === scaleName.toLowerCase()) {
+          return {
+            ...s,
+            colors: generatedShades,
+          };
+        }
+        return s;
+      })
+    );
+
+    const targetScale = scales.find(
+      (s) => s.name.toLowerCase() === scaleName.toLowerCase()
+    );
+    const prefix = targetScale?.prefix || scaleName.toLowerCase();
+
+    generatedShades.forEach((shade) => {
+      document.documentElement.style.setProperty(
+        `--primitive-${prefix}-${shade.level}`,
+        shade.hex
+      );
+    });
+
+    const semanticMap: Record<string, string> = {
+      primary: "--primary",
+      secondary: "--secondary",
+      success: "--success",
+      warning: "--warning",
+      danger: "--danger",
+      info: "--info",
+    };
+    if (semanticMap[prefix]) {
+      document.documentElement.style.setProperty(semanticMap[prefix], newHex);
+    }
+
+    toast.success("Escala cromática actualizada", {
+      description: `La familia "${scaleName}" y la tabla de colores se actualizaron a ${newHex}.`,
+    });
+    setEditingScale(null);
+  };
+
+  const handleResetScales = () => {
+    setScales(FULL_SCALES);
+    FULL_SCALES.forEach((scale) => {
+      scale.colors.forEach((c) => {
+        document.documentElement.style.removeProperty(
+          `--primitive-${scale.prefix}-${c.level}`
+        );
+      });
+      const semanticMap: Record<string, string> = {
+        primary: "--primary",
+        secondary: "--secondary",
+        success: "--success",
+        warning: "--warning",
+        danger: "--danger",
+        info: "--info",
+      };
+      if (semanticMap[scale.prefix]) {
+        document.documentElement.style.removeProperty(semanticMap[scale.prefix]);
+      }
+    });
+    toast.info("Paleta restaurada", {
+      description: "Se han restablecido todas las escalas al estándar original.",
+    });
+  };
+
   return (
     <div className="w-full flex flex-col gap-8 md:gap-12">
       {/* Subsección 0: Brand Assets / Logos Oficiales */}
@@ -545,82 +664,43 @@ export function StyleGuide({
           />
 
           {/* Card 2: Vertical */}
-          <div className="flex flex-col rounded-3xl border border-dashed border-border/60 bg-surface/50 overflow-hidden shadow-sm group">
-            <div className="h-48 w-full bg-muted/20 flex flex-col items-center justify-center p-6 text-center border-b border-dashed border-border/60">
-              <div className="size-12 rounded-full bg-muted/50 flex items-center justify-center mb-3">
-                <ImageOff className="size-5 text-muted-foreground/50" />
-              </div>
-              <span className="text-sm font-medium text-muted-foreground">Recurso faltante</span>
-              <span className="text-xs text-muted-foreground/60 mt-1 max-w-[200px]">falta el recurso oficial del manual de marca</span>
-            </div>
-            <div className="p-6 flex flex-col flex-1 bg-surface/50">
-              <div className="flex gap-2 mb-4">
-                <Badge tone="neutral" appearance="soft" size="sm" className="font-bold uppercase tracking-wider text-[10px] px-2.5 py-1 opacity-50">
-                  VERTICAL
-                </Badge>
-                <Badge tone="neutral" appearance="soft" size="sm" className="font-bold uppercase tracking-wider text-[10px] px-2.5 py-1 opacity-50">
-                  SECUNDARIO
-                </Badge>
-              </div>
-              <div className="flex flex-col gap-2">
-                <h3 className="text-foreground/70 font-bold text-lg">Logotipo Vertical</h3>
-                <p className="text-muted-foreground/60 text-sm leading-relaxed">
-                  Versión vertical del logotipo. Diseñada para composiciones verticales y banners donde el espacio horizontal es reducido.
-                </p>
-              </div>
-            </div>
-          </div>
+          <LogoManagerCard
+            slot="vertical"
+            title="Logotipo Vertical"
+            description="Versión vertical del logotipo. Diseñada para composiciones verticales y banners donde el espacio horizontal es reducido."
+            badge1="VERTICAL"
+            badge2="SECUNDARIO"
+            defaultLightImg="/logotipo.png"
+            defaultDarkImg="/logotipo.png"
+            monoLightImg="/logotipo.png"
+            monoDarkImg="/logotipo.png"
+          />
 
           {/* Card 3: Símbolo / Compacto */}
-          <div className="flex flex-col rounded-3xl border border-dashed border-border/60 bg-surface/50 overflow-hidden shadow-sm group">
-            <div className="h-48 w-full bg-muted/20 flex flex-col items-center justify-center p-6 text-center border-b border-dashed border-border/60">
-              <div className="size-12 rounded-full bg-muted/50 flex items-center justify-center mb-3">
-                <ImageOff className="size-5 text-muted-foreground/50" />
-              </div>
-              <span className="text-sm font-medium text-muted-foreground">Recurso faltante</span>
-              <span className="text-xs text-muted-foreground/60 mt-1 max-w-[200px]">falta el recurso oficial del manual de marca</span>
-            </div>
-            <div className="p-6 flex flex-col flex-1 bg-surface/50">
-              <div className="flex gap-2 mb-4">
-                <Badge tone="neutral" appearance="soft" size="sm" className="font-bold uppercase tracking-wider text-[10px] px-2.5 py-1 opacity-50">
-                  COMPACTO
-                </Badge>
-                <Badge tone="neutral" appearance="soft" size="sm" className="font-bold uppercase tracking-wider text-[10px] px-2.5 py-1 opacity-50">
-                  SÍMBOLO
-                </Badge>
-              </div>
-              <div className="flex flex-col gap-2">
-                <h3 className="text-foreground/70 font-bold text-lg">Logotipo Compacto / Símbolo</h3>
-                <p className="text-muted-foreground/60 text-sm leading-relaxed">
-                  Versión condensada del logotipo sin texto descriptivo inferior. Ideal para sidebars, botones y elementos compactos.
-                </p>
-              </div>
-            </div>
-          </div>
+          <LogoManagerCard
+            slot="sin-lema"
+            title="Logotipo Compacto / Símbolo"
+            description="Versión condensada del logotipo sin texto descriptivo inferior. Ideal para sidebars, botones y elementos compactos."
+            badge1="COMPACTO"
+            badge2="SÍMBOLO"
+            defaultLightImg="/logotipo.png"
+            defaultDarkImg="/logotipo.png"
+            monoLightImg="/logotipo.png"
+            monoDarkImg="/logotipo.png"
+          />
 
-          {/* Card 4: Placeholder Escudo Nacional */}
-          <div className="flex flex-col rounded-3xl border border-dashed border-border/60 bg-surface/50 overflow-hidden shadow-sm group">
-            <div className="h-48 w-full bg-muted/20 flex flex-col items-center justify-center p-6 text-center border-b border-dashed border-border/60">
-              <div className="size-12 rounded-full bg-muted/50 flex items-center justify-center mb-3">
-                <ImageOff className="size-5 text-muted-foreground/50" />
-              </div>
-              <span className="text-sm font-medium text-muted-foreground">Recurso faltante</span>
-              <span className="text-xs text-muted-foreground/60 mt-1 max-w-[200px]">falta el recurso oficial del manual de marca</span>
-            </div>
-            <div className="p-6 flex flex-col flex-1 bg-surface/50">
-              <div className="flex gap-2 mb-4">
-                <Badge tone="neutral" appearance="soft" size="sm" className="font-bold uppercase tracking-wider text-[10px] px-2.5 py-1 opacity-50">
-                  ESCUDO
-                </Badge>
-              </div>
-              <div className="flex flex-col gap-2">
-                <h3 className="text-foreground/70 font-bold text-lg">Escudo Nacional / Institucional</h3>
-                <p className="text-muted-foreground/60 text-sm leading-relaxed">
-                  Versión formal del escudo para documentos oficiales. Pendiente de cargar al repositorio de activos.
-                </p>
-              </div>
-            </div>
-          </div>
+          {/* Card 4: Escudo Nacional */}
+          <LogoManagerCard
+            slot="escudo"
+            title="Escudo Nacional / Institucional"
+            description="Versión formal del escudo para documentos oficiales y encabezados de alta jerarquía."
+            badge1="ESCUDO"
+            badge2="OFICIAL"
+            defaultLightImg="/logotipo.png"
+            defaultDarkImg="/logotipo.png"
+            monoLightImg="/logotipo.png"
+            monoDarkImg="/logotipo.png"
+          />
         </div>
       </SubSection>
 
@@ -654,42 +734,70 @@ export function StyleGuide({
               <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
                 {SEMANTIC_COLORS.filter((color) =>
                   category.filters.includes(color.name),
-                ).map((color) => (
-                  <div
-                    key={color.name}
-                    className="flex flex-col sm:flex-row items-center gap-6 p-6 sm:p-8 rounded-[2rem] border border-border/40 shadow-sm bg-surface/30 hover:bg-surface hover:shadow-md hover:border-border/80 transition-all duration-300 group"
-                  >
-                    {/* Swatch */}
-                    <div
-                      className={cn(
-                        "w-full h-32 sm:w-32 sm:h-32 rounded-2xl shrink-0 shadow-sm ring-1 ring-black/5 relative overflow-hidden transition-transform duration-500 group-hover:scale-105",
-                        color.class
-                      )}
-                    >
-                      <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-50" />
-                    </div>
+                ).map((color) => {
+                  const matchingScale = scales.find(
+                    (s) => s.name.toLowerCase() === color.name.toLowerCase()
+                  );
+                  const currentHex =
+                    matchingScale?.colors.find(
+                      (c) => c.level === "500" || c.level === "1"
+                    )?.hex || color.hex;
 
-                    {/* Info */}
-                    <div className="flex flex-col gap-3 flex-1 w-full">
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between w-full gap-2">
-                        <div className="flex items-center gap-3">
-                          <h3 className="text-xl sm:text-2xl font-heading font-bold text-foreground tracking-tight">
-                            {color.title}
-                          </h3>
-                          <Badge tone="neutral" appearance="soft" className="uppercase text-[9px] font-bold tracking-widest px-2 shadow-none bg-muted/40">
-                            {color.name}
-                          </Badge>
-                        </div>
-                        <code className="text-[11px] sm:text-xs font-mono font-bold text-muted-foreground bg-muted/20 px-2.5 py-1 rounded-md border border-border/50">
-                          {color.hex}
-                        </code>
+                  return (
+                    <div
+                      key={color.name}
+                      className="flex flex-col sm:flex-row items-center gap-6 p-6 sm:p-8 rounded-[2rem] border border-border/40 shadow-sm bg-surface/30 hover:bg-surface hover:shadow-md hover:border-border/80 transition-all duration-300 group"
+                    >
+                      {/* Swatch */}
+                      <div
+                        className="w-full h-32 sm:w-32 sm:h-32 rounded-2xl shrink-0 shadow-sm ring-1 ring-black/5 relative overflow-hidden transition-transform duration-500 group-hover:scale-105"
+                        style={{ backgroundColor: currentHex }}
+                      >
+                        <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-50" />
                       </div>
-                      <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
-                        {color.description}
-                      </p>
+
+                      {/* Info */}
+                      <div className="flex flex-col gap-3 flex-1 w-full">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between w-full gap-2">
+                          <div className="flex items-center gap-3">
+                            <h3 className="text-xl sm:text-2xl font-heading font-bold text-foreground tracking-tight">
+                              {color.title}
+                            </h3>
+                            <Badge tone="neutral" appearance="soft" className="uppercase text-[9px] font-bold tracking-widest px-2 shadow-none bg-muted/40">
+                              {color.name}
+                            </Badge>
+                          </div>
+                          <code className="text-[11px] sm:text-xs font-mono font-bold text-muted-foreground bg-muted/20 px-2.5 py-1 rounded-md border border-border/50">
+                            {currentHex}
+                          </code>
+                        </div>
+                        <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
+                          {color.description}
+                        </p>
+                        {matchingScale && (
+                          <div className="pt-1">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="rounded-full text-xs"
+                              onClick={() => {
+                                setEditingScale({
+                                  scaleName: matchingScale.name,
+                                  baseHex: currentHex,
+                                  newBaseHex: currentHex,
+                                  prefix: matchingScale.prefix,
+                                });
+                              }}
+                            >
+                              <Edit2 className="size-3 mr-1.5" />
+                              Personalizar escala
+                            </Button>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           ))}
@@ -724,7 +832,7 @@ export function StyleGuide({
             className="w-full lg:w-auto"
           >
             <TabsList className="flex flex-wrap h-auto w-full justify-start lg:w-auto lg:inline-flex p-1 bg-surface border border-border/60 rounded-2xl gap-1">
-              {FULL_SCALES.map((scale) => {
+              {scales.map((scale) => {
                 const baseColor =
                   scale.colors.find((c) => c.level === "500" || c.level === "1" || c.level === "0-bg")?.hex ||
                   "#000000";
@@ -756,7 +864,7 @@ export function StyleGuide({
             <button
               onClick={() => setScaleViewMode("detail")}
               className={cn(
-                "px-3 py-1.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5",
+                "px-3 py-1.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer",
                 scaleViewMode === "detail"
                   ? "bg-muted text-foreground shadow-xs"
                   : "text-muted-foreground hover:text-foreground",
@@ -768,7 +876,7 @@ export function StyleGuide({
             <button
               onClick={() => setScaleViewMode("matrix")}
               className={cn(
-                "px-3 py-1.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5",
+                "px-3 py-1.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer",
                 scaleViewMode === "matrix"
                   ? "bg-muted text-foreground shadow-xs"
                   : "text-muted-foreground hover:text-foreground",
@@ -815,7 +923,24 @@ export function StyleGuide({
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    className="rounded-full text-xs"
+                    onClick={() => {
+                      const base = activeScale.colors.find((c) => c.level === "500" || c.level === "1")?.hex || "#7E63B5";
+                      setEditingScale({
+                        scaleName: activeScale.name,
+                        baseHex: base,
+                        newBaseHex: base,
+                        prefix: activeScale.prefix,
+                      });
+                    }}
+                  >
+                    <Edit2 className="size-3.5 mr-1.5" />
+                    Editar Escala
+                  </Button>
                   <Button
                     variant="secondary"
                     size="sm"
@@ -827,6 +952,16 @@ export function StyleGuide({
                   >
                     <Copy className="size-3.5 mr-1.5" />
                     Copiar HEX Base
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="rounded-full text-xs"
+                    onClick={handleResetScales}
+                    title="Restablecer paleta original"
+                  >
+                    <RotateCcw className="size-3.5 mr-1.5" />
+                    Restablecer
                   </Button>
                 </div>
               </div>
@@ -950,7 +1085,7 @@ export function StyleGuide({
             </div>
 
             <div className="flex flex-col gap-3">
-              {FULL_SCALES.map((scale) => (
+              {scales.map((scale) => (
                 <div
                   key={scale.name}
                   className="flex flex-col md:flex-row md:items-center gap-3 p-3 rounded-2xl bg-surface border border-border/50 hover:border-primary/40 transition-colors"
@@ -1055,7 +1190,22 @@ export function StyleGuide({
                     {group.currentFont}
                   </Badge>
                 </h4>
-
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  className="rounded-full text-xs"
+                  onClick={() =>
+                    setEditingFontFamily({
+                      id: group.id,
+                      title: group.title,
+                      currentFont: group.currentFont,
+                      newFont: group.currentFont,
+                    })
+                  }
+                >
+                  <Edit2 className="size-3.5 mr-1.5" />
+                  Cambiar tipografía
+                </Button>
               </div>
 
               <div className="flex flex-col border border-border rounded-xl overflow-hidden bg-card text-left shadow-sm">
@@ -1901,31 +2051,40 @@ export function StyleGuide({
                 variant="warning"
                 className="w-full"
                 disabled={isApplyingFont}
-                onClick={async () => {
+                onClick={() => {
                   if (!editingFontFamily?.newFont) return;
                   setIsApplyingFont(true);
                   try {
-                    const res = await fetch("/api/kit-fonts", {
-                      method: "POST",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({
-                        role: editingFontFamily.id,
-                        family: editingFontFamily.newFont,
-                      }),
-                    });
-                    if (!res.ok)
-                      throw new Error(
-                        (await res.json().catch(() => null))?.error ??
-                        `HTTP ${res.status}`,
+                    const fontName = editingFontFamily.newFont;
+                    const linkId = `google-font-${fontName.replace(/\s+/g, "-")}`;
+                    if (!document.getElementById(linkId)) {
+                      const link = document.createElement("link");
+                      link.id = linkId;
+                      link.rel = "stylesheet";
+                      link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(fontName)}:wght@300;400;500;600;700;800&display=swap`;
+                      document.head.appendChild(link);
+                    }
+
+                    if (editingFontFamily.id === "heading") {
+                      document.documentElement.style.setProperty(
+                        "--font-heading",
+                        `'${fontName}', sans-serif`
                       );
+                    } else {
+                      document.documentElement.style.setProperty(
+                        "--font-sans",
+                        `'${fontName}', sans-serif`
+                      );
+                    }
 
                     setSimulatedFonts((prev) => ({
                       ...prev,
-                      [editingFontFamily.id]: editingFontFamily.newFont!,
+                      [editingFontFamily.id]: fontName,
                     }));
+
                     toast.success("Tipografía actualizada", {
-                      description:
-                        "Se descargó la fuente y se guardó en el bucket de borrador del kit.",
+                      description: `Se aplicó la familia "${fontName}" a ${editingFontFamily.id === "heading" ? "títulos" : "cuerpo de texto"
+                        }.`,
                     });
                     setEditingFontFamily(null);
                     setShowConfirmFont(false);
@@ -1959,6 +2118,148 @@ export function StyleGuide({
                 Cancelar
               </Button>
             </div>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog for Editing Color Scale */}
+      <Dialog
+        open={Boolean(editingScale)}
+        onOpenChange={(open) => !open && setEditingScale(null)}
+      >
+        <DialogContent className="sm:max-w-xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Palette className="size-5 text-primary" />
+              <span>Personalizar Escala: {editingScale?.scaleName}</span>
+            </DialogTitle>
+            <DialogDescription>
+              Selecciona o ingresa un nuevo color base (Nivel 500). El sistema
+              calculará automáticamente toda la rampa cromática (50–900) y
+              actualizará la tabla y componentes en tiempo real.
+            </DialogDescription>
+          </DialogHeader>
+
+          {editingScale && (
+            <div className="flex flex-col gap-6 py-4">
+              {/* Color Picker Control */}
+              <div className="flex flex-col sm:flex-row items-center gap-4 p-4 rounded-2xl bg-muted/30 border border-border">
+                <div className="relative size-16 rounded-2xl overflow-hidden shadow-inner border border-border/80 shrink-0">
+                  <input
+                    type="color"
+                    value={editingScale.newBaseHex}
+                    onChange={(e) =>
+                      setEditingScale((prev) =>
+                        prev ? { ...prev, newBaseHex: e.target.value.toUpperCase() } : null
+                      )
+                    }
+                    className="absolute -inset-4 size-24 cursor-pointer"
+                  />
+                </div>
+                <div className="flex flex-col flex-1 w-full gap-1.5">
+                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                    Código HEX del color base
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={editingScale.newBaseHex}
+                      onChange={(e) => {
+                        let val = e.target.value;
+                        if (!val.startsWith("#")) val = `#${val}`;
+                        setEditingScale((prev) =>
+                          prev ? { ...prev, newBaseHex: val.toUpperCase() } : null
+                        );
+                      }}
+                      className="h-10 px-3 rounded-xl border border-border bg-surface font-mono font-bold text-sm w-full focus:outline-none focus:ring-2 focus:ring-primary"
+                      placeholder="#000000"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Color Presets */}
+              <div className="flex flex-col gap-2">
+                <span className="text-xs font-semibold text-muted-foreground">
+                  Paletas sugeridas:
+                </span>
+                <div className="flex flex-wrap gap-2">
+                  {COLOR_PRESETS.map((preset) => (
+                    <button
+                      key={preset.name}
+                      type="button"
+                      onClick={() =>
+                        setEditingScale((prev) =>
+                          prev ? { ...prev, newBaseHex: preset.hex } : null
+                        )
+                      }
+                      className={cn(
+                        "flex items-center gap-2 px-2.5 py-1.5 rounded-full border text-xs font-medium transition-all cursor-pointer",
+                        editingScale.newBaseHex.toLowerCase() === preset.hex.toLowerCase()
+                          ? "border-primary bg-primary/10 text-primary font-bold shadow-xs"
+                          : "border-border hover:border-primary/40 text-muted-foreground hover:text-foreground"
+                      )}
+                    >
+                      <span
+                        className="size-3 rounded-full shrink-0 shadow-xs ring-1 ring-black/10"
+                        style={{ backgroundColor: preset.hex }}
+                      />
+                      <span>{preset.name}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Live Preview of Generated 10-Shade Scale */}
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center justify-between text-xs font-semibold text-muted-foreground">
+                  <span>Rampa generada en vivo (50 → 900):</span>
+                  <span className="font-mono text-[10px]">10 escalones</span>
+                </div>
+                <div className="h-12 w-full rounded-2xl overflow-hidden flex border border-border shadow-inner">
+                  {generateScaleFromBase(editingScale.newBaseHex).map((shade) => {
+                    const textC = getContrastTextColor(shade.hex);
+                    return (
+                      <div
+                        key={shade.level}
+                        className="flex-1 h-full flex flex-col items-center justify-center relative group"
+                        style={{ backgroundColor: shade.hex }}
+                        title={`${shade.level}: ${shade.hex}`}
+                      >
+                        <span
+                          className="text-[9px] font-mono font-bold opacity-80"
+                          style={{ color: textC }}
+                        >
+                          {shade.level}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          )}
+
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button
+              variant="outline"
+              className="rounded-full"
+              onClick={() => setEditingScale(null)}
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant="primary"
+              className="rounded-full"
+              disabled={!editingScale?.newBaseHex}
+              onClick={() => {
+                if (editingScale) {
+                  handleApplyScaleColor(editingScale.scaleName, editingScale.newBaseHex);
+                }
+              }}
+            >
+              Aplicar a la tabla y componentes
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

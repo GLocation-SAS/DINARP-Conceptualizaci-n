@@ -44,18 +44,19 @@ const buttonVariants = cva(
           "border-primary",
           "text-white",
           "bg-primary",
-          "[--radial-bg:var(--primary)] dark:[--radial-bg:var(--primary)]",
-          "[--glow:var(--primary)]",
-          "hover:opacity-90",
+          "[--radial-bg:color-mix(in_srgb,var(--primary)_60%,black)]",
+          "[--glow:color-mix(in_srgb,var(--primary)_65%,white)]",
+          "active:bg-[color-mix(in_srgb,var(--primary)_50%,black)]",
+          "data-[state=active]:bg-[color-mix(in_srgb,var(--primary)_50%,black)]",
+          "data-[state=active]:text-white",
         ].join(" "),
 
         secondary: [
           "border-secondary",
           "text-secondary",
           "bg-transparent",
-          "[--radial-bg:var(--secondary)] dark:[--radial-bg:var(--secondary)]",
+          "[--radial-bg:var(--secondary)]",
           "[--glow:var(--secondary)]",
-          "hover:border-secondary",
           "hover:text-white",
           "active:text-white",
           "data-[state=active]:border-secondary",
@@ -67,44 +68,53 @@ const buttonVariants = cva(
           "border-success",
           "text-white",
           "bg-success",
-          "[--radial-bg:var(--success)] dark:[--radial-bg:var(--success)]",
-          "[--glow:var(--success)]",
-          "hover:opacity-90",
+          "[--radial-bg:color-mix(in_srgb,var(--success)_60%,black)]",
+          "[--glow:color-mix(in_srgb,var(--success)_65%,white)]",
+          "active:bg-[color-mix(in_srgb,var(--success)_50%,black)]",
+          "data-[state=active]:bg-[color-mix(in_srgb,var(--success)_50%,black)]",
+          "data-[state=active]:text-white",
         ].join(" "),
 
         warning: [
           "border-warning",
           "text-white",
           "bg-warning",
-          "[--radial-bg:var(--warning)] dark:[--radial-bg:var(--warning)]",
-          "[--glow:var(--warning)]",
-          "hover:opacity-90",
+          "[--radial-bg:color-mix(in_srgb,var(--warning)_60%,black)]",
+          "[--glow:color-mix(in_srgb,var(--warning)_65%,white)]",
+          "active:bg-[color-mix(in_srgb,var(--warning)_50%,black)]",
+          "data-[state=active]:bg-[color-mix(in_srgb,var(--warning)_50%,black)]",
+          "data-[state=active]:text-white",
         ].join(" "),
 
         danger: [
           "border-danger",
           "text-white",
           "bg-danger",
-          "[--radial-bg:var(--danger)] dark:[--radial-bg:var(--danger)]",
-          "[--glow:var(--danger)]",
-          "hover:opacity-90",
+          "[--radial-bg:color-mix(in_srgb,var(--danger)_60%,black)]",
+          "[--glow:color-mix(in_srgb,var(--danger)_65%,white)]",
+          "active:bg-[color-mix(in_srgb,var(--danger)_50%,black)]",
+          "data-[state=active]:bg-[color-mix(in_srgb,var(--danger)_50%,black)]",
+          "data-[state=active]:text-white",
         ].join(" "),
 
         info: [
           "border-info",
           "text-white",
           "bg-info",
-          "[--radial-bg:var(--info)] dark:[--radial-bg:var(--info)]",
-          "[--glow:var(--info)]",
-          "hover:opacity-90",
+          "[--radial-bg:color-mix(in_srgb,var(--info)_60%,black)]",
+          "[--glow:color-mix(in_srgb,var(--info)_65%,white)]",
+          "active:bg-[color-mix(in_srgb,var(--info)_50%,black)]",
+          "data-[state=active]:bg-[color-mix(in_srgb,var(--info)_50%,black)]",
+          "data-[state=active]:text-white",
         ].join(" "),
 
         ghost: [
           "border-transparent",
           "text-foreground",
           "bg-transparent",
+          "[--radial-bg:var(--muted)]",
+          "[--glow:var(--muted)]",
           "hover:text-foreground",
-          "hover:border-border/40",
           "hover:bg-muted/30",
         ].join(" "),
 
@@ -112,22 +122,28 @@ const buttonVariants = cva(
           "border-border",
           "bg-muted",
           "text-foreground",
-          "hover:bg-muted-foreground/20",
-          "dark:hover:bg-muted-foreground/20",
-          "hover:text-foreground",
-          "dark:hover:text-foreground",
-          "hover:border-border",
-          "dark:hover:border-border",
+          "[--radial-bg:var(--primitive-neutral-700)] dark:[--radial-bg:var(--primitive-neutral-600)]",
+          "[--glow:color-mix(in_srgb,var(--primitive-neutral-500)_50%,white)]",
+          "hover:text-white",
+          "active:bg-neutral-800 dark:active:bg-neutral-700",
+          "active:text-white",
+          "active:border-neutral-800 dark:active:border-neutral-700",
+          "data-[state=active]:bg-neutral-700 dark:data-[state=active]:bg-neutral-600",
+          "data-[state=active]:text-white",
+          "data-[state=active]:border-neutral-700 dark:data-[state=active]:border-neutral-600",
+          "data-[active=true]:bg-neutral-700 dark:data-[active=true]:bg-neutral-600",
+          "data-[active=true]:text-white",
+          "data-[active=true]:border-neutral-700 dark:data-[active=true]:border-neutral-600",
         ].join(" "),
 
         outline: [
           "border-border",
           "bg-muted/40",
           "text-foreground",
-          "hover:border-foreground/20",
+          "[--radial-bg:var(--muted)]",
+          "[--glow:var(--muted)]",
           "hover:bg-muted/60",
           "hover:text-foreground",
-          "hover:shadow-[0_0_20px_-10px_hsl(var(--foreground)/0.25)]",
         ].join(" "),
       },
 
@@ -205,9 +221,9 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           style={{
             left: `${position.x}px`,
             top: `${position.y}px`,
-            transform: `translate(-50%, -50%) scale(${isHovered ? 1.5 : 0})`,
-            opacity: isHovered ? 0.8 : 0,
-            transition: "transform 1200ms cubic-bezier(0.22, 1, 0.36, 1), opacity 1000ms ease-in-out",
+            transform: `translate(-50%, -50%) scale(${isHovered ? 2 : 0})`,
+            opacity: isHovered ? 0.85 : 0,
+            transition: "transform 1000ms cubic-bezier(0.22, 1, 0.36, 1), opacity 800ms ease-in-out",
           }}
         />
 
@@ -218,19 +234,19 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
             "pointer-events-none",
             "absolute",
             "z-[2]",
-            "h-40",
-            "w-40",
+            "h-48",
+            "w-48",
             "-translate-x-1/2",
             "-translate-y-1/2",
             "!rounded-full",
             "bg-[var(--glow)]",
-            "blur-[40px]"
+            "blur-[36px]"
           )}
           style={{
             left: `${position.x}px`,
             top: `${position.y}px`,
-            opacity: isHovered ? 0.4 : 0,
-            transition: "opacity 1200ms ease-in-out",
+            opacity: isHovered ? 0.5 : 0,
+            transition: "opacity 800ms ease-in-out",
           }}
         />
 
@@ -290,6 +306,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           className
         )}
         onMouseEnter={(e) => {
+          handleMouseMove(e)
           setIsHovered(true)
           props.onMouseEnter?.(e)
         }}
