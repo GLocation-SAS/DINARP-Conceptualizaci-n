@@ -367,36 +367,11 @@ export function AsignarRevisorPanel({
       <div className="p-3 bg-surface rounded-xl border border-border/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs">
         <div className="flex items-center gap-2 min-w-0 flex-wrap sm:flex-nowrap">
           <Building2 className="size-4 text-primary shrink-0" />
-          <span className="font-semibold text-foreground">
+          <span className="font-semibold text-foreground truncate">
             {isMasiva
               ? `${solicitudesMasivas.length} solicitudes seleccionadas`
               : solicitud?.institucion || "Entidad Requirente"}
           </span>
-          {tieneAsignado && (
-            <Badge
-              tone={esTramiteAprobado ? "success" : yaEmpezoRevision ? "warning" : "info"}
-              appearance="soft"
-              size="sm"
-              className="font-bold uppercase tracking-wider text-[10px] gap-1 shrink-0 ml-1"
-            >
-              {esTramiteAprobado ? (
-                <>
-                  <CheckCircle2 className="size-3 text-success" />
-                  APROBADO
-                </>
-              ) : yaEmpezoRevision ? (
-                <>
-                  <Lock className="size-3 text-warning" />
-                  REVISIÓN EN CURSO
-                </>
-              ) : (
-                <>
-                  <RotateCcw className="size-3 text-info" />
-                  REASIGNABLE
-                </>
-              )}
-            </Badge>
-          )}
         </div>
 
         {!isMasiva && solicitud && (
