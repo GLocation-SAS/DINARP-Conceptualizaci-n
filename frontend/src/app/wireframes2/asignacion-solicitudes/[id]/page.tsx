@@ -1201,7 +1201,7 @@ export default function SolicitudDetailPage({ params }: PageProps) {
             <div className="lg:col-span-5 xl:col-span-5 space-y-5 lg:sticky lg:top-6">
               {/* SI ES DIRECTOR (DIR_GESTION / DIR_NORMATIVA): Exclusivamente Asignación / Reasignación */}
               {isDirector && (
-                <div className="bg-surface border border-border rounded-2xl p-5 shadow-xs">
+                <div className="bg-primary-200/20 dark:bg-primary-900/10 border border-primary/20 rounded-2xl p-5 shadow-xs">
                   <AsignarRevisorPanel
                     solicitud={solicitud}
                     tipoArea={
