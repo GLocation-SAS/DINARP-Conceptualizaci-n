@@ -1249,6 +1249,16 @@ export default function SolicitudDetailPage({ params }: PageProps) {
                         </p>
                       </div>
                     )}
+                    {solicitud.motivoRechazo && (solicitud.estado === "Rechazada" || solicitud.estado === "Cancelada") && (
+                      <div className="pt-2 border-t border-danger/30 text-[11px]">
+                        <span className="text-danger font-bold block mb-0.5 flex items-center gap-1">
+                          <XCircle className="size-3" /> Motivo del Rechazo:
+                        </span>
+                        <p className="text-foreground bg-danger/5 p-2 rounded-lg border border-danger/20">
+                          {solicitud.motivoRechazo}
+                        </p>
+                      </div>
+                    )}
                   </div>
 
                   {/* Acciones de dictamen para Revisor */}
