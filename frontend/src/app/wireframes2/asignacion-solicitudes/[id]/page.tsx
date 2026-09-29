@@ -548,7 +548,7 @@ export default function SolicitudDetailPage({ params }: PageProps) {
                       onValueChange={(val) => setDetailTab(Number(val.replace("tab-", "")))}
                       className="w-full"
                     >
-                      <TabsList className="h-auto p-1.5 rounded-full bg-surface-subtle border border-border/40 inline-flex gap-1.5 flex-nowrap w-full sm:w-auto justify-start">
+                      <TabsList className="h-auto p-1.5 rounded-full bg-primary-300 dark:bg-primary-900 border border-primary/20 inline-flex gap-1.5 flex-nowrap w-full sm:w-auto justify-start">
                         <TabsTrigger
                           value="tab-0"
                           className="px-4 py-2 text-xs font-bold gap-2"
