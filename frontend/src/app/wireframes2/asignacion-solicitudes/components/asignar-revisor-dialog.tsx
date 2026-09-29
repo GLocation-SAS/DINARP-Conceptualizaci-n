@@ -364,7 +364,7 @@ export function AsignarRevisorPanel({
       )}
 
       {/* ── 2. TARJETA INFORMATIVA INSTITUCIÓN Y CONTACTO ── */}
-      <div className="p-3 bg-muted/30 rounded-xl border border-border/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs">
+      <div className="p-3 bg-surface rounded-xl border border-border/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs">
         <div className="flex items-center gap-2 min-w-0 flex-wrap sm:flex-nowrap">
           <Building2 className="size-4 text-primary shrink-0" />
           <span className="font-semibold text-foreground">
