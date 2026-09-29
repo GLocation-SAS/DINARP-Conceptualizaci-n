@@ -146,7 +146,7 @@ export default function SolicitudDetailPage({ params }: PageProps) {
           id: `hist-${idx}`,
           title: h.accion,
           description: h.detalles || undefined,
-          date: h.fechaHora || h.fecha || "",
+          date: h.fechaHora,
           status,
           icon,
           user: h.realizadoPor || undefined,
@@ -293,6 +293,9 @@ export default function SolicitudDetailPage({ params }: PageProps) {
                 <h1 className="font-heading font-extrabold text-xl sm:text-2xl text-foreground">
                   Trámite {solicitud.id}
                 </h1>
+                <Badge tone="neutral" appearance="soft" size="sm" className="border border-border font-mono">
+                  {solicitud.codigoDocumental}
+                </Badge>
               </div>
               <p className="text-xs text-muted-foreground mt-0.5">
                 {solicitud.tituloTramite} · Registrado el {solicitud.fechaSolicitud} · {solicitud.institucion}
@@ -545,7 +548,7 @@ export default function SolicitudDetailPage({ params }: PageProps) {
                       onValueChange={(val) => setDetailTab(Number(val.replace("tab-", "")))}
                       className="w-full"
                     >
-                      <TabsList className="h-auto p-1.5 rounded-full bg-primary-300/20 dark:bg-primary-900/20 border border-primary/10 inline-flex gap-1.5 flex-nowrap w-full sm:w-auto justify-start">
+                      <TabsList className="h-auto p-1.5 rounded-full bg-surface-subtle border border-border/40 inline-flex gap-1.5 flex-nowrap w-full sm:w-auto justify-start">
                         <TabsTrigger
                           value="tab-0"
                           className="px-4 py-2 text-xs font-bold gap-2"
@@ -580,7 +583,7 @@ export default function SolicitudDetailPage({ params }: PageProps) {
 
                   {/* PASO 0: ENTIDAD Y AUTORIDAD */}
                   {detailTab === 0 && (
-                    <div className="bg-surface border border-border rounded-2xl p-6 sm:p-8 space-y-6 shadow-xs animate-in fade-in duration-200">
+                    <div className="bg-surface border border-border rounded-2xl p-4 sm:p-6 space-y-6 shadow-xs animate-in fade-in duration-200">
                       <div className="bg-primary-100/20 border-b border-primary p-3.5 mb-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-t-lg">
                         <div>
                           <h2 className="text-sm font-bold font-heading text-primary flex items-center gap-2">
@@ -734,7 +737,7 @@ export default function SolicitudDetailPage({ params }: PageProps) {
 
                   {/* PASO 1: COORDINADORES INSTITUCIONALES */}
                   {detailTab === 1 && (
-                    <div className="bg-surface border border-border rounded-2xl p-6 sm:p-8 space-y-6 shadow-xs animate-in fade-in duration-200">
+                    <div className="bg-surface border border-border rounded-2xl p-4 sm:p-6 space-y-6 shadow-xs animate-in fade-in duration-200">
                       <div className="space-y-6">
                         {/* Coordinador Titular */}
                         <div className="space-y-4 border border-border/80 rounded-2xl p-5 bg-surface shadow-2xs">
@@ -914,7 +917,7 @@ export default function SolicitudDetailPage({ params }: PageProps) {
 
                   {/* PASO 2: SERVICIOS Y PROCESOS */}
                   {detailTab === 2 && (
-                    <div className="bg-surface border border-border rounded-2xl p-6 sm:p-8 space-y-6 shadow-xs animate-in fade-in duration-200">
+                    <div className="bg-surface border border-border rounded-2xl p-4 sm:p-6 space-y-6 shadow-xs animate-in fade-in duration-200">
                       <div className="bg-primary-100/20 border-b border-primary p-3.5 mb-5 rounded-t-lg">
                         <h2 className="text-sm font-bold font-heading text-primary flex items-center gap-2">
                           <FileText className="size-4 text-primary shrink-0" />
@@ -1020,7 +1023,7 @@ export default function SolicitudDetailPage({ params }: PageProps) {
 
                   {/* PASO 3: DOCUMENTACIÓN HABILITANTE */}
                   {detailTab === 3 && (
-                    <div className="bg-surface border border-border rounded-2xl p-6 sm:p-8 space-y-6 shadow-xs animate-in fade-in duration-200">
+                    <div className="bg-surface border border-border rounded-2xl p-4 sm:p-6 space-y-6 shadow-xs animate-in fade-in duration-200">
                       <div className="bg-primary-100/20 border-b border-primary p-3.5 mb-5 rounded-t-lg">
                         <h2 className="text-sm font-bold font-heading text-primary flex items-center gap-2">
                           <ShieldCheck className="size-4 text-primary shrink-0" />
@@ -1198,7 +1201,7 @@ export default function SolicitudDetailPage({ params }: PageProps) {
             <div className="lg:col-span-5 xl:col-span-5 space-y-5 lg:sticky lg:top-6">
               {/* SI ES DIRECTOR (DIR_GESTION / DIR_NORMATIVA): Exclusivamente Asignación / Reasignación */}
               {isDirector && (
-                <div className="bg-primary-200/20 dark:bg-primary-900/10 border border-primary/20 rounded-2xl p-5 shadow-xs">
+                <div className="bg-surface border border-border rounded-2xl p-5 shadow-xs">
                   <AsignarRevisorPanel
                     solicitud={solicitud}
                     tipoArea={

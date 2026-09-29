@@ -282,7 +282,7 @@ export function AsignarRevisorPanel({
   const areaTitle = tipoArea === "GESTION" ? "Equipo de Gestión" : "Equipo de Normatividad";
 
   return (
-    <div className={cn("space-y-4", isCardMode ? "" : "bg-primary-200/20 dark:bg-primary-900/10 border border-primary/20 rounded-2xl p-6 sm:p-8")}>
+    <div className={cn("space-y-4", isCardMode ? "" : "bg-primary-200/20 dark:bg-primary-900/10 border border-primary/20 rounded-2xl p-4 sm:p-6 md:p-8")}>
       {/* ── 1. CABECERA CON LÍNEA INFERIOR DIVISORIA ── */}
       <div className="flex items-start justify-between gap-4 pb-4 border-b border-border">
         <div className="flex items-center gap-3">
@@ -779,7 +779,7 @@ export function AsignarRevisorDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl w-full p-6 sm:p-7">
+      <DialogContent className="max-w-4xl w-full p-4 sm:p-7">
         <AsignarRevisorPanel
           solicitud={solicitud}
           solicitudesMasivas={solicitudesMasivas}
