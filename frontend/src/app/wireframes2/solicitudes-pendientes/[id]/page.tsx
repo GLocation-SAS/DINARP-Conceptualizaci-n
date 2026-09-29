@@ -285,10 +285,10 @@ export default function SolicitudDetailPage({ params }: PageProps) {
           label: activeSectionTitle,
           onClick: (e: React.MouseEvent) => {
             e.preventDefault();
-            router.push("/wireframes2/asignacion-solicitudes");
+            router.push("/wireframes2/solicitudes-pendientes");
           },
         },
-        { label: `Trámite ${solicitud.id}` },
+        { label: `Detalle solicitud` },
       ]}
     >
       <main className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -312,54 +312,6 @@ export default function SolicitudDetailPage({ params }: PageProps) {
             {/* Botones de acción y badge de estado en la cabecera */}
             <div className="flex items-center gap-3 self-start sm:self-auto">
               {renderEstadoBadge(solicitud.estado)}
-
-              {/* ROL REVISOR GESTIÓN (gestion.revisor@gmail.com / EQ_GESTION): Aprobar y Devolver/Observar */}
-              {currentUser.role === "EQ_GESTION" && solicitud.estado === "EN_REVISION_GESTION" ? (
-                <>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setIsRejectOpen(true)}
-                    className="h-10 px-4 text-xs font-semibold gap-2 border-border text-foreground hover:bg-muted rounded-xl"
-                  >
-                    <XCircle className="size-4" />
-                    <span>Observar / Devolver</span>
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="primary"
-                    onClick={() => setIsApproveOpen(true)}
-                    className="h-10 px-4 text-xs font-semibold gap-2 shadow-xs"
-                  >
-                    <CheckCircle2 className="size-4" />
-                    <span>Aprobar revisión</span>
-                  </Button>
-                </>
-              ) : currentUser.role === "EQ_NORMATIVA" && solicitud.estado === "EN_REVISION_NORMATIVIDAD" ? (
-                <>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setIsRejectOpen(true)}
-                    className="h-10 px-4 text-xs font-semibold gap-2 border-border text-foreground hover:bg-muted rounded-xl"
-                  >
-                    <XCircle className="size-4" />
-                    <span>Observar / Rechazar</span>
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="primary"
-                    onClick={() => {
-                      store.aprobarNormatividad(solicitud.id, currentUser.name, "RES-DINARP-2026-001");
-                      toast.success("Resolución generada. Trámite finalizado exitosamente.");
-                    }}
-                    className="h-10 px-4 text-xs font-semibold gap-2 shadow-xs"
-                  >
-                    <FileSignature className="size-4" />
-                    <span>Generar resolución y finalizar</span>
-                  </Button>
-                </>
-              ) : null}
             </div>
           </div>
 
