@@ -40,8 +40,14 @@ export const metadata = {
   description: "Base frontend y sistema de diseño de DINARP.",
   icons: [
     {
-      url: `${basePath}/logotipo.png`,
-      href: `${basePath}/logotipo.png`,
+      media: "(prefers-color-scheme: light)",
+      url: `${basePath}/favicon-light.svg`,
+      href: `${basePath}/favicon-light.svg`,
+    },
+    {
+      media: "(prefers-color-scheme: dark)",
+      url: `${basePath}/favicon-dark.svg`,
+      href: `${basePath}/favicon-dark.svg`,
     }
   ],
 };
