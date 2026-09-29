@@ -218,7 +218,7 @@ export interface SolicitudIngreso {
   anexoC?: DatosAnexoC;
 }
 
-export const STORAGE_KEY_INGRESOS = "dinarp_solicitudes_ingreso_v4";
+export const STORAGE_KEY_INGRESOS = "dinarp_solicitudes_ingreso_v5";
 
 export const INITIAL_SOLICITUDES_INGRESO: SolicitudIngreso[] = [
   {
@@ -239,6 +239,16 @@ export const INITIAL_SOLICITUDES_INGRESO: SolicitudIngreso[] = [
     revisor: "Revisor Gestión",
     revisionIniciada: false,
     documentos: ["ARP-R01_Solicitud_Acceso_MINTEL.pdf"],
+    historial: [
+      {
+        id: "h-asig-101",
+        fechaHora: "28/09/2026 10:15",
+        accion: "Asignación de trámite",
+        realizadoPor: "Director Gestión",
+        rol: "Director / Coordinador",
+        detalles: "Trámite asignado a Revisor Gestión. Favor validar anexos."
+      }
+    ],
     anexoA: {
       entidadTipo: "Publica",
       nombreEntidad: "Ministerio de Telecomunicaciones",
