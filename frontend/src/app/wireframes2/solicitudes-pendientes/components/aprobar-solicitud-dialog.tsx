@@ -122,13 +122,13 @@ export function AprobarSolicitudDialog({
           </span>
         </div>
 
-        <DialogFooter className="gap-3 pt-3 sm:flex-row sm:justify-end sm:[&>*]:flex-none sm:[&>*]:w-auto">
+        <DialogFooter className="mt-4 flex flex-row w-full gap-3 sm:gap-3 [&>*]:flex-1">
           <Button
             type="button"
             variant="neutral"
             disabled={isSubmitting}
             onClick={() => onOpenChange(false)}
-            className="h-10 px-5 text-xs font-semibold rounded-xl"
+            className="w-full"
           >
             Cancelar
           </Button>
@@ -138,7 +138,7 @@ export function AprobarSolicitudDialog({
             variant="primary"
             disabled={isSubmitting}
             onClick={handleApprove}
-            className="h-11 px-6 text-xs font-semibold gap-2 rounded-full shadow-sm"
+            className="w-full gap-2"
           >
             {isSubmitting ? (
               <>
