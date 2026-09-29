@@ -148,9 +148,9 @@ const navItems: NavItem[] = [
   },
   {
     id: "solicitudes-asignadas-gestion",
-    label: "Solicitudes asignadas",
+    label: "Solicitudes pendientes",
     icon: FileSignature,
-    href: "/wireframes2/asignacion-solicitudes",
+    href: "/wireframes2/solicitudes-pendientes",
     allowedRoles: ["EQ_GESTION"]
   },
   {
@@ -260,7 +260,8 @@ export function WireframeDashboardLayout({
   };
 
   return (
-    <SidebarProvider defaultOpen={true}>
+    <TooltipProvider delayDuration={0}>
+      <SidebarProvider defaultOpen={true}>
       <Sidebar collapsible="icon" className="border-r border-border bg-surface">
         {/* Brand Header */}
         <SidebarHeader className="h-16 px-4 flex items-center justify-center border-b border-border/40 shrink-0">
@@ -446,5 +447,6 @@ export function WireframeDashboardLayout({
         </div>
       </SidebarInset>
     </SidebarProvider>
+    </TooltipProvider>
   );
 }

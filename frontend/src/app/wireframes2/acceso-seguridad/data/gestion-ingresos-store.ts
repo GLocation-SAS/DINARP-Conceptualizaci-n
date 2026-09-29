@@ -557,12 +557,23 @@ export function useSolicitudesIngresoStore() {
       const fechaStr = `${String(now.getDate()).padStart(2, "0")}/${String(now.getMonth() + 1).padStart(2, "0")}/${now.getFullYear()} ${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
       const updated = prev.map((item) => {
         if (item.id === id) {
+          const nuevoHistorial = [...(item.historial || [])];
+          nuevoHistorial.push({
+            id: `hist-${Date.now()}`,
+            fechaHora: fechaStr,
+            accion: "Solicitud rechazada",
+            realizadoPor: revisor,
+            rol: "Equipo de Gestión",
+            detalles: `Motivo:\n"${motivo.trim()}"\n\nNotificación:\nInstitución notificada por correo electrónico.`
+          });
+
           return {
             ...item,
-            estado: "Rechazada" as EstadoSolicitudIngreso,
+            estado: "Cancelada" as EstadoSolicitudIngreso,
             fechaRevision: fechaStr,
             revisor,
-            motivoRechazo: motivo.trim()
+            motivoRechazo: motivo.trim(),
+            historial: nuevoHistorial
           };
         }
         return item;
@@ -893,11 +904,32 @@ export function useSolicitudesIngresoStore() {
 
   const aprobarGestion = useCallback((solicitudId: string, aprobadoPor?: string, observaciones?: string) => {
     const now = new Date().toLocaleString("es-EC", { dateStyle: "short", timeStyle: "short" });
-    actualizarEstado(solicitudId, "PENDIENTE_ASIGNACION_NORMATIVIDAD", {
-      fechaRevision: now,
-      fechaAprobacionGestion: now
+    setSolicitudes((prev) => {
+      const updated = prev.map((item) => {
+        if (item.id === solicitudId) {
+          const nuevoHistorial = [...(item.historial || [])];
+          nuevoHistorial.push({
+            id: `hist-${Date.now()}`,
+            fechaHora: now,
+            accion: "Solicitud aprobada por Gestión",
+            realizadoPor: aprobadoPor || item.revisorGestion || "Revisor",
+            detalles: observaciones || "Trámite validado documentalmente. Continúa a Normatividad."
+          });
+
+          return {
+            ...item,
+            estado: "PENDIENTE_ASIGNACION_NORMATIVIDAD" as EstadoSolicitudIngreso,
+            fechaRevision: now,
+            fechaAprobacionGestion: now,
+            historial: nuevoHistorial
+          };
+        }
+        return item;
+      });
+      saveStoredSolicitudesIngreso(updated);
+      return updated;
     });
-  }, [actualizarEstado]);
+  }, []);
 
   const asignarRevisorNormatividad = useCallback((solicitudId: string, revisorNombre: string, asignadoPor?: string, observaciones?: string) => {
     const now = new Date().toLocaleString("es-EC", { dateStyle: "short", timeStyle: "short" });

@@ -47,7 +47,7 @@ export function LogoManagerCard({
     if (!file) return;
 
     if (!file.type.startsWith("image/")) {
-      toast.error("Formato no vÃ¡lido", { description: "Por favor sube un archivo de imagen (PNG, JPG, SVG o WEBP)." });
+      toast.error("Formato no válido", { description: "Por favor sube un archivo de imagen (PNG, JPG, SVG o WEBP)." });
       return;
     }
 
@@ -55,7 +55,7 @@ export function LogoManagerCard({
     reader.onload = (event) => {
       const result = event.target?.result as string;
       setCustomImg(result);
-      toast.success("Logotipo cargado", { description: `Se actualizÃ³ el logo "${title}" con Ã©xito.` });
+      toast.success("Logotipo cargado", { description: `Se actualizó el logo "${title}" con éxito.` });
     };
     reader.readAsDataURL(file);
   };
@@ -63,7 +63,7 @@ export function LogoManagerCard({
   const handleReset = () => {
     setCustomImg(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
-    toast.info("Logotipo restaurado", { description: "Se volviÃ³ al logotipo oficial predeterminado." });
+    toast.info("Logotipo restaurado", { description: "Se volvió al logotipo oficial predeterminado." });
   };
 
   const hasImage = Boolean(customImg || (!isMissing && (activeLightImg || activeDarkImg)));
@@ -86,7 +86,7 @@ export function LogoManagerCard({
           </div>
           <span className="text-sm font-medium text-muted-foreground">Recurso faltante</span>
           <span className="text-xs text-muted-foreground/60 mt-1 max-w-[200px]">
-            Puedes subir tu propio logo para simular su integraciÃ³n
+            Puedes subir tu propio logo para simular su integración
           </span>
           <Button
             variant="neutral"

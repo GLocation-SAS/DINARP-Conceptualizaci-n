@@ -244,7 +244,7 @@ export default function SolicitudDetailPage({ params }: PageProps) {
     return (
       <WireframeDashboardLayout
         breadcrumbs={[
-          { label: activeSectionTitle, onClick: () => router.push("/wireframes2/asignacion-solicitudes") },
+          { label: activeSectionTitle, onClick: () => router.push("/wireframes2/solicitudes-pendientes") },
           { label: "Trámite no encontrado" },
         ]}
       >

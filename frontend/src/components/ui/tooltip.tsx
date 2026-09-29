@@ -82,6 +82,7 @@ const tooltipContentVariants = cva(
         warning: "bg-warning text-warning-foreground text-white",
         danger: "bg-danger text-danger-foreground text-white",
         info: "bg-info text-info-foreground text-white",
+        surface: "bg-surface text-foreground border border-border shadow-md",
       },
     },
     defaultVariants: {
@@ -101,6 +102,7 @@ const tooltipArrowVariants = cva(
         warning: "bg-warning fill-warning",
         danger: "bg-danger fill-danger",
         info: "bg-info fill-info",
+        surface: "bg-surface fill-surface border-border",
       },
     },
     defaultVariants: {
