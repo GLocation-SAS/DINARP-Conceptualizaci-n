@@ -1206,26 +1206,6 @@ export default function SolicitudDetailPage({ params }: PageProps) {
 
             {/* COLUMNA DERECHA (5 cols en lg, 5 en xl): PANEL SEGÚN ROL */}
             <div className="lg:col-span-5 xl:col-span-5 space-y-5 lg:sticky lg:top-6">
-              {/* SI ES DIRECTOR (DIR_GESTION / DIR_NORMATIVA): Exclusivamente Asignación / Reasignación */}
-              {isDirector && (
-                <div className="bg-primary-200/20 dark:bg-primary-900/10 border border-primary/20 rounded-2xl p-5 shadow-xs">
-                  <AsignarRevisorPanel
-                    solicitud={solicitud}
-                    tipoArea={
-                      solicitud.estado.includes("NORMATIVIDAD") || currentUser.role === "DIR_NORMATIVA"
-                        ? "NORMATIVIDAD"
-                        : "GESTION"
-                    }
-                    directorNombre={currentUser.name}
-                    allSolicitudes={solicitudes}
-                    isCardMode={true}
-                    onConfirmAsignacion={(solId, revisor, dirNombre, observaciones) => {
-                      handleConfirmAsignacion(solId, revisor, dirNombre, observaciones);
-                    }}
-                  />
-                </div>
-              )}
-
               {/* SI ES REVISOR (gestion.revisor@gmail.com / EQ_GESTION o EQ_NORMATIVA): Panel de Revisión Técnica y Dictamen */}
               {isRevisor && (
                 <div className="bg-surface border border-border rounded-2xl p-5 shadow-xs space-y-4">
@@ -1337,18 +1317,6 @@ export default function SolicitudDetailPage({ params }: PageProps) {
           onConfirm={(sol, motivo) => {
             store.rechazarSolicitud(sol.id, motivo, currentUser.name);
             toast.success("Solicitud rechazada. La institución será notificada por correo.");
-          }}
-        />
-
-        <AsignarRevisorDialog
-          solicitud={solicitud}
-          open={isAssignOpen}
-          onOpenChange={setIsAssignOpen}
-          tipoArea={currentUser.role === "DIR_NORMATIVA" ? "NORMATIVIDAD" : "GESTION"}
-          directorNombre={currentUser.name}
-          allSolicitudes={solicitudes}
-          onConfirmAsignacion={(solId, revisor) => {
-            handleConfirmAsignacion(solId, revisor);
           }}
         />
 

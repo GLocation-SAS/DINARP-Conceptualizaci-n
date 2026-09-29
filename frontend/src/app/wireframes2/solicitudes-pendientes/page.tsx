@@ -505,29 +505,29 @@ export default function GestionIngresosPage() {
     setCurrentPage(1);
   };
 
-  // KPIs globales por rol
+  // KPIs globales para Equipo de Gestión
   const dynamicKpis = useMemo(() => {
+    // Solo consideramos las solicitudes asignadas a este revisor
+    const misSolicitudes = solicitudes.filter(
+      (s) => (s.revisorGestion === currentUser.name || s.revisor === currentUser.name)
+    );
+
     return {
-      sinAsignar: solicitudes.filter(
+      pendientes: misSolicitudes.filter(
+        (s) => s.estado === "EN_REVISION_GESTION" && !s.revisionIniciada
+      ).length,
+      enRevision: misSolicitudes.filter(
+        (s) => s.estado === "EN_REVISION_GESTION" && s.revisionIniciada
+      ).length,
+      finalizadas: misSolicitudes.filter(
         (s) =>
-          s.estado === "PENDIENTE_ASIGNACION_GESTION" ||
           s.estado === "PENDIENTE_ASIGNACION_NORMATIVIDAD" ||
-          s.estado === "Pendiente"
-      ).length,
-      enRevision: solicitudes.filter(
-        (s) =>
-          s.estado === "EN_REVISION_GESTION" ||
-          s.estado === "EN_REVISION_NORMATIVIDAD"
-      ).length,
-      resueltas: solicitudes.filter(
-        (s) =>
           s.estado === "Aprobada" ||
-          s.estado === "APROBADO_FINAL" ||
-          s.estado === "Rechazada" ||
-          s.estado === "Cancelada"
+          s.estado === "Cancelada" ||
+          s.estado === "Rechazada"
       ).length,
     };
-  }, [solicitudes]);
+  }, [solicitudes, currentUser.name]);
 
   // Filter & Sort
   const filteredData = useMemo(() => {
@@ -546,96 +546,23 @@ export default function GestionIngresosPage() {
         item.institucion.toLowerCase().includes(q) ||
         item.codigoDocumental.toLowerCase().includes(q);
 
-      // BPM Logic: Filtrar por rol con trazabilidad completa
-      if (
-        currentUser.role === "DIR_GESTION" &&
-        ![
-          "PENDIENTE_ASIGNACION_GESTION",
-          "EN_REVISION_GESTION",
-          "PENDIENTE_ASIGNACION_NORMATIVIDAD",
-          "EN_REVISION_NORMATIVIDAD",
-          "APROBADO_FINAL",
-          "Aprobada",
-          "Rechazada",
-          "Cancelada",
-        ].includes(item.estado)
-      )
+      // El revisor de gestión SOLO ve las solicitudes que le han sido asignadas
+      const revisorDelTramite = item.revisorGestion || item.revisor;
+      if (revisorDelTramite !== currentUser.name) {
         return false;
-
-      if (currentUser.role === "EQ_GESTION") {
-        if (![
-          "EN_REVISION_GESTION",
-          "PENDIENTE_ASIGNACION_GESTION",
-          "PENDIENTE_ASIGNACION_NORMATIVIDAD",
-          "EN_REVISION_NORMATIVIDAD",
-          "APROBADO_FINAL",
-          "Aprobada",
-          "Rechazada",
-          "Cancelada",
-        ].includes(item.estado)) {
-          return false;
-        }
-        
-        // El revisor de gestión SOLO ve las solicitudes que le han sido asignadas
-        const revisorDelTramite = item.revisorGestion || item.revisor;
-        if (revisorDelTramite !== currentUser.name) {
-          return false;
-        }
       }
 
-      if (
-        currentUser.role === "DIR_NORMATIVA" &&
-        ![
-          "PENDIENTE_ASIGNACION_NORMATIVIDAD",
-          "EN_REVISION_NORMATIVIDAD",
-          "APROBADO_FINAL",
-          "Aprobada",
-          "Rechazada",
-          "Cancelada",
-        ].includes(item.estado)
-      )
-        return false;
-
-      if (
-        currentUser.role === "EQ_NORMATIVA" &&
-        ![
-          "EN_REVISION_NORMATIVIDAD",
-          "APROBADO_FINAL",
-          "Aprobada",
-          "Rechazada",
-          "Cancelada",
-        ].includes(item.estado)
-      )
-        return false;
-
+      // Filtro por Estado interactivo desde las cards
       const matchesEstado = (() => {
         if (filterEstado === "Todos") return true;
-        if (filterEstado === "SIN_ASIGNAR") {
-          return (
-            item.estado === "PENDIENTE_ASIGNACION_GESTION" ||
-            item.estado === "PENDIENTE_ASIGNACION_NORMATIVIDAD" ||
-            item.estado === "Pendiente" ||
-            (!item.revisorGestion &&
-              !item.revisorNormatividad &&
-              item.estado !== "Cancelada" &&
-              item.estado !== "Rechazada")
-          );
-        }
-        if (filterEstado === "ASIGNADOS") {
-          return Boolean(
-            (item.revisorGestion || item.revisorNormatividad || item.revisor) &&
-              item.estado !== "Cancelada" &&
-              item.estado !== "Rechazada"
-          );
+        if (filterEstado === "PENDIENTES") {
+          return item.estado === "EN_REVISION_GESTION" && !item.revisionIniciada;
         }
         if (filterEstado === "EN_REVISION") {
-          return (
-            item.estado === "EN_REVISION_GESTION" ||
-            item.estado === "EN_REVISION_NORMATIVIDAD"
-          );
+          return item.estado === "EN_REVISION_GESTION" && item.revisionIniciada;
         }
-        if (filterEstado === "Aprobada" || filterEstado === "APROBADO_FINAL") {
-          return item.estado === "Aprobada" || item.estado === "APROBADO_FINAL";
+        if (filterEstado === "FINALIZADAS") {
+          return ["PENDIENTE_ASIGNACION_NORMATIVIDAD", "Aprobada", "Cancelada", "Rechazada"].includes(item.estado);
         }
         return item.estado === filterEstado;
       })();
@@ -1798,28 +1725,28 @@ export default function GestionIngresosPage() {
               );
             })()}
 
-            {/* ── 2. Resumen Superior (Tarjetas Interactivas Anchas con Hover y Navegación) ── */}
+            {/* ── 2. Resumen Superior (Tarjetas Interactivas) ── */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6 w-full">
-              {/* Card 1: Sin Asignar / Pendientes */}
+              {/* Card 1: Pendientes de revisión */}
               <Card
                 variant="featured"
                 role="button"
                 tabIndex={0}
                 onClick={() => {
-                  setFilterEstado(filterEstado === "SIN_ASIGNAR" ? "Todos" : "SIN_ASIGNAR");
+                  setFilterEstado(filterEstado === "PENDIENTES" ? "Todos" : "PENDIENTES");
                   setCurrentPage(1);
                 }}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
                     e.preventDefault();
-                    setFilterEstado(filterEstado === "SIN_ASIGNAR" ? "Todos" : "SIN_ASIGNAR");
+                    setFilterEstado(filterEstado === "PENDIENTES" ? "Todos" : "PENDIENTES");
                     setCurrentPage(1);
                   }
                 }}
                 className={cn(
                   "group relative overflow-hidden cursor-pointer transition-all duration-300 border rounded-2xl outline-none select-none p-6 lg:p-7 w-full min-h-[170px]",
                   "hover:-translate-y-1 hover:shadow-lg",
-                  filterEstado === "SIN_ASIGNAR"
+                  filterEstado === "PENDIENTES"
                     ? "bg-warning/15 border-warning ring-2 ring-warning/40 shadow-sm"
                     : "bg-warning/5 hover:bg-warning/10 border-warning/30 shadow-2xs"
                 )}
@@ -1827,23 +1754,23 @@ export default function GestionIngresosPage() {
               >
                 <div className="flex items-center justify-between w-full">
                   <span className="font-heading font-extrabold text-4xl lg:text-5xl text-warning tracking-tight">
-                    {dynamicKpis.sinAsignar}
+                    {dynamicKpis.pendientes}
                   </span>
                   <Badge tone="warning" appearance="soft" size="sm" className="font-bold text-xs tracking-wider uppercase gap-1.5 px-3 py-1">
                     <Clock className="size-3.5 shrink-0" />
-                    <span>SIN ASIGNAR</span>
+                    <span>PENDIENTES</span>
                   </Badge>
                 </div>
                 <div className="space-y-1">
                   <h3 className="text-base font-bold text-foreground block group-hover:text-warning transition-colors">
-                    Solicitudes Pendientes
+                    Pendientes de revisión
                   </h3>
                   <p className="text-xs text-muted-foreground font-normal block leading-relaxed">
-                    esperando asignación de revisor
+                    solicitudes nuevas asignadas
                   </p>
                 </div>
                 <div className="w-full pt-3 border-t border-warning/20 flex items-center justify-between text-xs font-semibold text-warning group-hover:text-warning">
-                  <span>{filterEstado === "SIN_ASIGNAR" ? "Filtro activo (clic para quitar)" : "Filtrar por sin asignar"}</span>
+                  <span>{filterEstado === "PENDIENTES" ? "Filtro activo (clic para quitar)" : "Filtrar por pendientes"}</span>
                   <ChevronRight className="size-4 transition-transform duration-200 group-hover:translate-x-1" />
                 </div>
                 <CardDecorativeIcon>
@@ -1851,7 +1778,7 @@ export default function GestionIngresosPage() {
                 </CardDecorativeIcon>
               </Card>
 
-              {/* Card 2: En Revisión / Asignadas */}
+              {/* Card 2: En revisión */}
               <Card
                 variant="featured"
                 role="button"
@@ -1887,10 +1814,10 @@ export default function GestionIngresosPage() {
                 </div>
                 <div className="space-y-1">
                   <h3 className="text-base font-bold text-foreground block group-hover:text-primary transition-colors">
-                    Solicitudes Asignadas
+                    En revisión
                   </h3>
                   <p className="text-xs text-muted-foreground font-normal block leading-relaxed">
-                    en análisis activo por el equipo
+                    análisis documental en curso
                   </p>
                 </div>
                 <div className="w-full pt-3 border-t border-primary/20 flex items-center justify-between text-xs font-semibold text-primary group-hover:text-primary">
@@ -1902,26 +1829,26 @@ export default function GestionIngresosPage() {
                 </CardDecorativeIcon>
               </Card>
 
-              {/* Card 3: Resueltas / Aprobadas */}
+              {/* Card 3: Finalizadas */}
               <Card
                 variant="featured"
                 role="button"
                 tabIndex={0}
                 onClick={() => {
-                  setFilterEstado(filterEstado === "Aprobada" ? "Todos" : "Aprobada");
+                  setFilterEstado(filterEstado === "FINALIZADAS" ? "Todos" : "FINALIZADAS");
                   setCurrentPage(1);
                 }}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
                     e.preventDefault();
-                    setFilterEstado(filterEstado === "Aprobada" ? "Todos" : "Aprobada");
+                    setFilterEstado(filterEstado === "FINALIZADAS" ? "Todos" : "FINALIZADAS");
                     setCurrentPage(1);
                   }
                 }}
                 className={cn(
                   "group relative overflow-hidden cursor-pointer transition-all duration-300 border rounded-2xl outline-none select-none p-6 lg:p-7 w-full min-h-[170px]",
                   "hover:-translate-y-1 hover:shadow-lg",
-                  filterEstado === "Aprobada"
+                  filterEstado === "FINALIZADAS"
                     ? "bg-success/15 border-success ring-2 ring-success/40 shadow-sm"
                     : "bg-success/5 hover:bg-success/10 border-success/30 shadow-2xs"
                 )}
@@ -1929,23 +1856,23 @@ export default function GestionIngresosPage() {
               >
                 <div className="flex items-center justify-between w-full">
                   <span className="font-heading font-extrabold text-4xl lg:text-5xl text-success tracking-tight">
-                    {dynamicKpis.resueltas}
+                    {dynamicKpis.finalizadas}
                   </span>
                   <Badge tone="success" appearance="soft" size="sm" className="font-bold text-xs tracking-wider uppercase gap-1.5 px-3 py-1">
                     <CheckCircle2 className="size-3.5 shrink-0" />
-                    <span>RESUELTAS</span>
+                    <span>FINALIZADAS</span>
                   </Badge>
                 </div>
                 <div className="space-y-1">
                   <h3 className="text-base font-bold text-foreground block group-hover:text-success transition-colors">
-                    Solicitudes Finalizadas
+                    Finalizadas
                   </h3>
                   <p className="text-xs text-muted-foreground font-normal block leading-relaxed">
-                    aprobadas y cerradas exitosamente
+                    aprobadas o rechazadas
                   </p>
                 </div>
                 <div className="w-full pt-3 border-t border-success/20 flex items-center justify-between text-xs font-semibold text-success group-hover:text-success">
-                  <span>{filterEstado === "Aprobada" ? "Filtro activo (clic para quitar)" : "Filtrar por resueltas"}</span>
+                  <span>{filterEstado === "FINALIZADAS" ? "Filtro activo (clic para quitar)" : "Filtrar por finalizadas"}</span>
                   <ChevronRight className="size-4 transition-transform duration-200 group-hover:translate-x-1" />
                 </div>
                 <CardDecorativeIcon>
@@ -2134,14 +2061,6 @@ export default function GestionIngresosPage() {
                   <Table className="w-full table-fixed">
                     <TableHeader>
                       <TableRow>
-                        <TableHead className="w-9 px-2 text-center">
-                          <Checkbox
-                            disabled={assignableRows.length === 0}
-                            checked={isAllAssignableSelected}
-                            onCheckedChange={toggleSelectAll}
-                            aria-label="Seleccionar todos los trámites asignables"
-                          />
-                        </TableHead>
                         <TableHead className="w-[10%] px-2">
                           TRÁMITE
                         </TableHead>
@@ -2151,19 +2070,16 @@ export default function GestionIngresosPage() {
                         <TableHead className="w-[20%] min-w-[170px] px-2">
                           SOLICITANTE
                         </TableHead>
-                        <TableHead className="w-[16%] px-2">
+                        <TableHead className="w-[18%] px-2">
                           INSTITUCIÓN
                         </TableHead>
-                        <TableHead className="w-[9%] px-2">
+                        <TableHead className="w-[10%] px-2">
                           FECHA
                         </TableHead>
-                        <TableHead className="w-[15%] min-w-[140px] px-2">
+                        <TableHead className="w-[16%] min-w-[140px] px-2">
                           ESTADO
                         </TableHead>
-                        <TableHead className="w-[11%] px-2">
-                          ASIGNADO
-                        </TableHead>
-                        <TableHead className="w-[8%] px-2 text-right">
+                        <TableHead className="w-[15%] px-2 text-right">
                           ACCIONES
                         </TableHead>
                       </TableRow>
@@ -2171,7 +2087,7 @@ export default function GestionIngresosPage() {
                     <TableBody>
                       {paginatedData.length === 0 ? (
                         <TableRow>
-                          <TableCell colSpan={9} className="text-center py-12">
+                          <TableCell colSpan={7} className="text-center py-12">
                             <div className="flex flex-col items-center justify-center max-w-sm mx-auto text-center space-y-2">
                               <div className="size-12 rounded-full bg-muted/60 flex items-center justify-center text-muted-foreground mb-1">
                                 <SearchIcon className="size-6" />
@@ -2187,34 +2103,12 @@ export default function GestionIngresosPage() {
                         </TableRow>
                       ) : (
                         paginatedData.map((row) => {
-                          const { puedeReasignar, esReasignacion, motivoBloqueo } = puedeReasignarSolicitud(row, currentUser.role);
-                          const isAssignable = puedeReasignar;
-                          const isSelected = selectedIds.includes(row.id);
-
-                          const revisorAsignado =
-                            currentUser.role === "DIR_NORMATIVA" || currentUser.role === "EQ_NORMATIVA"
-                              ? (row.revisorNormatividad || row.revisor)
-                              : (row.revisorGestion || row.revisor);
-
                           return (
                             <TableRow
                               key={row.id}
-                              className={cn(
-                                "cursor-pointer transition-colors hover:bg-muted/40",
-                                isSelected && "bg-primary/5"
-                              )}
+                              className="cursor-pointer transition-colors hover:bg-muted/40"
                               onClick={() => handleSelectSolicitud(row)}
                             >
-                              {/* Checkbox */}
-                              <TableCell className="px-2 text-center" onClick={(e) => e.stopPropagation()}>
-                                <Checkbox
-                                  disabled={!isAssignable}
-                                  checked={isSelected}
-                                  onCheckedChange={() => toggleSelectRow(row.id)}
-                                  aria-label={`Seleccionar trámite ${row.id}`}
-                                />
-                              </TableCell>
-
                               {/* N.º Trámite */}
                               <TableCell className="px-2 font-mono text-xs overflow-hidden">
                                 <div className="flex flex-col truncate">
@@ -2274,58 +2168,9 @@ export default function GestionIngresosPage() {
                                 {renderEstadoBadge(row.estado)}
                               </TableCell>
 
-                              {/* Asignado */}
-                              <TableCell className="px-2 text-xs overflow-hidden">
-                                {revisorAsignado ? (
-                                  <Badge tone="neutral" appearance="soft" className="border border-border text-[11px] font-medium text-foreground truncate max-w-full">
-                                    <User className="size-3 mr-1 text-primary shrink-0" />
-                                    <span className="truncate">{revisorAsignado}</span>
-                                  </Badge>
-                                ) : (
-                                  <span className="text-[11px] text-muted-foreground italic font-mono truncate block">Sin asignar</span>
-                                )}
-                              </TableCell>
-
                               {/* Acciones */}
                               <TableCell className="px-2 text-right" onClick={(e) => e.stopPropagation()}>
                                 <div className="flex items-center justify-end gap-1">
-                                  {isAssignable ? (
-                                    <Tooltip>
-                                      <TooltipTrigger asChild>
-                                        <Button
-                                          type="button"
-                                          variant={esReasignacion ? "neutral" : "primary"}
-                                          size="icon-sm"
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            handleOpenAssign(row);
-                                          }}
-                                          className={cn(
-                                            "size-7 rounded-lg shadow-2xs",
-                                            esReasignacion && "border border-border text-foreground hover:bg-muted"
-                                          )}
-                                          aria-label={esReasignacion ? `Reasignar revisor a trámite ${row.id}` : `Asignar revisor a trámite ${row.id}`}
-                                        >
-                                          {esReasignacion ? <RotateCcw className="size-3.5 text-primary" /> : <UserPlus className="size-3.5" />}
-                                        </Button>
-                                      </TooltipTrigger>
-                                      <TooltipContent side="top">
-                                        {esReasignacion ? `Reasignar revisor (trámite aún no iniciado por ${revisorAsignado})` : "Asignar revisor"}
-                                      </TooltipContent>
-                                    </Tooltip>
-                                  ) : motivoBloqueo && revisorAsignado && !["Aprobada", "APROBADO_FINAL", "Rechazada", "Cancelada"].includes(row.estado) ? (
-                                    <Tooltip>
-                                      <TooltipTrigger asChild>
-                                        <div className="size-7 rounded-lg flex items-center justify-center text-muted-foreground/40 cursor-not-allowed border border-dashed border-border/50">
-                                          <Lock className="size-3.5" />
-                                        </div>
-                                      </TooltipTrigger>
-                                      <TooltipContent side="top" className="max-w-xs text-xs">
-                                        {motivoBloqueo}
-                                      </TooltipContent>
-                                    </Tooltip>
-                                  ) : null}
-
                                   <Tooltip>
                                     <TooltipTrigger asChild>
                                       <Button
@@ -2352,41 +2197,6 @@ export default function GestionIngresosPage() {
                       )}
                     </TableBody>
                   </Table>
-
-                  {/* Barra Flotante Contextual para Asignación Masiva */}
-                  {selectedIds.length > 0 && (
-                    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-foreground text-background dark:bg-card dark:text-card-foreground px-6 py-3.5 rounded-2xl shadow-xl border border-border flex items-center gap-5 animate-slide-up">
-                      <div className="flex items-center gap-2 text-xs font-bold">
-                        <CheckCircle2 className="size-4 text-primary shrink-0" />
-                        <span>{selectedIds.length} {selectedIds.length === 1 ? "solicitud seleccionada" : "solicitudes seleccionadas"}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Button
-                          type="button"
-                          variant="primary"
-                          size="sm"
-                          onClick={() => {
-                            setSolicitudesMasivas(solicitudes.filter((s) => selectedIds.includes(s.id)));
-                            setIsAssignMasivoOpen(true);
-                          }}
-                          className="h-8 text-xs font-bold px-4 rounded-xl gap-1.5 shadow-xs"
-                        >
-                          <UserPlus className="size-3.5" />
-                          <span>Asignar revisor</span>
-                        </Button>
-
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setSelectedIds([])}
-                          className="h-8 text-xs font-semibold text-white/80 hover:text-white hover:bg-white/10 dark:text-muted-foreground dark:hover:text-foreground dark:hover:bg-muted/50 px-3 rounded-xl transition-colors"
-                        >
-                          Cancelar
-                        </Button>
-                      </div>
-                    </div>
-                  )}
                 </>
               );
             })()}
@@ -2604,24 +2414,6 @@ export default function GestionIngresosPage() {
           onConfirm={handleConfirmReject}
         />
 
-        <AsignarRevisorDialog
-          solicitud={solicitudToAssign}
-          solicitudesMasivas={solicitudesMasivas}
-          open={isAssignOpen || isAssignMasivoOpen}
-          onOpenChange={(open) => {
-            setIsAssignOpen(open);
-            setIsAssignMasivoOpen(open);
-            if (!open) {
-              setSolicitudToAssign(null);
-              setSolicitudesMasivas([]);
-            }
-          }}
-          tipoArea={currentUser.role === "DIR_NORMATIVA" ? "NORMATIVIDAD" : "GESTION"}
-          directorNombre={currentUser.name}
-          allSolicitudes={solicitudes}
-          onConfirmAsignacion={handleConfirmAsignacion}
-          onConfirmAsignacionMasiva={handleConfirmAsignacionMasiva}
-        />
       </main>
     </WireframeDashboardLayout>
   );
