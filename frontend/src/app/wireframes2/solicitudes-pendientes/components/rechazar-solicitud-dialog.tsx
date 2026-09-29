@@ -140,70 +140,38 @@ export function RechazarSolicitudDialog({
           </>
         ) : (
           <>
-            <DialogHeader className="space-y-2">
-              <div className="size-10 rounded-full bg-warning/15 border border-warning/30 text-warning-700 dark:text-warning-400 flex items-center justify-center mb-1">
-                <AlertTriangle className="size-5" />
+            <DialogHeader className="space-y-4 flex flex-col items-center text-center pb-2">
+              <div className="size-16 rounded-full bg-warning/15 text-warning flex items-center justify-center">
+                <AlertTriangle className="size-7" />
               </div>
-              <DialogTitle className="text-base font-bold text-foreground">
-                ¿Confirmas el rechazo de esta solicitud?
+              <DialogTitle className="text-xl font-bold text-foreground">
+                ¿Confirmas el rechazo?
               </DialogTitle>
-              <DialogDescription className="text-xs text-muted-foreground leading-relaxed">
-                Esta acción cambiará el estado del trámite y notificará a la institución por correo electrónico.
+              <DialogDescription className="text-sm text-muted-foreground leading-relaxed max-w-sm mx-auto">
+                Estás a punto de rechazar esta solicitud y la acción no se puede deshacer. Se notificará a la institución con el motivo: <br/> <span className="italic">"{motivo}"</span>
               </DialogDescription>
             </DialogHeader>
 
-            <div className="my-2 p-3 bg-muted/40 rounded-xl border border-border/70 space-y-3 text-xs">
-              <div className="flex items-start justify-between gap-4">
-                <span className="text-muted-foreground flex items-center gap-1.5 font-medium shrink-0">
-                  <FileText className="size-3.5 text-muted-foreground" /> Trámite:
-                </span>
-                <span className="font-mono font-medium text-foreground">{solicitud.id}</span>
-              </div>
-              <div className="flex items-start justify-between gap-4">
-                <span className="text-muted-foreground flex items-center gap-1.5 font-medium shrink-0">
-                  <Building2 className="size-3.5 text-muted-foreground" /> Institución:
-                </span>
-                <span className="font-medium text-foreground text-right">{solicitud.institucion}</span>
-              </div>
-              <div className="flex items-start justify-between gap-4 border-t border-border/60 pt-3">
-                <span className="text-muted-foreground flex items-center gap-1.5 font-medium shrink-0">
-                  <AlertCircle className="size-3.5 text-muted-foreground" /> Motivo:
-                </span>
-                <span className="font-medium text-foreground text-right italic">"{motivo}"</span>
-              </div>
-            </div>
-
-            <p className="text-[11px] font-medium text-warning-700 dark:text-warning-400 bg-warning/5 p-2 rounded-md border border-warning/20">
-              Una vez confirmado, el trámite quedará finalizado en esta etapa.
-            </p>
-
-            <DialogFooter className="gap-3 pt-3 sm:flex-row sm:justify-end sm:[&>*]:flex-none sm:[&>*]:w-auto">
+            <DialogFooter className="gap-3 pt-6 flex flex-row w-full [&>*]:flex-1">
               <Button
                 type="button"
                 variant="neutral"
                 disabled={isSubmitting}
                 onClick={() => setStep("MOTIVO")}
-                className="h-10 px-5 text-xs font-semibold rounded-xl"
+                className="h-12 text-sm font-semibold rounded-full bg-muted/80 hover:bg-muted text-muted-foreground hover:text-foreground border-none"
               >
                 Volver
               </Button>
               <Button
                 type="button"
-                variant="danger"
                 disabled={isSubmitting}
                 onClick={handleReject}
-                className="h-10 px-6 text-xs font-semibold gap-2 rounded-full shadow-sm"
+                className="h-12 text-sm font-semibold rounded-full bg-warning hover:bg-warning/90 text-warning-foreground shadow-none border-none"
               >
                 {isSubmitting ? (
-                  <>
-                    <Loader2 className="size-3.5 animate-spin" />
-                    <span>Procesando...</span>
-                  </>
+                  <Loader2 className="size-4 animate-spin" />
                 ) : (
-                  <>
-                    <XCircle className="size-4" />
-                    <span>Confirmar rechazo</span>
-                  </>
+                  "Confirmar rechazo"
                 )}
               </Button>
             </DialogFooter>
