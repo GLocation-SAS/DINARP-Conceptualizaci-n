@@ -47,17 +47,18 @@ export function WireframeUserMenu({ user, onRoleChange }: WireframeUserMenuProps
           className="group flex items-center gap-2.5 rounded-full outline-none pr-3 pl-1.5 py-1 hover:bg-muted/50 data-[state=open]:bg-muted/50 transition-all cursor-pointer border border-transparent hover:border-border/60"
           aria-label="Perfil de usuario"
         >
-          <Avatar className="size-8 cursor-pointer transition-all duration-200 border border-border">
-            <AvatarFallback className="bg-foreground text-background text-xs font-bold">
+          <Avatar className="size-8 cursor-pointer transition-all duration-200 border border-border group-hover:border-primary/30 group-hover:ring-2 group-hover:ring-primary/10">
+            <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold font-heading">
               {user.initials}
             </AvatarFallback>
           </Avatar>
           <div className="hidden sm:flex items-center gap-1.5 transition-colors">
             <div className="flex flex-col items-start leading-tight">
-              <span className="text-xs font-bold text-foreground">{user.name}</span>
-              <span className="text-[10px] text-muted-foreground flex items-center gap-1">
-                <span className="size-1.5 rounded-full bg-foreground shrink-0" />
-                {user.roleTitle.split("(")[0].trim()}
+              <span className="text-[13px] font-bold text-foreground">
+                {(user.roleTitle || user.name).split("(")[0].trim()}
+              </span>
+              <span className="text-[10px] text-muted-foreground flex items-center gap-1 -mt-0.5">
+                <span className="size-1.5 rounded-full bg-primary shrink-0" />
               </span>
             </div>
             <ChevronDown
@@ -77,29 +78,32 @@ export function WireframeUserMenu({ user, onRoleChange }: WireframeUserMenuProps
         className="w-72 p-2 border-border bg-popover text-popover-foreground shadow-lg rounded-xl"
       >
         {/* Encabezado del Perfil */}
-        <div className="p-3 bg-muted/40 rounded-lg flex flex-col gap-2">
-          <div className="flex items-center gap-3">
-            <Avatar className="size-10 border border-border">
-              <AvatarFallback className="bg-foreground text-background text-sm font-bold">
+        <div className="p-4 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20 rounded-xl flex flex-col gap-3 relative overflow-hidden mb-1">
+          {/* Decorative blur */}
+          <div className="absolute -right-8 -top-8 size-32 bg-primary/10 rounded-full blur-2xl pointer-events-none" />
+
+          <div className="flex items-center gap-3 relative z-10">
+            <Avatar className="size-12 border-2 border-background shadow-sm ring-1 ring-primary/20">
+              <AvatarFallback className="bg-gradient-to-br from-primary to-primary-600 text-primary-foreground text-base font-bold font-heading">
                 {user.initials}
               </AvatarFallback>
             </Avatar>
             <div className="flex flex-col min-w-0">
-              <span className="text-xs font-bold text-foreground truncate">{user.name}</span>
-              <span className="text-[11px] text-muted-foreground truncate">{getEmail(user.name, user.institution)}</span>
+              <span className="text-sm font-bold font-heading text-foreground truncate">{user.name}</span>
+              <span className="text-xs text-foreground/70 truncate">{user.email || getEmail(user.name, user.institution)}</span>
             </div>
           </div>
 
           <div className="pt-1.5 border-t border-border/60 flex flex-col gap-1 text-[11px]">
             <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">Rol / Cargo:</span>
-              <Badge tone="neutral" appearance="soft" size="sm" className="font-semibold">
+              <span className="text-foreground/70 font-medium">Rol / Cargo:</span>
+              <Badge tone="primary" appearance="soft" size="sm" className="font-bold border-primary/20">
                 {ROLES_CONFIG[user.role]?.shortName || user.roleTitle}
               </Badge>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">Institución:</span>
-              <span className="font-medium text-foreground truncate max-w-[150px] text-right">
+              <span className="text-foreground/70 font-medium">Institución:</span>
+              <span className="font-bold text-foreground truncate max-w-[150px] text-right">
                 {user.institution}
               </span>
             </div>
@@ -120,7 +124,7 @@ export function WireframeUserMenu({ user, onRoleChange }: WireframeUserMenuProps
             Simular Rol en Wireframe:
           </span>
           <div className="flex flex-col gap-0.5">
-            {(["DGR", "COORDINADOR_SINARP", "APROBADOR", "FACTURACION", "DTD", "DPI"] as UserRole[]).map((r) => {
+            {(["DIR_GESTION", "EQ_GESTION", "DIR_NORMATIVA", "EQ_NORMATIVA", "DGR", "COORDINADOR_SINARP", "APROBADOR"] as UserRole[]).map((r) => {
               const isCurrent = user.role === r;
               return (
                 <button
@@ -129,7 +133,7 @@ export function WireframeUserMenu({ user, onRoleChange }: WireframeUserMenuProps
                   onClick={() => {
                     try {
                       sessionStorage.setItem("dinarp_simulated_role", r);
-                    } catch {}
+                    } catch { }
                     window.dispatchEvent(
                       new CustomEvent("simulatedRoleChanged", { detail: { role: r } })
                     );
