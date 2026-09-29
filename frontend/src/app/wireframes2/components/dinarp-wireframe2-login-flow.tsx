@@ -169,14 +169,23 @@ export function DinarpWireframe2LoginFlow({
       });
 
       const cleanInput = cedula.trim().toLowerCase();
-      // Si entra como Director de Gestión o roles de gestión/normatividad, redirigir directo a asignación de solicitudes
+
+      // Redirigir al equipo de gestión a su bandeja específica
       if (
+        cleanInput === "gestion.revisor@gmail.com" ||
+        cleanInput.includes("gestion.revisor") ||
+        loggedUser?.email?.toLowerCase() === "gestion.revisor@gmail.com" ||
+        loggedUser?.role === "EQ_GESTION"
+      ) {
+        router.push("/wireframes2/solicitudes-pendientes");
+      } 
+      // Si entra como Director de Gestión o roles de normatividad, redirigir directo a asignación de solicitudes
+      else if (
         cleanInput === "gestion.director@gmail.com" ||
         cleanInput.includes("gestion.director") ||
         loggedUser?.email?.toLowerCase() === "gestion.director@gmail.com" ||
         loggedUser?.role === "DIR_GESTION" ||
         loggedUser?.role === "DIR_NORMATIVA" ||
-        loggedUser?.role === "EQ_GESTION" ||
         loggedUser?.role === "EQ_NORMATIVA"
       ) {
         router.push("/wireframes2/asignacion-solicitudes");
