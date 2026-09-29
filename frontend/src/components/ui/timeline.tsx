@@ -9,6 +9,7 @@ export interface TimelineItem {
   description?: string;
   date: string;
   status?: "neutral" | "success" | "warning" | "danger" | "info" | "primary" | "error";
+  statusLabel?: string; // Etiqueta semántica para mostrar en lugar del nombre del estado técnico
   icon?: React.ReactNode;
   user?: string;
 }
@@ -53,17 +54,19 @@ export function Timeline({ items, className }: TimelineProps) {
             {/* Right column: Content */}
             <div className="flex flex-col gap-1.5 flex-1 pt-1">
               <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 sm:gap-4">
-                <div className="flex flex-col gap-1.5 max-w-[280px]">
-                  <h4 className="font-semibold text-[15px] text-foreground leading-none">{item.title}</h4>
+                <div className="flex flex-col gap-1 flex-1 max-w-2xl">
+                  {item.title && (
+                    <h4 className="text-sm font-bold font-heading text-foreground">{item.title}</h4>
+                  )}
                   {item.description && (
-                    <p className="text-[14px] text-muted-foreground leading-relaxed">{item.description}</p>
+                    <p className="text-xs text-muted-foreground leading-relaxed">{item.description}</p>
                   )}
                 </div>
 
                 <div className="flex items-center gap-3 shrink-0 mt-1 sm:mt-0">
                   {item.status && (
                     <Badge tone={item.status === 'neutral' ? 'neutral' : item.status} size="sm" appearance="soft" className="px-2 py-0 text-[10px] h-5 uppercase tracking-wider font-bold">
-                      {item.status}
+                      {item.statusLabel || item.status}
                     </Badge>
                   )}
                   <span className="text-[13px] text-muted-foreground whitespace-nowrap font-medium">{item.date}</span>

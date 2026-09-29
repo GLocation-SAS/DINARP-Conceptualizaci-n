@@ -126,19 +126,24 @@ export default function SolicitudDetailPage({ params }: PageProps) {
           accionLower.includes("revis");
 
         let status: TimelineItem["status"] = "info";
+        let statusLabel = "REGISTRO";
         let icon: React.ReactNode = <History className="size-4" />;
 
         if (isDanger) {
           status = "danger";
+          statusLabel = "OBSERVADO";
           icon = <XCircle className="size-4" />;
         } else if (isSuccess) {
           status = "success";
+          statusLabel = "APROBADO";
           icon = <CheckCircle2 className="size-4" />;
         } else if (isAssign) {
           status = "primary";
+          statusLabel = "ASIGNADO";
           icon = <UserPlus className="size-4" />;
         } else if (isReview) {
           status = "warning";
+          statusLabel = "EN REVISIÓN";
           icon = <Clock className="size-4" />;
         }
 
@@ -148,6 +153,7 @@ export default function SolicitudDetailPage({ params }: PageProps) {
           description: h.detalles || undefined,
           date: h.fechaHora || h.fecha || "Fecha desconocida",
           status,
+          statusLabel,
           icon,
           user: h.realizadoPor || undefined,
         });
@@ -172,6 +178,7 @@ export default function SolicitudDetailPage({ params }: PageProps) {
           description: `Trámite asignado al funcionario ${revisorActual}. En espera de verificación documental.`,
           date: solicitud.fechaAsignacionGestion || solicitud.fechaAsignacionNormatividad || "Reciente",
           status: "primary",
+          statusLabel: "ASIGNADO",
           icon: <Clock className="size-4" />,
           user: revisorActual,
         });
@@ -472,7 +479,7 @@ export default function SolicitudDetailPage({ params }: PageProps) {
             <div className="lg:col-span-7 xl:col-span-7 space-y-6">
               <Tabs defaultValue="resumen" className="w-full space-y-6">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border/80 pb-3">
-                  <TabsList className="h-auto p-1.5 rounded-full bg-surface-subtle border border-border/40 inline-flex gap-1.5 w-full sm:w-auto justify-start">
+                  <TabsList className="h-auto p-1.5 rounded-full bg-background border border-border/40 inline-flex gap-1.5 w-full sm:w-auto justify-start">
                     <TabsTrigger
                       value="resumen"
                       className="px-5 py-2 text-xs font-bold gap-2"
