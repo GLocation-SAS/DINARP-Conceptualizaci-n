@@ -42,9 +42,10 @@ export function DINARPSpinner({
       >
         <div className="DINARP-spinner__ring" aria-hidden="true" />
 
-        <img
-          className="DINARP-spinner__shield object-contain"
-          src={getAssetPath("/logotipo.png")}
+        <>
+<img
+          className="dark:hidden DINARP-spinner__shield object-contain"
+          src={getAssetPath("/escudo-light.svg")}
           alt="Cargando"
           aria-hidden="true"
           style={{
@@ -52,6 +53,17 @@ export function DINARPSpinner({
             height: logoSize,
           }}
         />
+<img
+          className="hidden dark:block DINARP-spinner__shield object-contain"
+          src={getAssetPath("/escudo-dark.svg")}
+          alt="Cargando"
+          aria-hidden="true"
+          style={{
+            width: logoSize,
+            height: logoSize,
+          }}
+        />
+</>
       </div>
 
       {!hideLabel && label && (

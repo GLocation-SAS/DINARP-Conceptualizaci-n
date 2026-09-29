@@ -16,22 +16,13 @@ import {
   Eye,
   FileCheck2,
   ChevronDown,
-  Info,
-  X
+  Info
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDecorativeIcon } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Table,
-  TableHeader,
-  TableRow,
-  TableHead,
-  TableBody,
-  TableCell
-} from "@/components/ui/table";
 import {
   Dialog,
   DialogContent,
@@ -50,7 +41,6 @@ import {
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem
 } from "@/components/ui/dropdown-menu";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { WireframeDashboardLayout } from "../../components/wireframe-dashboard-layout";
 import { WireframeBreadcrumbs } from "../../components/wireframe-breadcrumbs";
 import {
@@ -231,348 +221,350 @@ function NovedadesListContent() {
 
   return (
     <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col gap-6">
+      {/* Breadcrumb */}
+      <WireframeBreadcrumbs
+        segments={[
+          { label: "Catálogo de Interoperabilidad", href: "/wireframes2/catalogo-interoperabilidad" },
+          { label: "Novedades" }
+        ]}
+      />
 
-      {/* Contenedor Principal de Encabezado y Métricas */}
-      <div className="border border-border rounded-xl bg-surface p-6 flex flex-col gap-6 shadow-xs">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div className="flex flex-col gap-1.5 min-w-0">
-            <div className="flex items-center gap-2">
-              <h1 className="font-heading text-2xl md:text-3xl font-bold tracking-tight text-foreground">
-                Novedades del Catálogo
-              </h1>
-              <Badge tone="neutral" appearance="outline" size="sm" className="text-xs">
-                HU-INT-16 a 19
-              </Badge>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              Gestiona los requerimientos de eliminación, supresión o fusión que afectan fuentes existentes del catálogo.
-            </p>
+      {/* Header Principal */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-border pb-6">
+        <div className="flex flex-col gap-1.5">
+          <div className="flex items-center gap-2">
+            <h1 className="font-heading text-2xl md:text-3xl font-bold tracking-tight text-foreground">
+              Novedades del Catálogo
+            </h1>
+            <Badge tone="neutral" appearance="outline" size="sm" className="text-xs">
+              HU-INT-16 a 19
+            </Badge>
           </div>
-
-          <div className="flex items-center gap-3 shrink-0 self-start sm:self-center">
-            <Button
-              variant="primary"
-              size="sm"
-              onClick={() => setIsNewModalOpen(true)}
-              className="gap-2 font-medium"
-            >
-              <Plus className="size-4" />
-              Radicar novedad
-            </Button>
-          </div>
+          <p className="text-sm text-muted-foreground max-w-3xl">
+            Gestiona los requerimientos de eliminación, supresión o fusión que afectan fuentes existentes del catálogo.
+          </p>
         </div>
 
-        {/* Cards de Resumen */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <Card
-            variant="featured"
-            className="bg-card hover:bg-muted/40 border border-border shadow-xs transition-all"
-            innerClassName="p-5 items-start text-left gap-1"
+        <div className="flex items-center gap-3">
+          <Button
+            variant="primary"
+            size="default"
+            className="gap-2 shrink-0 font-medium"
+            onClick={() => setIsNewModalOpen(true)}
           >
-            <span className="font-heading font-extrabold text-3xl sm:text-4xl text-foreground tracking-tight block">
-              {stats.total}
-            </span>
-            <span className="text-xs font-semibold text-foreground block">
-              Total de novedades
-            </span>
-            <span className="text-[11px] text-muted-foreground font-normal">
-              Requerimientos registrados
-            </span>
-            <CardDecorativeIcon>
-              <Layers className="size-24 text-muted-foreground" />
-            </CardDecorativeIcon>
-          </Card>
-          
-          <Card
-            variant="featured"
-            className="bg-card hover:bg-muted/40 border border-border shadow-xs transition-all"
-            innerClassName="p-5 items-start text-left gap-1"
-          >
-            <span className="font-heading font-extrabold text-3xl sm:text-4xl text-amber-600 tracking-tight block">
-              {stats.enValidacion}
-            </span>
-            <span className="text-xs font-semibold text-amber-600 block">
-              En validación
-            </span>
-            <span className="text-[11px] text-muted-foreground font-normal">
-              Pendientes de dictamen DGR
-            </span>
-            <CardDecorativeIcon>
-              <Clock className="size-24 text-muted-foreground" />
-            </CardDecorativeIcon>
-          </Card>
-          
-          <Card
-            variant="featured"
-            className="bg-card hover:bg-muted/40 border border-border shadow-xs transition-all"
-            innerClassName="p-5 items-start text-left gap-1"
-          >
-            <span className="font-heading font-extrabold text-3xl sm:text-4xl text-emerald-600 tracking-tight block">
-              {stats.finalizadas}
-            </span>
-            <span className="text-xs font-semibold text-emerald-600 block">
-              Finalizadas
-            </span>
-            <span className="text-[11px] text-muted-foreground font-normal">
-              Aplicadas en catálogo
-            </span>
-            <CardDecorativeIcon>
-              <CheckCircle2 className="size-24 text-muted-foreground" />
-            </CardDecorativeIcon>
-          </Card>
+            <Plus className="size-4" />
+            Nueva novedad
+          </Button>
         </div>
       </div>
 
-        {/* Bloque de Inventario: Filtros y Tabla */}
-        <div className="border border-border rounded-xl bg-surface p-6 flex flex-col gap-6 shadow-xs">
-          {/* Barra de Filtros */}
-          <div className="flex flex-col gap-3">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4 items-end">
-              {/* Búsqueda general */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-medium text-muted-foreground whitespace-nowrap block">Búsqueda general</label>
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Buscar por novedad..."
-                    value={searchTerm}
-                    onChange={e => setSearchTerm(e.target.value)}
-                    className="pl-9 w-full h-10 bg-background rounded-xl border-border/80 text-sm"
-                  />
-                </div>
-              </div>
+      {/* Cards de Resumen */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card variant="featured">
+          <CardHeader className="p-5 items-start text-left gap-1">
+            <div className="flex items-center justify-between w-full">
+              <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                Total de novedades
+              </span>
+              <CardDecorativeIcon>
+                <FileText className="size-4 text-muted-foreground" />
+              </CardDecorativeIcon>
+            </div>
+            <div className="text-3xl font-bold font-heading text-foreground mt-1">
+              {stats.total}
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              Trámites radicados en el sistema
+            </p>
+          </CardHeader>
+        </Card>
 
-              {/* Filtro Tipo */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-medium text-muted-foreground whitespace-nowrap block">Tipo de novedad</label>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" className="w-full h-10 justify-between text-xs sm:text-sm font-normal bg-background rounded-xl border-border/80 px-3.5 hover:bg-muted/40">
-                      <span>{tipoFilter === "ALL" ? "Todos los tipos" : tipoFilter}</span>
-                      <ChevronDown className="size-4 opacity-60 ml-2 shrink-0" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start" className="w-56">
-                    <DropdownMenuLabel className="text-xs">Tipo de requerimiento</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuRadioGroup value={tipoFilter} onValueChange={setTipoFilter}>
-                      <DropdownMenuRadioItem value="ALL">Todos los tipos</DropdownMenuRadioItem>
-                      <DropdownMenuRadioItem value="Eliminación">Eliminación</DropdownMenuRadioItem>
-                      <DropdownMenuRadioItem value="Supresión">Supresión</DropdownMenuRadioItem>
-                      <DropdownMenuRadioItem value="Fusión">Fusión</DropdownMenuRadioItem>
-                    </DropdownMenuRadioGroup>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
+        <Card variant="featured">
+          <CardHeader className="p-5 items-start text-left gap-1">
+            <div className="flex items-center justify-between w-full">
+              <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                En validación
+              </span>
+              <CardDecorativeIcon>
+                <Clock className="size-4 text-amber-600" />
+              </CardDecorativeIcon>
+            </div>
+            <div className="text-3xl font-bold font-heading text-amber-600 mt-1">
+              {stats.enValidacion}
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              En análisis legal y funcional (DGR)
+            </p>
+          </CardHeader>
+        </Card>
 
-              {/* Filtro Estado */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-medium text-muted-foreground whitespace-nowrap block">Estado actual</label>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" className="w-full h-10 justify-between text-xs sm:text-sm font-normal bg-background rounded-xl border-border/80 px-3.5 hover:bg-muted/40">
-                      <span>{estadoFilter === "ALL" ? "Todos los estados" : estadoFilter}</span>
-                      <ChevronDown className="size-4 opacity-60 ml-2 shrink-0" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start" className="w-56">
-                    <DropdownMenuLabel className="text-xs">Estado en DGR</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuRadioGroup value={estadoFilter} onValueChange={setEstadoFilter}>
-                      <DropdownMenuRadioItem value="ALL">Todos los estados</DropdownMenuRadioItem>
-                      <DropdownMenuRadioItem value="En validación">En validación</DropdownMenuRadioItem>
-                      <DropdownMenuRadioItem value="Finalizada">Finalizada (Aplicada)</DropdownMenuRadioItem>
-                      <DropdownMenuRadioItem value="No procede">No procede</DropdownMenuRadioItem>
-                    </DropdownMenuRadioGroup>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
+        <Card variant="featured">
+          <CardHeader className="p-5 items-start text-left gap-1">
+            <div className="flex items-center justify-between w-full">
+              <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                Finalizadas
+              </span>
+              <CardDecorativeIcon>
+                <CheckCircle2 className="size-4 text-emerald-600" />
+              </CardDecorativeIcon>
+            </div>
+            <div className="text-3xl font-bold font-heading text-emerald-600 mt-1">
+              {stats.finalizadas}
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              Fuentes actualizadas o desactivadas
+            </p>
+          </CardHeader>
+        </Card>
 
-              {/* Filtro Organismo */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-medium text-muted-foreground whitespace-nowrap block">Organismo solicitante</label>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" className="w-full h-10 justify-between text-xs sm:text-sm font-normal bg-background rounded-xl border-border/80 px-3.5 hover:bg-muted/40 truncate">
-                      <span className="truncate">{organismoFilter === "ALL" ? "Todos los organismos" : organismoFilter}</span>
-                      <ChevronDown className="size-4 opacity-60 ml-2 shrink-0" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start" className="w-64">
-                    <DropdownMenuLabel className="text-xs">Entidad requirente</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuRadioGroup value={organismoFilter} onValueChange={setOrganismoFilter}>
-                      <DropdownMenuRadioItem value="ALL">Todos los organismos</DropdownMenuRadioItem>
-                      {organismosList.map(org => (
-                        <DropdownMenuRadioItem key={org} value={org} className="text-xs">
-                          {org}
-                        </DropdownMenuRadioItem>
-                      ))}
-                    </DropdownMenuRadioGroup>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
+        <Card variant="featured">
+          <CardHeader className="p-5 items-start text-left gap-1">
+            <div className="flex items-center justify-between w-full">
+              <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                No procedentes
+              </span>
+              <CardDecorativeIcon>
+                <XCircle className="size-4 text-muted-foreground" />
+              </CardDecorativeIcon>
+            </div>
+            <div className="text-3xl font-bold font-heading text-muted-foreground mt-1">
+              {stats.noProceden}
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              Desestimadas con justificación legal
+            </p>
+          </CardHeader>
+        </Card>
+      </div>
+
+      {/* Filtros */}
+      <Card>
+        <CardContent className="p-4 flex flex-col gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            {/* Búsqueda general */}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+              <Input
+                placeholder="Buscar por número, fuente u organismo..."
+                value={searchTerm}
+                onChange={e => setSearchTerm(e.target.value)}
+                className="pl-9 h-10 text-sm"
+              />
             </div>
 
-            {/* Badges de filtros activos */}
-            {(searchTerm || tipoFilter !== "ALL" || estadoFilter !== "ALL" || organismoFilter !== "ALL") && (
-              <div className="flex items-center gap-2 pt-3 flex-wrap text-xs">
-                <span className="text-muted-foreground font-medium">Filtros activos:</span>
-                {searchTerm && (
-                  <Badge tone="neutral" appearance="soft" size="sm">
-                    Búsqueda: {searchTerm}
-                  </Badge>
-                )}
-                {tipoFilter !== "ALL" && (
-                  <Badge tone="neutral" appearance="soft" size="sm">
-                    Tipo: {tipoFilter}
-                  </Badge>
-                )}
-                {estadoFilter !== "ALL" && (
-                  <Badge tone="neutral" appearance="soft" size="sm">
-                    Estado: {estadoFilter}
-                  </Badge>
-                )}
-                {organismoFilter !== "ALL" && (
-                  <Badge tone="neutral" appearance="soft" size="sm">
-                    Organismo: {organismoFilter}
-                  </Badge>
-                )}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-6 px-2 text-xs text-muted-foreground hover:text-foreground"
-                  onClick={() => {
-                    setSearchTerm("");
-                    setTipoFilter("ALL");
-                    setEstadoFilter("ALL");
-                    setOrganismoFilter("ALL");
-                  }}
-                >
-                  <X className="size-3.5 mr-1" /> Limpiar todos
-                </Button>
-              </div>
-            )}
+            {/* Tipo de novedad */}
+            <div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="w-full h-10 justify-between text-xs sm:text-sm font-normal bg-background px-3">
+                    <span>{tipoFilter === "ALL" ? "Todos los tipos" : tipoFilter}</span>
+                    <ChevronDown className="size-4 opacity-60 ml-2 shrink-0" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-48">
+                  <DropdownMenuLabel className="text-xs">Tipo de novedad</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuRadioGroup value={tipoFilter} onValueChange={setTipoFilter}>
+                    <DropdownMenuRadioItem value="ALL">Todos los tipos</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="Eliminación">Eliminación</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="Supresión">Supresión</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="Fusión">Fusión</DropdownMenuRadioItem>
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+
+            {/* Estado */}
+            <div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="w-full h-10 justify-between text-xs sm:text-sm font-normal bg-background px-3">
+                    <span>{estadoFilter === "ALL" ? "Todos los estados" : estadoFilter}</span>
+                    <ChevronDown className="size-4 opacity-60 ml-2 shrink-0" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-48">
+                  <DropdownMenuLabel className="text-xs">Estado</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuRadioGroup value={estadoFilter} onValueChange={setEstadoFilter}>
+                    <DropdownMenuRadioItem value="ALL">Todos los estados</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="En validación">En validación</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="Finalizada">Finalizada</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="No procede">No procede</DropdownMenuRadioItem>
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+
+            {/* Organismo Solicitante */}
+            <div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="w-full h-10 justify-between text-xs sm:text-sm font-normal bg-background px-3 truncate">
+                    <span className="truncate">{organismoFilter === "ALL" ? "Todos los organismos" : organismoFilter}</span>
+                    <ChevronDown className="size-4 opacity-60 ml-2 shrink-0" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-64">
+                  <DropdownMenuLabel className="text-xs">Organismo solicitante</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuRadioGroup value={organismoFilter} onValueChange={setOrganismoFilter}>
+                    <DropdownMenuRadioItem value="ALL">Todos los organismos</DropdownMenuRadioItem>
+                    {organismosList.map(org => (
+                      <DropdownMenuRadioItem key={org} value={org} className="text-xs">
+                        {org}
+                      </DropdownMenuRadioItem>
+                    ))}
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
 
-          {/* Encabezado de Resultados y Conteo */}
-          <div className="flex items-center justify-between border-t border-border/60 pt-4">
-            <span className="text-xs text-muted-foreground">
-              Mostrando <strong className="text-foreground font-semibold">{novedadesFiltradas.length}</strong> de{" "}
-              <strong className="text-foreground font-semibold">{novedades.length}</strong> novedades
-            </span>
-          </div>
+          {/* Badges de filtros activos */}
+          {(searchTerm || tipoFilter !== "ALL" || estadoFilter !== "ALL" || organismoFilter !== "ALL") && (
+            <div className="flex items-center gap-2 pt-2 border-t border-border flex-wrap text-xs">
+              <span className="text-muted-foreground font-medium">Filtros activos:</span>
+              {searchTerm && (
+                <Badge tone="neutral" appearance="soft" size="sm">
+                  Búsqueda: {searchTerm}
+                </Badge>
+              )}
+              {tipoFilter !== "ALL" && (
+                <Badge tone="neutral" appearance="soft" size="sm">
+                  Tipo: {tipoFilter}
+                </Badge>
+              )}
+              {estadoFilter !== "ALL" && (
+                <Badge tone="neutral" appearance="soft" size="sm">
+                  Estado: {estadoFilter}
+                </Badge>
+              )}
+              {organismoFilter !== "ALL" && (
+                <Badge tone="neutral" appearance="soft" size="sm">
+                  Organismo: {organismoFilter}
+                </Badge>
+              )}
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-6 px-2 text-xs text-muted-foreground hover:text-foreground"
+                onClick={() => {
+                  setSearchTerm("");
+                  setTipoFilter("ALL");
+                  setEstadoFilter("ALL");
+                  setOrganismoFilter("ALL");
+                }}
+              >
+                Limpiar todos
+              </Button>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
-          {/* Tabla de Novedades */}
-          <div className="overflow-x-auto border-y border-border bg-card mt-2">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>N.º de novedad</TableHead>
-                  <TableHead>Tipo</TableHead>
-                  <TableHead>Fuente(s) afectada(s)</TableHead>
-                  <TableHead>Organismo solicitante</TableHead>
-                  <TableHead>Estado</TableHead>
-                  <TableHead>Fecha radicación</TableHead>
-                  <TableHead>Última actualización</TableHead>
-                  <TableHead className="text-right">Acciones</TableHead>
-                </TableRow>
-              </TableHeader>
-            <TableBody>
+      {/* Tabla de Novedades */}
+      <Card>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm border-collapse">
+            <thead>
+              <tr className="border-b border-border bg-muted/40 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                <th className="py-3.5 px-4">N.º de novedad</th>
+                <th className="py-3.5 px-4">Tipo</th>
+                <th className="py-3.5 px-4">Fuente(s) afectada(s)</th>
+                <th className="py-3.5 px-4">Organismo solicitante</th>
+                <th className="py-3.5 px-4">Estado</th>
+                <th className="py-3.5 px-4">Fecha radicación</th>
+                <th className="py-3.5 px-4">Última actualización</th>
+                <th className="py-3.5 px-4 text-right">Acciones</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border">
               {novedadesFiltradas.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={8} className="py-12 text-center text-muted-foreground">
+                <tr>
+                  <td colSpan={8} className="py-12 text-center text-muted-foreground">
                     <FileText className="size-8 mx-auto mb-2 opacity-40" />
                     <p className="font-medium text-foreground">No se encontraron novedades</p>
                     <p className="text-xs mt-1">Ajusta los criterios de búsqueda o filtros seleccionados.</p>
-                  </TableCell>
-                </TableRow>
+                  </td>
+                </tr>
               ) : (
                 novedadesFiltradas.map(nov => (
-                  <TableRow key={nov.id}>
-                    <TableCell className="font-mono font-medium text-foreground">
+                  <tr key={nov.id} className="hover:bg-muted/30 transition-colors">
+                    <td className="py-3.5 px-4 font-mono font-medium text-foreground whitespace-nowrap">
                       <div className="flex items-center gap-2">
                         <FileText className="size-4 text-muted-foreground" />
                         {nov.nroTramite}
                       </div>
-                    </TableCell>
-                    <TableCell>
+                    </td>
+                    <td className="py-3.5 px-4 whitespace-nowrap">
                       {getBadgeTipo(nov.tipoNovedad)}
-                    </TableCell>
-                    <TableCell className="max-w-xs whitespace-normal">
+                    </td>
+                    <td className="py-3.5 px-4 max-w-xs">
                       {nov.fuentesAfectadas.map((fa, i) => (
                         <div key={i} className="flex flex-col">
                           <span className="font-medium text-foreground text-xs line-clamp-1">
                             {fa.fuenteNombre}
                           </span>
-                          <span className="text-[11px] text-muted-foreground font-mono mt-0.5">
+                          <span className="text-[11px] text-muted-foreground font-mono">
                             {fa.codigoServicio || fa.fuenteId}
                           </span>
                         </div>
                       ))}
-                    </TableCell>
-                    <TableCell className="text-xs text-muted-foreground max-w-xs whitespace-normal">
+                    </td>
+                    <td className="py-3.5 px-4 text-xs text-muted-foreground max-w-xs">
                       <span className="line-clamp-2">{nov.organismoSolicitante}</span>
-                    </TableCell>
-                    <TableCell>
+                    </td>
+                    <td className="py-3.5 px-4 whitespace-nowrap">
                       {getBadgeEstado(nov.estado)}
-                    </TableCell>
-                    <TableCell className="text-xs text-muted-foreground">
+                    </td>
+                    <td className="py-3.5 px-4 text-xs text-muted-foreground whitespace-nowrap">
                       {nov.fechaRadicacion}
-                    </TableCell>
-                    <TableCell className="text-xs text-muted-foreground">
+                    </td>
+                    <td className="py-3.5 px-4 text-xs text-muted-foreground whitespace-nowrap">
                       {nov.ultimaActualizacion || nov.fechaRadicacion}
-                    </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex items-center justify-end gap-1">
-                          <TooltipProvider delayDuration={0}>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Button
-                                  variant="ghost"
-                                  size="icon-sm"
-                                  asChild
-                                  className="size-8 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted"
-                                >
-                                  <Link href={`/wireframes2/catalogo-interoperabilidad/novedades/${nov.id}`}>
-                                    <Eye className="size-4" />
-                                  </Link>
-                                </Button>
-                              </TooltipTrigger>
-                              <TooltipContent side="top">
-                                <p className="text-xs">Ver detalle</p>
-                              </TooltipContent>
-                            </Tooltip>
+                    </td>
+                    <td className="py-3.5 px-4 text-right whitespace-nowrap">
+                      <div className="flex items-center justify-end gap-1.5">
+                        <Button variant="outline" size="sm" asChild className="h-8 gap-1 text-xs">
+                          <Link href={`/wireframes2/catalogo-interoperabilidad/novedades/${nov.id}`}>
+                            Ver detalle
+                            <ArrowRight className="size-3" />
+                          </Link>
+                        </Button>
 
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="size-8">
+                              <MoreHorizontal className="size-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-44">
+                            <DropdownMenuItem asChild>
+                              <Link href={`/wireframes2/catalogo-interoperabilidad/novedades/${nov.id}`}>
+                                <Eye className="size-4 mr-2" />
+                                Ver detalle
+                              </Link>
+                            </DropdownMenuItem>
                             {nov.fuentesAfectadas[0]?.fuenteId && (
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Button
-                                    variant="ghost"
-                                    size="icon-sm"
-                                    asChild
-                                    className="size-8 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted"
-                                  >
-                                    <Link href={`/wireframes2/catalogo-interoperabilidad/gestion/fuente/${nov.fuentesAfectadas[0].fuenteId}`}>
-                                      <Layers className="size-4" />
-                                    </Link>
-                                  </Button>
-                                </TooltipTrigger>
-                                <TooltipContent side="top">
-                                  <p className="text-xs">Ver fuente en Gestión</p>
-                                </TooltipContent>
-                              </Tooltip>
+                              <DropdownMenuItem asChild>
+                                <Link href={`/wireframes2/catalogo-interoperabilidad/gestion/fuente/${nov.fuentesAfectadas[0].fuenteId}`}>
+                                  <Layers className="size-4 mr-2" />
+                                  Ver fuente en Gestión
+                                </Link>
+                              </DropdownMenuItem>
                             )}
-                          </TooltipProvider>
-                        </div>
-                      </TableCell>
-                  </TableRow>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    </td>
+                  </tr>
                 ))
               )}
-            </TableBody>
-          </Table>
+            </tbody>
+          </table>
         </div>
-      </div>
+      </Card>
 
       {/* Modal Nueva Novedad */}
       <Dialog open={isNewModalOpen} onOpenChange={setIsNewModalOpen}>
@@ -722,10 +714,6 @@ export default function NovedadesListPage() {
       activeMenu="novedades-catalogo"
       currentRole="DGR"
       currentUser={MOCK_USERS_BY_ROLE.DGR}
-      breadcrumbs={[
-        { label: "Catálogo de Interoperabilidad", href: "/wireframes2/catalogo-interoperabilidad" },
-        { label: "Novedades" }
-      ]}
     >
       <Suspense fallback={<div className="p-8 text-center text-muted-foreground">Cargando novedades...</div>}>
         <NovedadesListContent />

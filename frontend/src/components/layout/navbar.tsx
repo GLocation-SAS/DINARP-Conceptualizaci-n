@@ -120,14 +120,24 @@ export function Navbar() {
           >
             <div className="relative h-16 flex items-center justify-center px-2">
               <div className="absolute inset-0 bg-primary/10 rounded-xl blur-lg group-hover:bg-primary/20 transition-colors" />
-              <Image
-                src={getAssetPath("/logotipo.png")}
-                alt="Logo DINARP"
-                width={240}
-                height={64}
-                className="relative z-10 h-14 w-auto object-contain"
-                priority
-              />
+              <>
+                <Image
+                  src={getAssetPath("/logo-horizontal.svg")}
+                  alt="Logo DINARP"
+                  width={240}
+                  height={64}
+                  className="relative z-10 h-14 w-auto object-contain dark:hidden"
+                  priority
+                />
+                <Image
+                  src={getAssetPath("/logo-horizontal-blanco.svg")}
+                  alt="Logo DINARP"
+                  width={240}
+                  height={64}
+                  className="relative z-10 h-14 w-auto object-contain hidden dark:block"
+                  priority
+                />
+              </>
             </div>
           </Link>
 
@@ -184,14 +194,24 @@ export function Navbar() {
                 <SheetHeader className="p-6 border-b border-border/40">
                   <div className="flex items-center gap-2">
                     <SheetTitle className="sr-only">DINARP</SheetTitle>
-                    <Image
-                      src={getAssetPath("/logotipo.png")}
-                      alt="Logo DINARP"
-                      width={180}
-                      height={48}
-                      className="relative z-10 h-12 w-auto object-contain"
-                      priority
-                    />
+                    <>
+                      <Image
+                        src={getAssetPath("/logo-horizontal.svg")}
+                        alt="Logo DINARP"
+                        width={180}
+                        height={48}
+                        className="relative z-10 h-12 w-auto object-contain dark:hidden"
+                        priority
+                      />
+                      <Image
+                        src={getAssetPath("/logo-horizontal-blanco.svg")}
+                        alt="Logo DINARP"
+                        width={180}
+                        height={48}
+                        className="relative z-10 h-12 w-auto object-contain hidden dark:block"
+                        priority
+                      />
+                    </>
                   </div>
                 </SheetHeader>
                 <div className="flex flex-col gap-2 p-4 md:p-6">

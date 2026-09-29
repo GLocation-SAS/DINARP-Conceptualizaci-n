@@ -464,14 +464,15 @@ export default function NuevaSolicitudAccesoPage() {
                             className="pl-2.5 pr-1 py-0.5 rounded-full text-[11px] h-7 gap-1.5 font-medium bg-muted text-foreground border border-border"
                           >
                             <span>Búsqueda: <strong className="font-semibold text-foreground">&ldquo;{searchTerm}&rdquo;</strong></span>
-                            <button
+                            <Button
+                              variant="ghost"
                               type="button"
                               onClick={() => setSearchTerm("")}
-                              className="p-0.5 rounded-full hover:bg-foreground/10 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                              className="h-auto p-0.5 rounded-full hover:bg-foreground/10 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
                               aria-label="Eliminar filtro de búsqueda"
                             >
                               <X className="size-3" />
-                            </button>
+                            </Button>
                           </Badge>
                         )}
 
@@ -485,14 +486,15 @@ export default function NuevaSolicitudAccesoPage() {
                               <Building2 className="size-3 text-muted-foreground" />
                               Institución: <strong className="font-semibold text-foreground">{institucionOptions.find((i) => i.value === institucionFilter)?.label || institucionFilter}</strong>
                             </span>
-                            <button
+                            <Button
+                              variant="ghost"
                               type="button"
                               onClick={() => setInstitucionFilter("ALL")}
-                              className="p-0.5 rounded-full hover:bg-foreground/10 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                              className="h-auto p-0.5 rounded-full hover:bg-foreground/10 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
                               aria-label="Eliminar filtro de institución"
                             >
                               <X className="size-3" />
-                            </button>
+                            </Button>
                           </Badge>
                         )}
 
@@ -506,14 +508,15 @@ export default function NuevaSolicitudAccesoPage() {
                               {clasificacionFilter === "Accesible" ? <Check className="size-3 text-muted-foreground" /> : <Lock className="size-3 text-muted-foreground" />}
                               Clasificación: <strong className="font-semibold text-foreground">{clasificacionFilter}</strong>
                             </span>
-                            <button
+                            <Button
+                              variant="ghost"
                               type="button"
                               onClick={() => setClasificacionFilter("ALL")}
-                              className="p-0.5 rounded-full hover:bg-foreground/10 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                              className="h-auto p-0.5 rounded-full hover:bg-foreground/10 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
                               aria-label="Eliminar filtro de clasificación"
                             >
                               <X className="size-3" />
-                            </button>
+                            </Button>
                           </Badge>
                         )}
 

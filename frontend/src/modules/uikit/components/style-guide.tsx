@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { SubSection } from "./sub-section";
 
 import React, { useState } from "react";
@@ -61,12 +61,12 @@ function generateScaleFromBase(baseHex: string) {
 }
 
 const COLOR_PRESETS = [
-  { name: "DINARP Púrpura", hex: "#4F318B" },
+  { name: "DINARP PÃºrpura", hex: "#454193" },
   { name: "DINARP Secundario", hex: "#2D2D96" },
-  { name: "Azul Océano", hex: "#0284C7" },
+  { name: "Azul OcÃ©ano", hex: "#0284C7" },
   { name: "Verde Esmeralda", hex: "#16A34A" },
-  { name: "Ámbar Dorado", hex: "#D97706" },
-  { name: "Rojo Carmesí", hex: "#DC2626" },
+  { name: "Ãmbar Dorado", hex: "#D97706" },
+  { name: "Rojo CarmesÃ­", hex: "#DC2626" },
   { name: "Teal Marino", hex: "#0D9488" },
   { name: "Violeta Profundo", hex: "#7C3AED" },
   { name: "Rosa Vibrante", hex: "#DB2777" },
@@ -124,14 +124,14 @@ const SEMANTIC_COLORS = [
   {
     name: "Primary",
     title: "Primary",
-    hex: "#7E63B5",
+    hex: "#454193",
     variable: "--primary",
     class: "bg-primary",
     foreground: "text-primary-foreground",
     description: (
       <>
         Color principal para acciones importantes y elementos institucionales.
-        Se utiliza, por ejemplo, en botones principales, navegación y
+        Se utiliza, por ejemplo, en botones principales, navegaciÃ³n y
         encabezados destacados.
       </>
     ),
@@ -139,7 +139,7 @@ const SEMANTIC_COLORS = [
   {
     name: "Secondary",
     title: "Secondary",
-    hex: "#2D2D96",
+    hex: "#8F91C7",
     variable: "--secondary",
     class: "bg-secondary",
     foreground: "text-secondary-foreground",
@@ -159,7 +159,7 @@ const SEMANTIC_COLORS = [
     foreground: "text-success-foreground",
     description: (
       <>
-        Indica que una acción se realizó correctamente o que un proceso terminó
+        Indica que una acciÃ³n se realizÃ³ correctamente o que un proceso terminÃ³
         de forma satisfactoria.
       </>
     ),
@@ -173,8 +173,8 @@ const SEMANTIC_COLORS = [
     foreground: "text-warning-foreground",
     description: (
       <>
-        Advierte sobre una situación que requiere atención, pero que todavía no
-        representa un error crítico.
+        Advierte sobre una situaciÃ³n que requiere atenciÃ³n, pero que todavÃ­a no
+        representa un error crÃ­tico.
       </>
     ),
   },
@@ -187,7 +187,7 @@ const SEMANTIC_COLORS = [
     foreground: "text-danger-foreground",
     description: (
       <>
-        Indica errores, situaciones críticas o acciones que pueden tener
+        Indica errores, situaciones crÃ­ticas o acciones que pueden tener
         consecuencias importantes.
       </>
     ),
@@ -199,7 +199,7 @@ const SEMANTIC_COLORS = [
     foreground: "text-info-foreground",
     description: (
       <>
-        Se utiliza para mostrar información útil, instrucciones, ayuda o
+        Se utiliza para mostrar informaciÃ³n Ãºtil, instrucciones, ayuda o
         contexto adicional.
       </>
     ),
@@ -213,7 +213,7 @@ const SEMANTIC_COLORS = [
     foreground: "text-foreground",
     description: (
       <>
-        Color utilizado como fondo de tarjetas, paneles y áreas donde se
+        Color utilizado como fondo de tarjetas, paneles y Ã¡reas donde se
         organiza el contenido.
       </>
     ),
@@ -227,7 +227,7 @@ const SEMANTIC_COLORS = [
     foreground: "text-muted-foreground",
     description: (
       <>
-        Se utiliza en información que debe permanecer visible pero con menor
+        Se utiliza en informaciÃ³n que debe permanecer visible pero con menor
         importancia visual.
       </>
     ),
@@ -241,7 +241,7 @@ const SEMANTIC_COLORS = [
     foreground: "text-accent-foreground",
     description: (
       <>
-        Color utilizado para destacar elementos específicos de la interfaz sin
+        Color utilizado para destacar elementos especÃ­ficos de la interfaz sin
         reemplazar el color principal.
       </>
     ),
@@ -254,16 +254,16 @@ const FULL_SCALES = [
     title: "Primary",
     prefix: "primary",
     colors: [
-      { level: "50", hex: "#F7F7F8" },
-      { level: "100", hex: "#E9E7EC" },
-      { level: "200", hex: "#CAC3D6" },
-      { level: "300", hex: "#A798C4" },
-      { level: "400", hex: "#7E63B5" },
-      { level: "500", hex: "#4F318B" },
-      { level: "600", hex: "#3A216E" },
-      { level: "700", hex: "#2C1657" },
-      { level: "800", hex: "#1F0E41" },
-      { level: "900", hex: "#14082B" },
+      { level: "50", hex: "#F5F5F8" },
+      { level: "100", hex: "#EAE9F1" },
+      { level: "200", hex: "#C9C7DC" },
+      { level: "300", hex: "#A4A1C4" },
+      { level: "400", hex: "#7875A8" },
+      { level: "500", hex: "#454193" },
+      { level: "600", hex: "#373377" },
+      { level: "700", hex: "#2A275A" },
+      { level: "800", hex: "#1C193D" },
+      { level: "900", hex: "#0F0D20" },
     ],
   },
   {
@@ -271,16 +271,16 @@ const FULL_SCALES = [
     title: "Secondary",
     prefix: "secondary",
     colors: [
-      { level: "50", hex: "#F6F6F8" },
-      { level: "100", hex: "#E6E6EE" },
-      { level: "200", hex: "#C2C2DA" },
-      { level: "300", hex: "#9696CA" },
-      { level: "400", hex: "#5F5FBE" },
-      { level: "500", hex: "#2D2D96" },
-      { level: "600", hex: "#1D1D76" },
-      { level: "700", hex: "#13135D" },
-      { level: "800", hex: "#0C0C44" },
-      { level: "900", hex: "#07072C" },
+      { level: "50", hex: "#F6F6FA" },
+      { level: "100", hex: "#EBEBF3" },
+      { level: "200", hex: "#D0D1E7" },
+      { level: "300", hex: "#B5B6D9" },
+      { level: "400", hex: "#A0A2D0" },
+      { level: "500", hex: "#8F91C7" },
+      { level: "600", hex: "#7274A0" },
+      { level: "700", hex: "#565779" },
+      { level: "800", hex: "#3A3A52" },
+      { level: "900", hex: "#1D1D2A" },
     ],
   },
   {
@@ -421,7 +421,7 @@ const FULL_SCALES = [
   },
   {
     name: "Data",
-    title: "Gráficos y Datos",
+    title: "GrÃ¡ficos y Datos",
     prefix: "chart",
     colors: [
       { level: "1", hex: "#2563EB" },
@@ -434,7 +434,7 @@ const FULL_SCALES = [
   },
   {
     name: "Avatar",
-    title: "Avatar Dinámico",
+    title: "Avatar DinÃ¡mico",
     prefix: "avatar",
     colors: [
       { level: "0-bg", hex: "#FEE2E2" },
@@ -460,25 +460,25 @@ const FULL_SCALES = [
 const TYPOGRAPHY_SCALE = [
   {
     level: "H1",
-    style: "Título Principal",
+    style: "TÃ­tulo Principal",
     size: "32px",
     lineHeight: "40px",
     weight: "700",
-    usage: "Encabezados principales de página",
+    usage: "Encabezados principales de pÃ¡gina",
     className: "text-h1 font-heading font-bold",
   },
   {
     level: "H2",
-    style: "Título Secundario",
+    style: "TÃ­tulo Secundario",
     size: "24px",
     lineHeight: "32px",
     weight: "600",
-    usage: "Secciones dentro de una página",
+    usage: "Secciones dentro de una pÃ¡gina",
     className: "text-h2 font-heading font-semibold",
   },
   {
     level: "H3",
-    style: "Título Terciario",
+    style: "TÃ­tulo Terciario",
     size: "20px",
     lineHeight: "28px",
     weight: "600",
@@ -491,7 +491,7 @@ const TYPOGRAPHY_SCALE = [
     size: "16px",
     lineHeight: "24px",
     weight: "400",
-    usage: "Contenido principal y párrafos",
+    usage: "Contenido principal y pÃ¡rrafos",
     className: "text-body font-normal",
   },
   {
@@ -514,7 +514,7 @@ const TYPOGRAPHY_SCALE = [
   },
   {
     level: "Button",
-    style: "Texto del Botón",
+    style: "Texto del BotÃ³n",
     size: "14px",
     lineHeight: "20px",
     weight: "500",
@@ -551,7 +551,7 @@ export function StyleGuide({
   } | null>(null);
   const [isApplyingColor, setIsApplyingColor] = useState(false);
 
-  // Tipografía
+  // TipografÃ­a
   const [simulatedFonts, setSimulatedFonts] = useState<{
     heading: string;
     body: string;
@@ -609,7 +609,7 @@ export function StyleGuide({
       document.documentElement.style.setProperty(semanticMap[prefix], newHex);
     }
 
-    toast.success("Escala cromática actualizada", {
+    toast.success("Escala cromÃ¡tica actualizada", {
       description: `La familia "${scaleName}" y la tabla de colores se actualizaron a ${newHex}.`,
     });
     setEditingScale(null);
@@ -636,13 +636,13 @@ export function StyleGuide({
       }
     });
     toast.info("Paleta restaurada", {
-      description: "Se han restablecido todas las escalas al estándar original.",
+      description: "Se han restablecido todas las escalas al estÃ¡ndar original.",
     });
   };
 
   return (
     <div className="w-full flex flex-col gap-8 md:gap-12">
-      {/* Subsección 0: Brand Assets / Logos Oficiales */}
+      {/* SubsecciÃ³n 0: Brand Assets / Logos Oficiales */}
       <SubSection
         id="foundations-logos"
         registerSection={registerSection}
@@ -654,63 +654,63 @@ export function StyleGuide({
           <LogoManagerCard
             slot="horizontal"
             title="Logotipo Horizontal"
-            description="Versión principal del logotipo con lema. Recomendada para encabezados, páginas web, documentos y espacios horizontales."
+            description="VersiÃ³n principal del logotipo con lema. Recomendada para encabezados, pÃ¡ginas web, documentos y espacios horizontales."
             badge1="HORIZONTAL"
             badge2="PRINCIPAL"
-            defaultLightImg="/logotipo.png"
-            defaultDarkImg="/logotipo.png"
-            monoLightImg="/logotipo.png"
-            monoDarkImg="/logotipo.png"
+            defaultLightImg="/logo-horizontal.svg"
+            defaultDarkImg="/logo-horizontal-blanco.svg"
+            monoLightImg="/logo-horizontal-outline-azul.svg"
+            monoDarkImg="/logo-horizontal-outline-blanco.svg"
           />
 
           {/* Card 2: Vertical */}
           <LogoManagerCard
             slot="vertical"
             title="Logotipo Vertical"
-            description="Versión vertical del logotipo. Diseñada para composiciones verticales y banners donde el espacio horizontal es reducido."
+            description="VersiÃ³n vertical del logotipo. DiseÃ±ada para composiciones verticales y banners donde el espacio horizontal es reducido."
             badge1="VERTICAL"
             badge2="SECUNDARIO"
-            defaultLightImg="/logotipo.png"
-            defaultDarkImg="/logotipo.png"
-            monoLightImg="/logotipo.png"
-            monoDarkImg="/logotipo.png"
+            defaultLightImg="/logo-vertical.svg"
+            defaultDarkImg="/logo-vertical-blanco.svg"
+            monoLightImg="/logo-vertical-outline-azul.svg"
+            monoDarkImg="/logo-vertical-outline-blanco.svg"
           />
 
-          {/* Card 3: Símbolo / Compacto */}
+          {/* Card 3: SÃ­mbolo / Compacto */}
           <LogoManagerCard
             slot="sin-lema"
-            title="Logotipo Compacto / Símbolo"
-            description="Versión condensada del logotipo sin texto descriptivo inferior. Ideal para sidebars, botones y elementos compactos."
-            badge1="COMPACTO"
-            badge2="SÍMBOLO"
-            defaultLightImg="/logotipo.png"
-            defaultDarkImg="/logotipo.png"
-            monoLightImg="/logotipo.png"
-            monoDarkImg="/logotipo.png"
+            title="Favicon / SÃ­mbolo"
+            description="SÃ­mbolo representativo (Favicon). Ideal para pestaÃ±as del navegador, sidebars contraÃ­dos y elementos muy compactos."
+            badge1="FAVICON"
+            badge2="SÃMBOLO"
+            defaultLightImg="/favicon-light.svg"
+            defaultDarkImg="/favicon-dark.svg"
+            monoLightImg="/favicon-light.svg"
+            monoDarkImg="/favicon-dark.svg"
           />
 
           {/* Card 4: Escudo Nacional */}
           <LogoManagerCard
             slot="escudo"
             title="Escudo Nacional / Institucional"
-            description="Versión formal del escudo para documentos oficiales y encabezados de alta jerarquía."
+            description="VersiÃ³n formal del escudo para documentos oficiales y encabezados de alta jerarquÃ­a."
             badge1="ESCUDO"
             badge2="OFICIAL"
-            defaultLightImg="/logotipo.png"
-            defaultDarkImg="/logotipo.png"
-            monoLightImg="/logotipo.png"
-            monoDarkImg="/logotipo.png"
+            defaultLightImg="/escudo-light.svg"
+            defaultDarkImg="/escudo-dark.svg"
+            monoLightImg="/escudo-light.svg"
+            monoDarkImg="/escudo-dark.svg"
           />
         </div>
       </SubSection>
 
-      {/* Subsección 1.5: Colores de Marca */}
+      {/* SubsecciÃ³n 1.5: Colores de Marca */}
       <SubSection
         id="foundations-colors"
         registerSection={registerSection}
-        title="Colores Generales Base y Semánticos"
+        title="Colores Generales Base y SemÃ¡nticos"
         icon={Contrast}
-        description="Los colores semánticos ayudan a reconocer rápidamente qué está ocurriendo en la interfaz. Cada color comunica un significado específico, como éxito, advertencia, error o información. Estos son colores generales base y semánticos."
+        description="Los colores semÃ¡nticos ayudan a reconocer rÃ¡pidamente quÃ© estÃ¡ ocurriendo en la interfaz. Cada color comunica un significado especÃ­fico, como Ã©xito, advertencia, error o informaciÃ³n. Estos son colores generales base y semÃ¡nticos."
       >
         <div className="flex flex-col gap-14">
           {[
@@ -720,7 +720,7 @@ export function StyleGuide({
               filters: ["Primary", "Secondary", "Accent"],
             },
             {
-              title: "Semánticos",
+              title: "SemÃ¡nticos",
               dot: "bg-info",
               filters: ["Success", "Warning", "Danger", "Info"],
             },
@@ -777,7 +777,7 @@ export function StyleGuide({
                         {matchingScale && (
                           <div className="pt-1">
                             <Button
-                              variant="outline"
+                              variant="neutral"
                               size="sm"
                               className="rounded-full text-xs"
                               onClick={() => {
@@ -804,20 +804,20 @@ export function StyleGuide({
         </div>
       </SubSection>
 
-      {/* Subsección 2: Escalas Cromáticas Primitivas */}
+      {/* SubsecciÃ³n 2: Escalas CromÃ¡ticas Primitivas */}
       <SubSection
         id="foundations-scales"
         registerSection={registerSection}
-        title="Escalas Cromáticas"
+        title="Escalas CromÃ¡ticas"
         icon={Palette}
         description={
           <div className="flex flex-col gap-4">
             <span className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
-              Escalas cromáticas primitivas · 50–900
+              Escalas cromÃ¡ticas primitivas Â· 50â€“900
             </span>
             <p>
-              Cada color principal cuenta con diferentes tonos, desde los más
-              claros hasta los más oscuros. Estas variaciones permiten crear
+              Cada color principal cuenta con diferentes tonos, desde los mÃ¡s
+              claros hasta los mÃ¡s oscuros. Estas variaciones permiten crear
               fondos, bordes, estados al pasar el cursor, elementos
               seleccionados y textos manteniendo una misma familia visual.
             </p>
@@ -929,7 +929,7 @@ export function StyleGuide({
                     size="sm"
                     className="rounded-full text-xs"
                     onClick={() => {
-                      const base = activeScale.colors.find((c) => c.level === "500" || c.level === "1")?.hex || "#7E63B5";
+                      const base = activeScale.colors.find((c) => c.level === "500" || c.level === "1")?.hex || "#454193";
                       setEditingScale({
                         scaleName: activeScale.name,
                         baseHex: base,
@@ -954,7 +954,7 @@ export function StyleGuide({
                     Copiar HEX Base
                   </Button>
                   <Button
-                    variant="outline"
+                    variant="neutral"
                     size="sm"
                     className="rounded-full text-xs"
                     onClick={handleResetScales}
@@ -980,8 +980,8 @@ export function StyleGuide({
                   ))}
                 </div>
                 <div className="flex justify-between items-center px-1 text-[10px] font-mono text-muted-foreground">
-                  <span>← Tonos Claros (Fondos / Superficies)</span>
-                  <span>Tonos Oscuros (Bordes / Textos) →</span>
+                  <span>â† Tonos Claros (Fondos / Superficies)</span>
+                  <span>Tonos Oscuros (Bordes / Textos) â†’</span>
                 </div>
               </div>
             </div>
@@ -1080,7 +1080,7 @@ export function StyleGuide({
                 Matriz Comparativa de Todas las Escalas
               </h3>
               <p className="text-xs text-muted-foreground">
-                Compara la consistencia tonal y luminosidad en paralelo entre todas las familias cromáticas.
+                Compara la consistencia tonal y luminosidad en paralelo entre todas las familias cromÃ¡ticas.
               </p>
             </div>
 
@@ -1141,19 +1141,19 @@ export function StyleGuide({
         )}
       </SubSection>
 
-      {/* Subsección 3: Sistema Tipográfico */}
+      {/* SubsecciÃ³n 3: Sistema TipogrÃ¡fico */}
       <SubSection
         id="foundations-typography"
         registerSection={registerSection}
-        title="Tipografía"
+        title="TipografÃ­a"
         icon={Type}
         description={
           <>
-            Jerarquía visual utilizando{" "}
+            JerarquÃ­a visual utilizando{" "}
             <strong className="text-foreground">
               {simulatedFonts.heading}
             </strong>{" "}
-            para títulos y encabezados, combinada con{" "}
+            para tÃ­tulos y encabezados, combinada con{" "}
             <strong className="text-foreground">{simulatedFonts.body}</strong>{" "}
             para cuerpo de texto.
           </>
@@ -1163,7 +1163,7 @@ export function StyleGuide({
           {[
             {
               id: "heading" as const,
-              title: "Tipografía de títulos",
+              title: "TipografÃ­a de tÃ­tulos",
               currentFont: simulatedFonts.heading,
               items: TYPOGRAPHY_SCALE.filter((t) =>
                 t.className.includes("font-heading"),
@@ -1171,7 +1171,7 @@ export function StyleGuide({
             },
             {
               id: "body" as const,
-              title: "Tipografía de cuerpo",
+              title: "TipografÃ­a de cuerpo",
               currentFont: simulatedFonts.body,
               items: TYPOGRAPHY_SCALE.filter(
                 (t) => !t.className.includes("font-heading"),
@@ -1204,7 +1204,7 @@ export function StyleGuide({
                   }
                 >
                   <Edit2 className="size-3.5 mr-1.5" />
-                  Cambiar tipografía
+                  Cambiar tipografÃ­a
                 </Button>
               </div>
 
@@ -1212,7 +1212,7 @@ export function StyleGuide({
                 <div className="hidden md:grid grid-cols-12 gap-6 px-8 py-4 border-b border-border bg-muted/30 text-xs font-bold text-muted-foreground uppercase tracking-wider">
                   <div className="col-span-2">Token</div>
                   <div className="col-span-3">Estilo & Peso</div>
-                  <div className="col-span-2">Tamaño</div>
+                  <div className="col-span-2">TamaÃ±o</div>
                   <div className="col-span-5">Muestra</div>
                 </div>
                 {group.items.map((type, i) => (
@@ -1256,7 +1256,7 @@ export function StyleGuide({
                       )}
                       style={{ fontFamily: group.currentFont }}
                     >
-                      El veloz murciélago hindú comía...
+                      El veloz murciÃ©lago hindÃº comÃ­a...
                     </div>
                   </div>
                 ))}
@@ -1266,20 +1266,20 @@ export function StyleGuide({
         </div>
       </SubSection>
 
-      {/* Subsección 4: Sombras y Elevación */}
+      {/* SubsecciÃ³n 4: Sombras y ElevaciÃ³n */}
       <SubSection
         id="foundations-shadows"
         registerSection={registerSection}
-        title="Sombras y Elevación"
+        title="Sombras y ElevaciÃ³n"
         icon={Layers}
-        description="Sistema de sombras semánticas para establecer jerarquía y crear sensación de volumen real."
+        description="Sistema de sombras semÃ¡nticas para establecer jerarquÃ­a y crear sensaciÃ³n de volumen real."
       >
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
           {[
             {
               level: "xs",
               class: "shadow-xs",
-              desc: "Elementos interactivos pequeños, inputs",
+              desc: "Elementos interactivos pequeÃ±os, inputs",
             },
             {
               level: "sm",
@@ -1289,7 +1289,7 @@ export function StyleGuide({
             {
               level: "md",
               class: "shadow-md",
-              desc: "Dropdowns, menús, tarjetas elevadas",
+              desc: "Dropdowns, menÃºs, tarjetas elevadas",
             },
             {
               level: "lg",
@@ -1337,7 +1337,7 @@ export function StyleGuide({
         </div>
       </SubSection>
 
-      {/* Subsección 5: Radios y Bordes */}
+      {/* SubsecciÃ³n 5: Radios y Bordes */}
       <SubSection
         id="foundations-radius"
         registerSection={registerSection}
@@ -1418,13 +1418,13 @@ export function StyleGuide({
         </div>
       </SubSection>
 
-      {/* Subsección 6: Espaciado */}
+      {/* SubsecciÃ³n 6: Espaciado */}
       <SubSection
         id="foundations-spacing"
         registerSection={registerSection}
         title="Espaciado"
         icon={Ruler}
-        description="Escala utilizada para mantener consistencia en márgenes, paddings y separación entre elementos."
+        description="Escala utilizada para mantener consistencia en mÃ¡rgenes, paddings y separaciÃ³n entre elementos."
       >
         <div className="flex flex-col gap-6">
           <p className="text-sm text-muted-foreground">
@@ -1467,7 +1467,7 @@ export function StyleGuide({
         </div>
       </SubSection>
 
-      {/* Subsección 7: Grid y Layout */}
+      {/* SubsecciÃ³n 7: Grid y Layout */}
       <SubSection
         id="foundations-grid-layout"
         registerSection={registerSection}
@@ -1489,7 +1489,7 @@ export function StyleGuide({
                   Estructura Base
                 </span>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  Divide el lienzo en <strong className="text-foreground">columnas</strong>, <strong className="text-foreground">gutters</strong> y <strong className="text-foreground">márgenes</strong> para asegurar orden y proporción uniforme en todos los módulos.
+                  Divide el lienzo en <strong className="text-foreground">columnas</strong>, <strong className="text-foreground">gutters</strong> y <strong className="text-foreground">mÃ¡rgenes</strong> para asegurar orden y proporciÃ³n uniforme en todos los mÃ³dulos.
                 </p>
               </div>
 
@@ -1499,7 +1499,7 @@ export function StyleGuide({
                   Breakpoints
                 </span>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  <strong className="text-foreground">Desktop:</strong> 12 col · <strong className="text-foreground">Tablet:</strong> 8 col · <strong className="text-foreground">Mobile:</strong> 4 col con apilamiento fluido y prioridad visual.
+                  <strong className="text-foreground">Desktop:</strong> 12 col Â· <strong className="text-foreground">Tablet:</strong> 8 col Â· <strong className="text-foreground">Mobile:</strong> 4 col con apilamiento fluido y prioridad visual.
                 </p>
               </div>
 
@@ -1509,7 +1509,7 @@ export function StyleGuide({
                   Comportamiento
                 </span>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  Distribuciones complejas (ej. 8 col formulario + 4 col panel) se transforman en flujos apilados de ancho completo en móvil.
+                  Distribuciones complejas (ej. 8 col formulario + 4 col panel) se transforman en flujos apilados de ancho completo en mÃ³vil.
                 </p>
               </div>
             </div>
@@ -1525,7 +1525,7 @@ export function StyleGuide({
                 </div>
                 <div className="flex gap-2 text-xs text-muted-foreground mb-2">
                   <span>Gutter: 24px</span>
-                  <span>·</span>
+                  <span>Â·</span>
                   <span>Margen: 32px</span>
                 </div>
                 <div className="flex gap-1 h-32 w-full px-4 border-x-[3px] border-primary bg-primary/5 rounded-lg shadow-inner">
@@ -1548,7 +1548,7 @@ export function StyleGuide({
                 </div>
                 <div className="flex gap-2 text-xs text-muted-foreground mb-2">
                   <span>Gutter: 24px</span>
-                  <span>·</span>
+                  <span>Â·</span>
                   <span>Margen: 24px</span>
                 </div>
                 <div className="flex gap-1.5 h-32 w-full px-3 border-x-[3px] border-primary bg-primary/5 rounded-lg shadow-inner">
@@ -1571,7 +1571,7 @@ export function StyleGuide({
                 </div>
                 <div className="flex gap-2 text-xs text-muted-foreground mb-2">
                   <span>Gutter: 16px</span>
-                  <span>·</span>
+                  <span>Â·</span>
                   <span>Margen: 16px</span>
                 </div>
                 <div className="flex gap-2 h-32 w-full px-2 border-x-[3px] border-primary bg-primary/5 rounded-lg shadow-inner">
@@ -1626,7 +1626,7 @@ export function StyleGuide({
               {/* Right Column: Nuevo color */}
               <div className="flex flex-col gap-2 items-center">
                 <span className="text-sm font-bold text-foreground">
-                  Nuevo color (Simulación)
+                  Nuevo color (SimulaciÃ³n)
                 </span>
                 <div className="flex items-center gap-3 p-4 rounded-xl border border-border bg-surface w-full relative">
                   <div
@@ -1681,14 +1681,14 @@ export function StyleGuide({
                   <p className="text-sm text-warning-900 dark:text-warning-200 text-left font-normal">
                     Este color es un acento gubernamental y{" "}
                     <strong className="font-bold">
-                      no cuenta con una escala cromática
+                      no cuenta con una escala cromÃ¡tica
                     </strong>{" "}
-                    de 10 tonos en el sistema. Su modificación solo afectará a
+                    de 10 tonos en el sistema. Su modificaciÃ³n solo afectarÃ¡ a
                     esta variable en particular.
                   </p>
                 ) : (
                   <p className="text-sm text-warning-900 dark:text-warning-200 text-left font-normal">
-                    Estás editando el color base (
+                    EstÃ¡s editando el color base (
                     <strong className="font-bold">tono 500</strong>) de la
                     escala. El resto de los tonos debe{" "}
                     <strong className="font-bold">
@@ -1706,8 +1706,8 @@ export function StyleGuide({
                     "Government Info",
                   ].includes(editingColor.name) && (
                     <p className="text-sm text-warning-900 dark:text-warning-200 font-medium mt-1 text-left">
-                      Al cambiar este color gubernamental, también estás
-                      modificando el color base de la escala semántica{" "}
+                      Al cambiar este color gubernamental, tambiÃ©n estÃ¡s
+                      modificando el color base de la escala semÃ¡ntica{" "}
                       <strong className="font-bold">
                         {editingColor.name === "Government Primary"
                           ? "Primary"
@@ -1715,7 +1715,7 @@ export function StyleGuide({
                             ? "Secondary"
                             : "Info"}
                       </strong>
-                      , lo que afectará las variables y componentes de
+                      , lo que afectarÃ¡ las variables y componentes de
                       desarrollo.
                     </p>
                   )}
@@ -1724,7 +1724,7 @@ export function StyleGuide({
                   editingColor.scaleId &&
                   editingColor.level === "500" && (
                     <p className="text-sm text-warning-900 dark:text-warning-200 font-medium mt-1 text-left">
-                      Al editar el tono 500, estás modificando el color
+                      Al editar el tono 500, estÃ¡s modificando el color
                       principal de toda la escala{" "}
                       <strong className="font-bold">
                         {editingColor.scaleId}
@@ -1732,7 +1732,7 @@ export function StyleGuide({
                       {["Primary", "Secondary", "Info"].includes(
                         editingColor.scaleId,
                       ) &&
-                        ` y su color gubernamental asociado, lo que impactará directamente en las variables de desarrollo y el diseño general.`}
+                        ` y su color gubernamental asociado, lo que impactarÃ¡ directamente en las variables de desarrollo y el diseÃ±o general.`}
                     </p>
                   )}
               </div>
@@ -1742,7 +1742,7 @@ export function StyleGuide({
           <DialogFooter className="w-full pt-4">
             <div className="grid grid-cols-2 w-full gap-3">
               <Button
-                variant="outline"
+                variant="neutral"
                 className="w-full"
                 onClick={() => setEditingColor(null)}
               >
@@ -1798,7 +1798,7 @@ export function StyleGuide({
                     setSimulatedColors((prev) => ({ ...prev, ...updates }));
                     toast.success("Color actualizado", {
                       description:
-                        "Se guardó en el bucket de borrador del kit.",
+                        "Se guardÃ³ en el bucket de borrador del kit.",
                     });
                   } catch (err) {
                     toast.error("No se pudo guardar el color", {
@@ -1855,9 +1855,9 @@ export function StyleGuide({
           }}
         >
           <DialogHeader>
-            <DialogTitle className="text-info">Cambiar tipografía</DialogTitle>
+            <DialogTitle className="text-info">Cambiar tipografÃ­a</DialogTitle>
             <DialogDescription>
-              Selecciona la nueva familia tipográfica que utilizará esta escala.
+              Selecciona la nueva familia tipogrÃ¡fica que utilizarÃ¡ esta escala.
             </DialogDescription>
           </DialogHeader>
           <div className="py-2 flex flex-col gap-6">
@@ -1865,7 +1865,7 @@ export function StyleGuide({
             <div className="flex flex-col gap-4">
               <div className="flex items-center justify-between px-1">
                 <span className="text-sm font-semibold text-foreground">
-                  Tipografía actual
+                  TipografÃ­a actual
                 </span>
                 <Badge
                   appearance="outline"
@@ -1879,7 +1879,7 @@ export function StyleGuide({
 
               <div className="flex flex-col gap-2 w-full">
                 <span className="text-sm font-semibold text-foreground text-left px-1">
-                  Nueva tipografía
+                  Nueva tipografÃ­a
                 </span>
                 <div className="w-full">
                   <Combobox
@@ -1891,7 +1891,7 @@ export function StyleGuide({
                         );
                     }}
                   >
-                    <ComboboxInput placeholder="Buscar o seleccionar tipografía..." />
+                    <ComboboxInput placeholder="Buscar o seleccionar tipografÃ­a..." />
                     <ComboboxContent>
                       <ComboboxList>
                         {[
@@ -1935,8 +1935,8 @@ export function StyleGuide({
                     />
                   </svg>
                   <p className="text-sm text-info-900 dark:text-info-200 flex-1 text-left">
-                    Selecciona únicamente la familia tipográfica. La escala de
-                    tamaños, pesos y alturas de línea se conservará.
+                    Selecciona Ãºnicamente la familia tipogrÃ¡fica. La escala de
+                    tamaÃ±os, pesos y alturas de lÃ­nea se conservarÃ¡.
                   </p>
                 </div>
               </div>
@@ -1966,7 +1966,7 @@ export function StyleGuide({
                     className="text-lg font-bold"
                     style={{ fontFamily: editingFontFamily?.currentFont }}
                   >
-                    Título de ejemplo
+                    TÃ­tulo de ejemplo
                   </div>
                   <div
                     className="text-sm"
@@ -1994,7 +1994,7 @@ export function StyleGuide({
                     className="text-lg font-bold text-primary"
                     style={{ fontFamily: editingFontFamily?.newFont }}
                   >
-                    Título de ejemplo
+                    TÃ­tulo de ejemplo
                   </div>
                   <div
                     className="text-sm text-primary"
@@ -2010,7 +2010,7 @@ export function StyleGuide({
           <DialogFooter className="w-full pt-4">
             <div className="grid grid-cols-2 w-full gap-3">
               <Button
-                variant="outline"
+                variant="neutral"
                 className="w-full"
                 onClick={() => setEditingFontFamily(null)}
               >
@@ -2025,7 +2025,7 @@ export function StyleGuide({
                   editingFontFamily.newFont === editingFontFamily.currentFont
                 }
               >
-                Aplicar tipografía
+                Aplicar tipografÃ­a
               </Button>
             </div>
           </DialogFooter>
@@ -2037,12 +2037,12 @@ export function StyleGuide({
         <DialogContent variant="warning" className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="text-warning">
-              ¿Cambiar esta tipografía?
+              Â¿Cambiar esta tipografÃ­a?
             </DialogTitle>
             <DialogDescription>
-              La nueva familia se aplicará a todos los estilos asociados a esta
-              escala tipográfica. Los tamaños, pesos y alturas de línea se
-              conservarán.
+              La nueva familia se aplicarÃ¡ a todos los estilos asociados a esta
+              escala tipogrÃ¡fica. Los tamaÃ±os, pesos y alturas de lÃ­nea se
+              conservarÃ¡n.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="w-full pt-4 mt-2">
@@ -2082,14 +2082,14 @@ export function StyleGuide({
                       [editingFontFamily.id]: fontName,
                     }));
 
-                    toast.success("Tipografía actualizada", {
-                      description: `Se aplicó la familia "${fontName}" a ${editingFontFamily.id === "heading" ? "títulos" : "cuerpo de texto"
+                    toast.success("TipografÃ­a actualizada", {
+                      description: `Se aplicÃ³ la familia "${fontName}" a ${editingFontFamily.id === "heading" ? "tÃ­tulos" : "cuerpo de texto"
                         }.`,
                     });
                     setEditingFontFamily(null);
                     setShowConfirmFont(false);
                   } catch (err) {
-                    toast.error("No se pudo aplicar la tipografía", {
+                    toast.error("No se pudo aplicar la tipografÃ­a", {
                       description:
                         err instanceof Error
                           ? err.message
@@ -2110,7 +2110,7 @@ export function StyleGuide({
                 )}
               </Button>
               <Button
-                variant="outline"
+                variant="neutral"
                 className="w-full"
                 disabled={isApplyingFont}
                 onClick={() => setShowConfirmFont(false)}
@@ -2135,8 +2135,8 @@ export function StyleGuide({
             </DialogTitle>
             <DialogDescription>
               Selecciona o ingresa un nuevo color base (Nivel 500). El sistema
-              calculará automáticamente toda la rampa cromática (50–900) y
-              actualizará la tabla y componentes en tiempo real.
+              calcularÃ¡ automÃ¡ticamente toda la rampa cromÃ¡tica (50â€“900) y
+              actualizarÃ¡ la tabla y componentes en tiempo real.
             </DialogDescription>
           </DialogHeader>
 
@@ -2158,7 +2158,7 @@ export function StyleGuide({
                 </div>
                 <div className="flex flex-col flex-1 w-full gap-1.5">
                   <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                    Código HEX del color base
+                    CÃ³digo HEX del color base
                   </span>
                   <div className="flex items-center gap-2">
                     <input
@@ -2213,7 +2213,7 @@ export function StyleGuide({
               {/* Live Preview of Generated 10-Shade Scale */}
               <div className="flex flex-col gap-2">
                 <div className="flex items-center justify-between text-xs font-semibold text-muted-foreground">
-                  <span>Rampa generada en vivo (50 → 900):</span>
+                  <span>Rampa generada en vivo (50 â†’ 900):</span>
                   <span className="font-mono text-[10px]">10 escalones</span>
                 </div>
                 <div className="h-12 w-full rounded-2xl overflow-hidden flex border border-border shadow-inner">
@@ -2242,7 +2242,7 @@ export function StyleGuide({
 
           <DialogFooter className="gap-2 sm:gap-0">
             <Button
-              variant="outline"
+              variant="neutral"
               className="rounded-full"
               onClick={() => setEditingScale(null)}
             >
@@ -2266,6 +2266,8 @@ export function StyleGuide({
     </div>
   );
 }
+
+
 
 
 

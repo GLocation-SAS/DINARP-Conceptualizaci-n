@@ -55,7 +55,7 @@ function Checkbox({
       <CheckboxPrimitive.Indicator
         data-slot="checkbox-indicator"
         className={cn(
-          "grid place-content-center text-current transition-none",
+          "grid place-content-center text-white transition-none",
           size === "sm" && "[&>svg]:size-3",
           (size === "md" || !size) && "[&>svg]:size-3.5",
           size === "lg" && "[&>svg]:size-4"

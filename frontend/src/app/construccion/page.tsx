@@ -44,7 +44,7 @@ export default function Construccion() {
             </Link>
           </Button>
           <Button
-            variant="outline"
+            variant="neutral"
             leftIcon={<ArrowLeft className="size-4" />}
             onClick={() => window.history.back()}
           >

@@ -1,4 +1,5 @@
-import { Montserrat, Poppins } from "next/font/google";
+import { Montserrat } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 
 import { cn } from "@/lib/utils";
@@ -16,26 +17,19 @@ import messages from "../../messages/es.json";
   Se utiliza como tipografía principal para textos, formularios,
   tablas, botones, menús y navegación.
 
-  Poppins:
+  Metropolis:
   Se utiliza para títulos, subtítulos y encabezados institucionales.
 
   Las variables creadas aquí se conectan con las variables
   configuradas en globals.css:
 
-  --font-heading: var(--font-poppins);
+  --font-heading: var(--font-metropolis);
   --font-sans: var(--font-montserrat);
 */
 
 const montserrat = Montserrat({
   subsets: ["latin"],
   variable: "--font-montserrat",
-  display: "swap",
-});
-
-const poppins = Poppins({
-  weight: ["300", "400", "500", "600", "700", "800", "900"],
-  subsets: ["latin"],
-  variable: "--font-poppins",
   display: "swap",
 });
 
@@ -67,14 +61,18 @@ export default async function RootLayout({
       data-theme={theme}
       className={cn(
         montserrat.variable,
-        poppins.variable,
         "font-sans"
       )}
       suppressHydrationWarning
     >
       <head>
-        <script
+        <link href="https://fonts.cdnfonts.com/css/metropolis-2" rel="stylesheet" />
+      </head>
+
+      <body>
+        <Script
           id="theme-script"
+          strategy="beforeInteractive"
           dangerouslySetInnerHTML={{
             __html: `
               (function() {
@@ -98,9 +96,6 @@ export default async function RootLayout({
             `,
           }}
         />
-      </head>
-
-      <body>
         <NextIntlClientProvider
           locale="es"
           messages={messages}

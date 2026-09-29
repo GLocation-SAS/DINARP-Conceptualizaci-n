@@ -184,17 +184,31 @@ function SidebarPreview({ collapsed, variant = "full", navItems = NAV_ITEMS, con
           {/* ── Logo row ── */}
           <div className={cn("flex items-center gap-2.5 px-3 py-3 border-b border-border shrink-0", collapsed ? "justify-center" : "justify-start")}>
             {collapsed ? (
-              <img
-                src={getAssetPath("/logotipo.png")}
-                alt="Logo DINARP Símbolo"
-                className="h-7 w-auto object-contain mx-auto"
-              />
+              <>
+                <img
+                  src={getAssetPath("/favicon-light.svg")}
+                  alt="Logo DINARP Símbolo"
+                  className="h-7 w-auto object-contain mx-auto dark:hidden"
+                />
+                <img
+                  src={getAssetPath("/favicon-dark.svg")}
+                  alt="Logo DINARP Símbolo"
+                  className="h-7 w-auto object-contain mx-auto hidden dark:block"
+                />
+              </>
             ) : (
-              <img
-                src={getAssetPath("/logotipo.png")}
-                alt="Logo DINARP"
-                className="h-9 w-auto object-contain"
-              />
+              <>
+                <img
+                  src={getAssetPath("/logo-horizontal.svg")}
+                  alt="Logo DINARP"
+                  className="h-9 w-auto object-contain dark:hidden"
+                />
+                <img
+                  src={getAssetPath("/logo-horizontal-blanco.svg")}
+                  alt="Logo DINARP"
+                  className="h-9 w-auto object-contain hidden dark:block"
+                />
+              </>
             )}
           </div>
         </>

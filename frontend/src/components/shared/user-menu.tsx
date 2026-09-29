@@ -49,8 +49,8 @@ export function UserMenu() {
       type="button"
       className="group flex items-center gap-2 rounded-full outline-none pr-3 pl-1.5 py-1 hover:bg-muted/50 data-[state=open]:bg-muted/50 transition-all cursor-pointer border border-transparent hover:border-border/60"
     >
-      <Avatar className="size-8 cursor-pointer transition-all duration-200 border border-border">
-        <AvatarFallback className="bg-muted text-foreground text-xs font-bold">
+      <Avatar className="size-8 cursor-pointer transition-all duration-200 border border-border group-hover:border-primary/30 group-hover:ring-2 group-hover:ring-primary/10">
+        <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold font-heading">
           CM
         </AvatarFallback>
       </Avatar>
@@ -58,7 +58,7 @@ export function UserMenu() {
         <div className="flex flex-col items-start leading-tight">
           <span className="text-xs font-bold text-foreground">Carlos Mendoza</span>
           <span className="text-[10px] text-muted-foreground flex items-center gap-1">
-            <span className="size-1.5 rounded-full bg-foreground shrink-0" />
+            <span className="size-1.5 rounded-full bg-primary shrink-0" />
             MINTEL · Admin
           </span>
         </div>
@@ -103,17 +103,18 @@ export function UserMenu() {
 
           <div className="px-4 sm:px-6 pb-6 pt-4 overflow-y-auto max-h-[85vh] space-y-4">
             {/* User Info Header */}
-            <div className="flex items-center gap-3.5 p-3 rounded-2xl bg-muted/30 border border-border/60">
-              <Avatar className="size-12 shrink-0 border border-border">
-                <AvatarFallback className="bg-muted text-foreground text-base font-bold">
+            <div className="flex items-center gap-3.5 p-4 rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20 relative overflow-hidden mb-2">
+              <div className="absolute -right-8 -top-8 size-32 bg-primary/10 rounded-full blur-2xl pointer-events-none" />
+              <Avatar className="size-14 shrink-0 border-2 border-background shadow-sm ring-1 ring-primary/20 relative z-10">
+                <AvatarFallback className="bg-gradient-to-br from-primary to-primary-600 text-primary-foreground text-lg font-bold font-heading">
                   CM
                 </AvatarFallback>
               </Avatar>
-              <div className="flex flex-col min-w-0">
-                <span className="text-sm font-bold text-foreground truncate">
+              <div className="flex flex-col min-w-0 relative z-10">
+                <span className="text-sm font-bold font-heading text-foreground truncate">
                   Ing. Carlos Mendoza
                 </span>
-                <span className="text-xs text-muted-foreground mt-0.5 truncate">
+                <span className="text-xs font-medium text-foreground/80 mt-0.5 truncate">
                   Director de Tecnologías · MINTEL
                 </span>
                 <span className="text-[11px] text-muted-foreground/80 mt-0.5 truncate font-mono">
@@ -181,18 +182,21 @@ export function UserMenu() {
           "duration-150 ease-out"
         )}
       >
-        <div className="flex flex-col p-3 mb-1 border-b border-border/60 bg-muted/30 rounded-xl">
-          <div className="flex items-center gap-3">
-            <Avatar className="size-9 shrink-0 border border-border">
-              <AvatarFallback className="bg-muted text-foreground text-xs font-bold">
+        <div className="p-4 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20 rounded-xl flex flex-col gap-3 relative overflow-hidden mb-1">
+          {/* Decorative blur */}
+          <div className="absolute -right-6 -top-6 size-24 bg-primary/10 rounded-full blur-xl pointer-events-none" />
+          
+          <div className="flex items-center gap-3 relative z-10">
+            <Avatar className="size-11 shrink-0 border-2 border-background shadow-sm ring-1 ring-primary/20">
+              <AvatarFallback className="bg-gradient-to-br from-primary to-primary-600 text-primary-foreground text-sm font-bold font-heading">
                 CM
               </AvatarFallback>
             </Avatar>
             <div className="flex flex-col min-w-0">
-              <span className="text-xs font-bold text-foreground truncate">
+              <span className="text-sm font-bold font-heading text-foreground truncate">
                 Carlos Mendoza
               </span>
-              <span className="text-[11px] text-muted-foreground truncate">
+              <span className="text-xs font-medium text-foreground/80 truncate">
                 MINTEL · Admin TIC
               </span>
               <span className="text-[10px] text-muted-foreground/80 font-mono truncate mt-0.5">

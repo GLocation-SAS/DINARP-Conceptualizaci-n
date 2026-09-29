@@ -81,6 +81,8 @@ const SECTION_COMPONENTS: Record<string, React.ComponentType<{ registerSection?:
   switch: SwitchShowcase,
   table: TableShowcase,
   toggle: ToggleShowcase,
+  badge: BadgeShowcase,
+  "data-table": TableShowcase,
 };
 
 export const UIKitContext = React.createContext({ showOnlyEditable: false });
@@ -147,8 +149,18 @@ function UIKitContent() {
     ];
   }, []);
 
-  const activeSection = UIKIT_SECTIONS.find(s => s.id === activeCategory) || UIKIT_SECTIONS[0];
-  const ShowcaseComponent = SECTION_COMPONENTS[activeSection.id];
+  let activeSection = UIKIT_SECTIONS.find(s => s.id === activeCategory);
+  if (!activeSection) {
+    for (const section of UIKIT_SECTIONS) {
+      const sub = section.subItems?.find(sub => sub.id === activeCategory);
+      if (sub) {
+        activeSection = { ...section, id: sub.id, label: sub.label, description: "" };
+        break;
+      }
+    }
+  }
+  activeSection = activeSection || UIKIT_SECTIONS[0];
+  const ShowcaseComponent = SECTION_COMPONENTS[activeCategory] || SECTION_COMPONENTS[activeSection.id];
 
   return (
     <div className="flex flex-col min-h-screen bg-background relative selection:bg-primary/20">

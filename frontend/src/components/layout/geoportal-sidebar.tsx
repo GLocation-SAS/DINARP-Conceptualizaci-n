@@ -223,17 +223,31 @@ export function GeoportalSidebar({
             <div className="flex items-center justify-between px-4 py-3 lg:px-4 lg:py-4 group-data-[collapsible=icon]:px-2 group-data-[collapsible=icon]:py-4 border-b-2 border-primary-300 lg:border-b-0 lg:border-none">
               <Link href="/" className="flex items-center gap-3 shrink-0 group focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none rounded-md overflow-hidden w-full justify-start">
                 {/* Expanded logo */}
-                <img
-                  src={getAssetPath("/logotipo.png")}
+                <>
+<img
+                  src={getAssetPath("/logo-horizontal.svg")}
                   alt="Logo DINARP GEOportal"
-                  className="h-9 lg:h-10 w-auto object-contain transition-transform group-hover:scale-105 group-data-[collapsible=icon]:hidden"
+                  className="dark:hidden h-9 lg:h-10 w-auto object-contain transition-transform group-hover:scale-105 group-data-[collapsible=icon]:hidden"
                 />
+<img
+                  src={getAssetPath("/logo-horizontal-blanco.svg")}
+                  alt="Logo DINARP GEOportal"
+                  className="hidden dark:block h-9 lg:h-10 w-auto object-contain transition-transform group-hover:scale-105 group-data-[collapsible=icon]:hidden"
+                />
+</>
                 {/* Collapsed logo */}
-                <img
-                  src={getAssetPath("/logotipo.png")}
+                <>
+<img
+                  src={getAssetPath("/logo-horizontal.svg")}
                   alt="Logo DINARP Símbolo"
-                  className="h-8 w-auto object-contain transition-transform group-hover:scale-105 hidden group-data-[collapsible=icon]:block mx-auto"
+                  className="dark:hidden h-8 w-auto object-contain transition-transform group-hover:scale-105 hidden group-data-[collapsible=icon]:block mx-auto"
                 />
+<img
+                  src={getAssetPath("/logo-horizontal-blanco.svg")}
+                  alt="Logo DINARP Símbolo"
+                  className="hidden dark:block h-8 w-auto object-contain transition-transform group-hover:scale-105 hidden group-data-[collapsible=icon]:block mx-auto"
+                />
+</>
               </Link>
               {isMobile && (
                 <Button

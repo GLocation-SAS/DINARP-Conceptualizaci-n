@@ -84,11 +84,11 @@ function ComboboxInput({
 }) {
   return (
     <InputGroup state={state} className={cn("w-auto", className)}>
-      <InputGroupAddon align="inline-start" className="pl-1 pr-1.5 pointer-events-none">
-        <SearchIcon className={cn("size-4 text-muted-foreground", disabled && "opacity-50")} />
+      <InputGroupAddon align="inline-start" className="pl-2.5 pr-0.5 pointer-events-none">
+        <SearchIcon className={cn("size-3.5 text-muted-foreground", disabled && "opacity-50")} />
       </InputGroupAddon>
       <ComboboxPrimitive.Input
-        render={<InputGroupInput />}
+        render={<InputGroupInput className="pl-1 pr-1" />}
         disabled={disabled}
         placeholder={placeholder}
         {...props}

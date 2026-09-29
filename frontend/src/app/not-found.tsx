@@ -3,7 +3,7 @@
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, ArrowLeft } from "lucide-react";
 
 export default function NotFound() {
   return (
@@ -32,8 +32,8 @@ export default function NotFound() {
               Ir al Dashboard <ArrowRight className="ml-2 size-5" />
             </Button>
           </Link>
-          <Button variant="outline" size="lg" className="rounded-full px-8 py-6 text-base font-semibold border-border/80 hover:bg-muted/50 transition-colors" onClick={() => window.history.back()}>
-            Regresar
+          <Button variant="neutral" size="lg" className="rounded-full px-8 py-6 text-base font-semibold transition-colors" onClick={() => window.history.back()}>
+            <ArrowLeft className="mr-2 size-5" /> Regresar
           </Button>
         </div>
 

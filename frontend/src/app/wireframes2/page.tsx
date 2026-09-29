@@ -194,8 +194,8 @@ export default function Wireframes2HubPage() {
 
             <div className="flex items-center gap-2 shrink-0">
               <Button variant="secondary" size="sm" asChild className="text-xs font-semibold">
-                <Link href="/wireframes2/acceso-seguridad/gestion-ingresos">
-                  Gestionar ingresos
+                <Link href="/wireframes2/asignacion-solicitudes">
+                  Asignación de solicitudes
                   <ChevronRight className="size-4 ml-1" />
                 </Link>
               </Button>

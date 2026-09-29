@@ -56,11 +56,18 @@ export function Footer() {
           {/* Column 1: Logo & Info */}
           <div className="flex flex-col items-start text-left lg:pr-8">
             <Link href="/" className="mb-4 sm:mb-6 inline-block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-md">
-              <img
-                src={getAssetPath("/logotipo.png")}
+              <>
+<img
+                src={getAssetPath("/logo-horizontal.svg")}
                 alt="DINARP Logo"
-                className="h-9 sm:h-12 w-auto object-contain"
+                className="dark:hidden h-9 sm:h-12 w-auto object-contain"
               />
+<img
+                src={getAssetPath("/logo-horizontal-blanco.svg")}
+                alt="DINARP Logo"
+                className="hidden dark:block h-9 sm:h-12 w-auto object-contain"
+              />
+</>
             </Link>
             <p className="text-body-sm text-muted-foreground/80 leading-relaxed mb-4 sm:mb-6">
               Plataforma integral para centralizar, monitorear y gestionar riesgos, incidentes y emergencias, facilitando la coordinación, trazabilidad y toma de decisiones.

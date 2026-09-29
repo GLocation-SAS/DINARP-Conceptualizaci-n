@@ -61,11 +61,11 @@ export function NovedadDetailClientView({ initialNovedad }: NovedadDetailClientV
   // Estados de edición DGR
   const [conceptoLegal, setConceptoLegal] = useState(
     novedad.evaluacionDGR.conceptoLegal ||
-      "Cumple con los requisitos establecidos en el Art. 18 de la Resolución N° 004-DN-2023. La entidad rectora fundamentó adecuadamente el requerimiento."
+    "Cumple con los requisitos establecidos en el Art. 18 de la Resolución N° 004-DN-2023. La entidad rectora fundamentó adecuadamente el requerimiento."
   );
   const [conceptoFuncional, setConceptoFuncional] = useState(
     novedad.evaluacionDGR.conceptoFuncional ||
-      "No existen solicitudes de acceso en trámite dependientes de esta fuente. Se procede a coordinar la actualización del catálogo."
+    "No existen solicitudes de acceso en trámite dependientes de esta fuente. Se procede a coordinar la actualización del catálogo."
   );
 
   // Modales
@@ -254,14 +254,16 @@ export function NovedadDetailClientView({ initialNovedad }: NovedadDetailClientV
       activeMenu="novedades-catalogo"
       currentRole="DGR"
       currentUser={MOCK_USERS_BY_ROLE.DGR}
-      breadcrumbs={[
-        { label: "Catálogo de Interoperabilidad", href: "/wireframes2/catalogo-interoperabilidad" },
-        { label: "Novedades", href: "/wireframes2/catalogo-interoperabilidad/novedades" },
-        { label: novedad.nroTramite }
-      ]}
     >
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col gap-8">
-
+        {/* Breadcrumb */}
+        <WireframeBreadcrumbs
+          segments={[
+            { label: "Catálogo de Interoperabilidad", href: "/wireframes2/catalogo-interoperabilidad" },
+            { label: "Novedades", href: "/wireframes2/catalogo-interoperabilidad/novedades" },
+            { label: novedad.nroTramite }
+          ]}
+        />
 
         {/* Barra de Retorno y Accesos */}
         <div className="flex items-center justify-between gap-4 -mt-2">

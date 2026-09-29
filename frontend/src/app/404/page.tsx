@@ -35,7 +35,7 @@ export default function Page404() {
             </Link>
           </Button>
           <Button
-            variant="outline"
+            variant="neutral"
             leftIcon={<ArrowLeft className="size-4" />}
             onClick={() => window.history.back()}
           >

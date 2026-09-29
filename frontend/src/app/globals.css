@@ -63,9 +63,9 @@
     className="font-mono text-caption"
   */
 
-  --font-heading: var(--font-poppins);
-  --font-sans: var(--font-montserrat);
-  --font-mono: var(--font-montserrat);
+  --font-heading: 'Metropolis', sans-serif;
+  --font-sans: var(--font-montserrat), sans-serif;
+  --font-mono: var(--font-montserrat), monospace;
 
   /*
   PESOS TIPOGRÃFICOS
@@ -474,32 +474,32 @@
     PRIMARY â€” azul institucional profundo (Azul Gubernamental)
     Uso base: navegaciÃ³n, acciones principales, encabezados y foco.
   */
-  --primitive-primary-50: #F7F7F8;
-  --primitive-primary-100: #E9E7EC;
-  --primitive-primary-200: #CAC3D6;
-  --primitive-primary-300: #A798C4;
-  --primitive-primary-400: #7E63B5;
-  --primitive-primary-500: #4F318B;
-  --primitive-primary-600: #3A216E;
-  --primitive-primary-700: #2C1657;
-  --primitive-primary-800: #1F0E41;
-  --primitive-primary-900: #14082B;
+  --primitive-primary-50: #F5F5F8;
+  --primitive-primary-100: #EAE9F1;
+  --primitive-primary-200: #C9C7DC;
+  --primitive-primary-300: #A4A1C4;
+  --primitive-primary-400: #7875A8;
+  --primitive-primary-500: #454193;
+  --primitive-primary-600: #373377;
+  --primitive-primary-700: #2A275A;
+  --primitive-primary-800: #1C193D;
+  --primitive-primary-900: #0F0D20;
 
   /*
     SECONDARY â€” morado secundario (Morado Gubernamental)
     Uso base: acciones complementarias, informaciÃ³n cartogrÃ¡fica,
     iconos de apoyo y elementos secundarios.
   */
-  --primitive-secondary-50: #F6F6F8;
-  --primitive-secondary-100: #E6E6EE;
-  --primitive-secondary-200: #C2C2DA;
-  --primitive-secondary-300: #9696CA;
-  --primitive-secondary-400: #5F5FBE;
-  --primitive-secondary-500: #2D2D96;
-  --primitive-secondary-600: #1D1D76;
-  --primitive-secondary-700: #13135D;
-  --primitive-secondary-800: #0C0C44;
-  --primitive-secondary-900: #07072C;
+  --primitive-secondary-50: #F6F6FA;
+  --primitive-secondary-100: #EBEBF3;
+  --primitive-secondary-200: #D0D1E7;
+  --primitive-secondary-300: #B5B6D9;
+  --primitive-secondary-400: #A0A2D0;
+  --primitive-secondary-500: #8F91C7;
+  --primitive-secondary-600: #7274A0;
+  --primitive-secondary-700: #565779;
+  --primitive-secondary-800: #3A3A52;
+  --primitive-secondary-900: #1D1D2A;
 
   /*
     SUCCESS â€” confirmaciÃ³n positiva
@@ -630,6 +630,7 @@
 
 
 
+
   /*
     ============================================================
     3. TOKENS SEMÃNTICOS â€” MODO CLARO
@@ -676,7 +677,7 @@
     Ejemplo:
     className="bg-primary text-primary-foreground"
   */
-  --primary: var(--primitive-primary-400);
+  --primary: var(--primitive-primary-500);
   --primary-foreground: var(--primitive-neutral-50);
 
   --secondary: var(--primitive-secondary-500);
@@ -876,7 +877,7 @@
   --surface-raised: var(--primitive-neutral-800);
   --surface-subtle: var(--primitive-neutral-900);
 
-  --card: var(--surface);
+  --card: #08090b;
   --card-foreground: var(--surface-foreground);
 
   --popover: var(--primitive-neutral-900);
@@ -1992,7 +1993,7 @@ select:-webkit-autofill:focus {
   inset: 0;
   border-radius: inherit;
   padding: 1.5px;
-  background: conic-gradient(from var(--border-angle, 0deg), transparent 0deg, transparent 280deg, var(--card-accent, #4F318B) 360deg);
+  background: conic-gradient(from var(--border-angle, 0deg), transparent 0deg, transparent 280deg, var(--card-accent, #454193) 360deg);
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;

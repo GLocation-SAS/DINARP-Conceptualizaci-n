@@ -4,7 +4,11 @@ export type UserRole =
   | "DTD"
   | "DPI"
   | "APROBADOR"
-  | "FACTURACION";
+  | "FACTURACION"
+  | "DIR_GESTION"
+  | "EQ_GESTION"
+  | "DIR_NORMATIVA"
+  | "EQ_NORMATIVA";
 
 export interface RoleInfo {
   id: UserRole;
@@ -94,24 +98,91 @@ export const ROLES_CONFIG: Record<UserRole, RoleInfo> = {
       "Anexar Comprobante Único de Registro (CUR) en PDF",
       "Emitir validación formal del pago para habilitación técnica"
     ]
-  }
+  },
+  DIR_GESTION: {
+    id: "DIR_GESTION",
+    name: "Director Área de Gestión",
+    shortName: "Dir. Gestión",
+    badgeTone: "neutral",
+    description: "Recibe solicitudes del Anexo A, asigna revisores y consulta estado.",
+    responsibilities: []
+  },
+  EQ_GESTION: {
+    id: "EQ_GESTION",
+    name: "Equipo de Gestión",
+    shortName: "Eq. Gestión",
+    badgeTone: "neutral",
+    description: "Revisa Anexo A, aprueba o devuelve solicitudes de ingreso.",
+    responsibilities: []
+  },
+  DIR_NORMATIVA: {
+    id: "DIR_NORMATIVA",
+    name: "Director Área de Normatividad",
+    shortName: "Dir. Normativa",
+    badgeTone: "neutral",
+    description: "Recibe solicitudes de Gestión y asigna revisor normativo.",
+    responsibilities: []
+  },
+  EQ_NORMATIVA: {
+    id: "EQ_NORMATIVA",
+    name: "Equipo de Normatividad",
+    shortName: "Eq. Normativa",
+    badgeTone: "neutral",
+    description: "Genera resolución de ingreso y finaliza trámite.",
+    responsibilities: []
+  },
 };
 
 export interface MockUser {
   id: string;
   name: string;
   role: UserRole;
-  roleTitle: string;
+  roleTitle?: string;
   institution: string;
-  initials: string;
+  initials?: string;
+  email?: string;
+  avatar?: string;
 }
 
 export const MOCK_USERS_BY_ROLE: Record<UserRole, MockUser> = {
+  DIR_GESTION: {
+    id: "U-DIRGEST",
+    name: "Director Gestión",
+    role: "DIR_GESTION",
+    email: "gestion.director@gmail.com",
+    avatar: "DG",
+    institution: "DINARP"
+  },
+  EQ_GESTION: {
+    id: "U-EQGEST",
+    name: "Revisor Gestión",
+    role: "EQ_GESTION",
+    email: "gestion.revisor@gmail.com",
+    avatar: "RG",
+    institution: "DINARP"
+  },
+  DIR_NORMATIVA: {
+    id: "U-DIRNORM",
+    name: "Director Normatividad",
+    role: "DIR_NORMATIVA",
+    email: "normativa.director@gmail.com",
+    avatar: "DN",
+    institution: "DINARP"
+  },
+  EQ_NORMATIVA: {
+    id: "U-EQNORM",
+    name: "Revisor Normatividad",
+    role: "EQ_NORMATIVA",
+    email: "normativa.revisor@gmail.com",
+    avatar: "RN",
+    institution: "DINARP"
+  },
   COORDINADOR_SINARP: {
     id: "USR-001",
     name: "Andrea López",
     role: "COORDINADOR_SINARP",
     roleTitle: "Coordinador SINARP",
+    email: "coordinador@gmail.com",
     institution: "Dirección General de Registro Civil",
     initials: "AL"
   },
@@ -202,6 +273,7 @@ export interface FuenteServicio {
   codigoServicio: string;
   descripcion: string;
   estado: FuenteEstado;
+  cantidadCampos?: number;
   etapaActual?: string;
   version: string;
   tipoConsumo: "Servicio Web (REST/JSON)" | "Intercambio Masivo (Batch)" | "SOAP / XML";

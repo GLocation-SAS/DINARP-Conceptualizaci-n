@@ -322,22 +322,38 @@ export function UIKitSidebar({ activeSection, onNavigate }: UIKitSidebarProps) {
         <div className="flex items-center justify-between gap-2 overflow-hidden">
           {/* Logo */}
           <div className="flex items-center shrink-0">
-            {/* Expanded Logo */}
+            {/* Expanded Logo - Light Mode */}
             <Image
-              src={getAssetPath("/logotipo.png")}
+              src={getAssetPath("/logo-horizontal.svg")}
               alt="Logo DINARP"
               width={150}
               height={35}
-              className="h-[35px] w-auto group-data-[state=collapsed]:hidden animate-in fade-in duration-300 object-contain"
+              className="h-[35px] w-auto group-data-[state=collapsed]:hidden animate-in fade-in duration-300 object-contain dark:hidden"
+            />
+            {/* Expanded Logo - Dark Mode */}
+            <Image
+              src={getAssetPath("/logo-horizontal-blanco.svg")}
+              alt="Logo DINARP"
+              width={150}
+              height={35}
+              className="h-[35px] w-auto group-data-[state=collapsed]:hidden animate-in fade-in duration-300 object-contain hidden dark:block"
             />
 
-            {/* Collapsed Icon */}
+            {/* Collapsed Icon - Light Mode */}
             <Image
-              src={getAssetPath("/logotipo.png")}
+              src={getAssetPath("/favicon-light.svg")}
               alt="Logo DINARP"
               width={27}
               height={27}
-              className="h-[27px] w-auto group-data-[state=expanded]:hidden animate-in zoom-in-75 duration-300 object-contain"
+              className="h-[27px] w-auto group-data-[state=expanded]:hidden animate-in zoom-in-75 duration-300 object-contain dark:hidden"
+            />
+            {/* Collapsed Icon - Dark Mode */}
+            <Image
+              src={getAssetPath("/favicon-dark.svg")}
+              alt="Logo DINARP"
+              width={27}
+              height={27}
+              className="h-[27px] w-auto group-data-[state=expanded]:hidden animate-in zoom-in-75 duration-300 object-contain hidden dark:block"
             />
           </div>
         </div>

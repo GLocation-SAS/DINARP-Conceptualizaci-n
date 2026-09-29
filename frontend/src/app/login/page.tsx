@@ -25,6 +25,7 @@ import {
   InputGroupButton,
 } from "@/components/ui/input-group";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { getAssetPath } from "@/lib/utils";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -117,14 +118,20 @@ export default function LoginPage() {
           {/* ══════════════════════════════════════════════════
               COLUMNA IZQUIERDA: Panel Azul Institucional
              ══════════════════════════════════════════════════ */}
-          <section className="lg:col-span-7 xl:col-span-7 2xl:col-span-8 relative flex flex-col justify-between overflow-hidden rounded-3xl bg-gradient-to-br from-[#061d4a] via-[#092a6b] to-[#041638] p-8 sm:p-12 lg:p-14 text-white shadow-xl min-h-[560px] lg:min-h-[640px]">
+          <section className="lg:col-span-7 xl:col-span-7 2xl:col-span-8 relative flex flex-col justify-between overflow-hidden rounded-3xl bg-primary text-primary-foreground p-8 sm:p-12 lg:p-14 shadow-xl min-h-[560px] lg:min-h-[640px]">
+            {/* Imagen de fondo institucional /fondo.png */}
+            <img
+              src={getAssetPath("/fondo.png")}
+              alt="Fondo Institucional DINARP"
+              className="absolute inset-0 w-full h-full object-contain object-center z-0 opacity-30 pointer-events-none select-none"
+            />
             {/* Fondo con resplandor ambiental */}
-            <div className="absolute -top-24 -left-24 w-96 h-96 bg-cyan-500/15 rounded-full blur-3xl pointer-events-none" />
-            <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-blue-600/20 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute -top-24 -left-24 w-96 h-96 bg-primary-foreground/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-primary-foreground/10 rounded-full blur-3xl pointer-events-none" />
 
             {/* Encabezado y Descripción */}
             <div className="relative z-10 flex flex-col items-start text-left max-w-2xl">
-              <div className="w-9 h-1 bg-cyan-400 rounded-full mb-6" />
+              <div className="w-9 h-1 bg-secondary rounded-full mb-6" />
 
               <h1 className="font-heading text-3xl sm:text-4xl lg:text-[44px] font-extrabold tracking-tight text-white leading-[1.15] mb-4">
                 La información pública, <br className="hidden sm:inline" />

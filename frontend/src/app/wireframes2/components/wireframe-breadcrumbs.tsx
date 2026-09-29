@@ -14,6 +14,7 @@ import {
 export interface BreadcrumbSegment {
   label: string;
   href?: string;
+  onClick?: (e: React.MouseEvent) => void;
 }
 
 interface WireframeBreadcrumbsProps {
@@ -37,11 +38,23 @@ export function WireframeBreadcrumbs({ segments, className }: WireframeBreadcrum
           return (
             <React.Fragment key={index}>
               <BreadcrumbItem>
-                {isLast || !segment.href ? (
+                {isLast || (!segment.href && !segment.onClick) ? (
                   <BreadcrumbPage>{segment.label}</BreadcrumbPage>
                 ) : (
                   <BreadcrumbLink asChild>
-                    <Link href={segment.href}>{segment.label}</Link>
+                    {segment.href ? (
+                      <Link href={segment.href} onClick={segment.onClick}>
+                        {segment.label}
+                      </Link>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={segment.onClick}
+                        className="hover:underline text-muted-foreground hover:text-foreground cursor-pointer"
+                      >
+                        {segment.label}
+                      </button>
+                    )}
                   </BreadcrumbLink>
                 )}
               </BreadcrumbItem>

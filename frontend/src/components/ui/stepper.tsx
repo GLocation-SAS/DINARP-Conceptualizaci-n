@@ -9,7 +9,7 @@ export interface Step {
   id: string;
   title: string;
   description?: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon?: React.ComponentType<{ className?: string }>;
 }
 
 export interface StepperProps {
@@ -20,19 +20,23 @@ export interface StepperProps {
   orientation?: "horizontal" | "vertical";
   variant?: "default" | "tabs-pill";
   stepPrefix?: string;
+  startIndex?: number;
+  showTitle?: boolean;
   size?: "default" | "sm";
   showBadge?: boolean;
   className?: string;
 }
 
-export function Stepper({ 
-  steps, 
-  activeStep, 
-  completedSteps = [], 
+export function Stepper({
+  steps,
+  activeStep,
+  completedSteps = [],
   onStepClick,
   orientation = "horizontal",
   variant = "default",
   stepPrefix = "Paso",
+  startIndex = 1,
+  showTitle = true,
   size = "default",
   showBadge = true,
   className,
@@ -61,8 +65,8 @@ export function Stepper({
                   isActive
                     ? "bg-foreground text-background px-4 py-2 rounded-xl shadow-xs cursor-default"
                     : isCompleted
-                    ? "text-muted-foreground hover:text-foreground cursor-pointer px-1 py-1"
-                    : "text-muted-foreground/60 cursor-not-allowed px-1 py-1",
+                      ? "text-muted-foreground hover:text-foreground cursor-pointer px-1 py-1"
+                      : "text-muted-foreground/60 cursor-not-allowed px-1 py-1",
                   "focus-visible:ring-2 focus-visible:ring-ring focus-visible:rounded-xl"
                 )}
               >
@@ -72,7 +76,7 @@ export function Stepper({
                     isActive ? "text-background" : "text-muted-foreground"
                   )}
                 >
-                  {index + 1}.
+                  {index + startIndex}.
                 </span>
                 <span
                   className={cn(
@@ -91,16 +95,16 @@ export function Stepper({
   }
 
   return (
-    <div className={cn("w-full", className)}>
+    <div className={cn("w-full overflow-x-auto pb-2 sm:pb-0 scrollbar-none", className)}>
       <ol className={cn(
         "flex w-full relative",
-        isVertical ? "flex-col items-start gap-6" : "flex-row items-start justify-between"
+        isVertical ? "flex-col items-start gap-6" : "flex-row items-start justify-between min-w-max sm:min-w-full"
       )}>
         {steps.map((step, index) => {
           const isCompleted = completedSteps.includes(index) || index < activeStep;
           const isActive = index === activeStep;
           const isPending = index > activeStep && !isCompleted;
-          
+
           // Determine Icon to show
           const Icon = isCompleted ? Check : step.icon;
 
@@ -108,8 +112,8 @@ export function Stepper({
             <li
               key={step.id}
               className={cn(
-                "relative group flex",
-                isVertical ? "flex-row items-start w-full" : "flex-col items-center flex-1"
+                "relative group flex px-1",
+                isVertical ? "flex-row items-start w-full" : "flex-col items-center flex-1 min-w-[110px] sm:min-w-[130px]"
               )}
               aria-current={isActive ? "step" : undefined}
             >
@@ -117,7 +121,7 @@ export function Stepper({
               {index < steps.length - 1 && (
                 <div className={cn(
                   "absolute bg-border z-0",
-                  isVertical 
+                  isVertical
                     ? isSmall
                       ? "left-[14px] top-[28px] bottom-[-24px] w-[2px]"
                       : "left-[19px] top-[40px] bottom-[-32px] w-[2px]"
@@ -127,12 +131,13 @@ export function Stepper({
                 )}>
                   <motion.div
                     className={cn(
-                      "bg-primary origin-top-left",
+                      "origin-top-left",
+                      (completedSteps.includes(index) || activeStep > index) ? "bg-success" : "bg-primary",
                       isVertical ? "w-full h-full" : "h-full w-full"
                     )}
                     initial={isVertical ? { scaleY: 0 } : { scaleX: 0 }}
                     animate={
-                      isVertical 
+                      isVertical
                         ? { scaleY: completedSteps.includes(index) || activeStep > index ? 1 : 0 }
                         : { scaleX: completedSteps.includes(index) || activeStep > index ? 1 : 0 }
                     }
@@ -156,9 +161,9 @@ export function Stepper({
                     "rounded-full flex items-center justify-center transition-all duration-300 outline-none",
                     isSmall ? "size-7" : "size-10",
                     isActive ? "ring-4 ring-primary/20 dark:ring-primary/40 ring-offset-0" : "focus-visible:ring-2 focus-visible:ring-ring",
-                    isCompleted 
-                      ? "bg-foreground text-background border-2 border-foreground shadow-xs"
-                      : isActive 
+                    isCompleted
+                      ? "bg-success text-white border-2 border-success shadow-xs"
+                      : isActive
                         ? "bg-primary text-primary-foreground border-2 border-primary shadow-xs"
                         : "bg-surface border-2 border-dashed border-border text-muted-foreground",
                     isPending || !onStepClick ? (isPending ? "cursor-not-allowed" : "cursor-default") : "cursor-pointer hover:opacity-80"
@@ -173,7 +178,13 @@ export function Stepper({
                       transition={{ duration: 0.2 }}
                       className="flex items-center justify-center"
                     >
-                      <Icon className={cn(isSmall ? "size-3.5" : "size-4", isCompleted ? "stroke-[3px]" : "stroke-[2px]")} />
+                      {Icon ? (
+                        <Icon className={cn(isSmall ? "size-3.5" : "size-4", isCompleted ? "stroke-[3px]" : "stroke-[2px]")} />
+                      ) : (
+                        <span className={cn(isSmall ? "text-xs" : "text-sm", "font-bold select-none leading-none")}>
+                          {index + startIndex}
+                        </span>
+                      )}
                     </motion.div>
                   </AnimatePresence>
                 </motion.button>
@@ -188,25 +199,27 @@ export function Stepper({
                   "font-bold text-muted-foreground uppercase tracking-widest",
                   isSmall ? "text-[9px] mb-0.5" : "text-[10px] mb-0.5"
                 )}>
-                  {stepPrefix} {index + 1}
+                  {stepPrefix} {index + startIndex}
                 </span>
-                <span className={cn(
-                  "font-semibold transition-colors duration-300 whitespace-nowrap",
-                  isSmall ? "text-xs mb-0.5" : "text-sm mb-1.5",
-                  isActive ? "text-foreground font-bold" : isCompleted ? "text-foreground" : "text-muted-foreground"
-                )}>
-                  {step.title}
-                </span>
-                
+                {showTitle && step.title && (
+                  <span className={cn(
+                    "font-semibold transition-colors duration-300 whitespace-nowrap",
+                    isSmall ? "text-xs mb-0.5" : "text-sm mb-1.5",
+                    isActive ? "text-foreground font-bold" : isCompleted ? "text-foreground" : "text-muted-foreground"
+                  )}>
+                    {step.title}
+                  </span>
+                )}
+
                 {/* Status Badge */}
                 {showBadge && (
                   <span className={cn(
                     "text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full transition-colors",
-                    isCompleted 
-                      ? "bg-muted text-foreground font-semibold" 
-                      : isActive 
-                        ? "bg-primary/10 text-primary" 
-                        : "bg-muted/40 text-muted-foreground border border-border"
+                    isCompleted
+                      ? "bg-muted text-foreground font-semibold"
+                      : isActive
+                        ? "bg-primary/10 text-primary"
+                        : "bg-danger/10 text-danger border border-danger/20"
                   )}>
                     {isCompleted ? "Completado" : isActive ? "En curso" : "Pendiente"}
                   </span>

@@ -170,7 +170,7 @@ export function FormsFiltersShowcase({ registerSection }: { registerSection?: (i
             <div className="w-full sm:w-72">
               <Search placeholder="Buscar incidentes, folios o usuarios..." className="h-10 bg-background" />
             </div>
-            <Button variant="neutral" className="h-10 px-4 gap-2 border-border text-foreground font-medium">
+            <Button variant="secondary" className="h-10 px-4 gap-2 border-border font-medium">
               <Filter className="h-4 w-4" />
               Filtros
               <Badge tone="primary" appearance="soft" className="ml-1 rounded-full px-1.5 py-0 min-w-5 h-5 justify-center text-[10px] font-bold">3</Badge>

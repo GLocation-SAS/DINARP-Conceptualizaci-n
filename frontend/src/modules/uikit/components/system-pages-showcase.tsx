@@ -21,15 +21,9 @@ export function SystemPagesShowcase({ registerSection }: { registerSection?: (id
         >
           <div className="flex gap-4 items-center flex-wrap">
             <Button variant="neutral" asChild>
-              <Link href="/login" target="_blank">
+              <Link href="/wireframes2/login" target="_blank">
                 <Layout className="size-4 mr-2" />
                 Probar Pantalla Login
-                <ArrowUpRight className="size-3.5 ml-1.5 opacity-60" />
-              </Link>
-            </Button>
-            <Button variant="outline" asChild>
-              <Link href="/wireframes/login" target="_blank">
-                Ver Login Wireframe
                 <ArrowUpRight className="size-3.5 ml-1.5 opacity-60" />
               </Link>
             </Button>
@@ -51,12 +45,6 @@ export function SystemPagesShowcase({ registerSection }: { registerSection?: (id
                 <ArrowUpRight className="size-3.5 ml-1.5 opacity-60" />
               </Link>
             </Button>
-            <Button variant="outline" asChild>
-              <Link href="/wireframes/404" target="_blank">
-                Ver 404 Wireframe
-                <ArrowUpRight className="size-3.5 ml-1.5 opacity-60" />
-              </Link>
-            </Button>
           </div>
         </SubSection>
 
@@ -72,12 +60,6 @@ export function SystemPagesShowcase({ registerSection }: { registerSection?: (id
               <Link href="/construccion" target="_blank">
                 <Hammer className="size-4 mr-2" />
                 Probar Pantalla Construcción
-                <ArrowUpRight className="size-3.5 ml-1.5 opacity-60" />
-              </Link>
-            </Button>
-            <Button variant="outline" asChild>
-              <Link href="/wireframes/construccion" target="_blank">
-                Ver Wireframe Construcción
                 <ArrowUpRight className="size-3.5 ml-1.5 opacity-60" />
               </Link>
             </Button>

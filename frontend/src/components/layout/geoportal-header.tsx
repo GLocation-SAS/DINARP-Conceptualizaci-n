@@ -136,8 +136,8 @@ export const defaultNavItems: NavItem[] = [
 
 export const defaultHeaderConfig = {
   showLogo: true,
-  logoUrlLight: "/logotipo.png",
-  logoUrlDark: "/logotipo.png",
+  logoUrlLight: "/logo-horizontal.svg",
+  logoUrlDark: "/logo-horizontal-blanco.svg",
   title: "",
   showSearch: true,
   showThemeToggle: true,
@@ -526,11 +526,18 @@ export function GeoportalHeader({
                 )}
               >
                 {headerConfig.showLogo && (
-                  <img
-                    src={getAssetPath(headerConfig.logoUrlLight || "/logotipo.png")}
-                    alt="Logo DINARP"
-                    className="h-8 sm:h-10 w-auto object-contain"
-                  />
+                  <>
+                    <img
+                      src={getAssetPath(headerConfig.logoUrlLight || "/logo-horizontal.svg")}
+                      alt="Logo DINARP"
+                      className="h-8 sm:h-10 w-auto object-contain dark:hidden"
+                    />
+                    <img
+                      src={getAssetPath(headerConfig.logoUrlDark || "/logo-horizontal-blanco.svg")}
+                      alt="Logo DINARP"
+                      className="h-8 sm:h-10 w-auto object-contain hidden dark:block"
+                    />
+                  </>
                 )}
               </Link>
 
@@ -635,11 +642,18 @@ export function GeoportalHeader({
                         <div className="flex items-center justify-between px-5 py-3 border-b border-border">
                           <div className="flex items-center gap-3">
                             {headerConfig.showLogo && (
-                              <img
-                                src={getAssetPath(headerConfig.logoUrlLight || "/logotipo.png")}
-                                alt="Logo DINARP GEOportal"
-                                className="h-9 w-auto object-contain"
-                              />
+                              <>
+                                <img
+                                  src={getAssetPath(headerConfig.logoUrlLight || "/logo-horizontal.svg")}
+                                  alt="Logo DINARP GEOportal"
+                                  className="h-9 w-auto object-contain dark:hidden"
+                                />
+                                <img
+                                  src={getAssetPath(headerConfig.logoUrlDark || "/logo-horizontal-blanco.svg")}
+                                  alt="Logo DINARP GEOportal"
+                                  className="h-9 w-auto object-contain hidden dark:block"
+                                />
+                              </>
                             )}
                             {headerConfig.title && (
                               <span className="font-bold text-lg text-foreground ml-2">

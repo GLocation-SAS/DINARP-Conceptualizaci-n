@@ -49,12 +49,20 @@ const LoadingSpinner = React.forwardRef<HTMLDivElement, LoadingSpinnerProps>(
             />
           </svg>
 
-          <img
-            src={getAssetPath("/logotipo.png")}
-            alt=""
-            aria-hidden="true"
-            className={cn("absolute inset-0 m-auto object-contain pointer-events-none", shieldClasses[size])}
-          />
+          <>
+            <img
+              src={getAssetPath("/logo-horizontal.svg")}
+              alt=""
+              aria-hidden="true"
+              className={cn("absolute inset-0 m-auto object-contain pointer-events-none", shieldClasses[size])}
+            />
+            <img
+              src={getAssetPath("/logo-horizontal-blanco.svg")}
+              alt=""
+              aria-hidden="true"
+              className={cn("absolute inset-0 m-auto object-contain pointer-events-none", shieldClasses[size])}
+            />
+          </>
         </div>
 
         {/* Mensaje opcional */}
@@ -71,3 +79,4 @@ const LoadingSpinner = React.forwardRef<HTMLDivElement, LoadingSpinnerProps>(
 LoadingSpinner.displayName = "LoadingSpinner";
 
 export { LoadingSpinner };
+export default LoadingSpinner;
