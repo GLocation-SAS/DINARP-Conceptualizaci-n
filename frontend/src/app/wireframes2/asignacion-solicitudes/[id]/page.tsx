@@ -146,7 +146,7 @@ export default function SolicitudDetailPage({ params }: PageProps) {
           id: `hist-${idx}`,
           title: h.accion,
           description: h.detalles || undefined,
-          date: h.fechaHora,
+          date: h.fechaHora || h.fecha || "Fecha desconocida",
           status,
           icon,
           user: h.realizadoPor || undefined,
