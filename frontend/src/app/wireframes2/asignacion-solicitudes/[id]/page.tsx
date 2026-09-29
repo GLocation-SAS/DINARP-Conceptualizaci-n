@@ -558,28 +558,28 @@ export default function SolicitudDetailPage({ params }: PageProps) {
                       <TabsList className="h-auto p-1.5 rounded-full bg-background border border-border/40 inline-flex gap-1.5 flex-nowrap w-full sm:w-auto justify-start">
                         <TabsTrigger
                           value="tab-0"
-                          className="px-4 py-2 text-xs font-bold gap-2 data-[state=active]:bg-primary-300 data-[state=active]:text-primary-900 data-[state=active]:[&_svg]:text-primary-900 dark:data-[state=active]:bg-primary-300 dark:data-[state=active]:text-primary-900 dark:data-[state=active]:[&_svg]:text-primary-900"
+                          className="px-4 py-2 text-xs font-bold gap-2 data-[state=active]:bg-primary-300 data-[state=active]:text-white data-[state=active]:[&_svg]:text-white dark:data-[state=active]:bg-primary-300 dark:data-[state=active]:text-white dark:data-[state=active]:[&_svg]:text-white"
                         >
                           <Building2 className="size-3.5 shrink-0" />
                           <span>1. Entidad y Autoridad</span>
                         </TabsTrigger>
                         <TabsTrigger
                           value="tab-1"
-                          className="px-4 py-2 text-xs font-bold gap-2 data-[state=active]:bg-primary-300 data-[state=active]:text-primary-900 data-[state=active]:[&_svg]:text-primary-900 dark:data-[state=active]:bg-primary-300 dark:data-[state=active]:text-primary-900 dark:data-[state=active]:[&_svg]:text-primary-900"
+                          className="px-4 py-2 text-xs font-bold gap-2 data-[state=active]:bg-primary-300 data-[state=active]:text-white data-[state=active]:[&_svg]:text-white dark:data-[state=active]:bg-primary-300 dark:data-[state=active]:text-white dark:data-[state=active]:[&_svg]:text-white"
                         >
                           <User className="size-3.5 shrink-0" />
                           <span>2. Coordinadores</span>
                         </TabsTrigger>
                         <TabsTrigger
                           value="tab-2"
-                          className="px-4 py-2 text-xs font-bold gap-2 data-[state=active]:bg-primary-300 data-[state=active]:text-primary-900 data-[state=active]:[&_svg]:text-primary-900 dark:data-[state=active]:bg-primary-300 dark:data-[state=active]:text-primary-900 dark:data-[state=active]:[&_svg]:text-primary-900"
+                          className="px-4 py-2 text-xs font-bold gap-2 data-[state=active]:bg-primary-300 data-[state=active]:text-white data-[state=active]:[&_svg]:text-white dark:data-[state=active]:bg-primary-300 dark:data-[state=active]:text-white dark:data-[state=active]:[&_svg]:text-white"
                         >
                           <FileText className="size-3.5 shrink-0" />
                           <span>3. Servicios y Procesos</span>
                         </TabsTrigger>
                         <TabsTrigger
                           value="tab-3"
-                          className="px-4 py-2 text-xs font-bold gap-2 data-[state=active]:bg-primary-300 data-[state=active]:text-primary-900 data-[state=active]:[&_svg]:text-primary-900 dark:data-[state=active]:bg-primary-300 dark:data-[state=active]:text-primary-900 dark:data-[state=active]:[&_svg]:text-primary-900"
+                          className="px-4 py-2 text-xs font-bold gap-2 data-[state=active]:bg-primary-300 data-[state=active]:text-white data-[state=active]:[&_svg]:text-white dark:data-[state=active]:bg-primary-300 dark:data-[state=active]:text-white dark:data-[state=active]:[&_svg]:text-white"
                         >
                           <ShieldCheck className="size-3.5 shrink-0" />
                           <span>4. Declaraciones y firma</span>
