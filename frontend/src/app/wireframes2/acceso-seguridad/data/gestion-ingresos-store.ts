@@ -7,13 +7,66 @@ export type TipoTramiteIngreso =
   | "PROCESO_B_ENROLAMIENTO_COORDINADOR"
   | "PROCESO_C_CAMBIO_COORDINADOR";
 
-export type EstadoSolicitudIngreso = "Pendiente" | "Aprobada" | "Rechazada";
+export type EstadoSolicitudIngreso =
+  | "Pendiente"
+  | "Aprobada"
+  | "Rechazada"
+  | "PENDIENTE_ASIGNACION_GESTION"
+  | "EN_REVISION_GESTION"
+  | "APROBADO_GESTION"
+  | "PENDIENTE_ASIGNACION_NORMATIVIDAD"
+  | "EN_REVISION_NORMATIVIDAD"
+  | "APROBADO_FINAL"
+  | "Cancelada";
+
+// Helper para badges de estado
+export function getEstadoBadgeProps(estado: EstadoSolicitudIngreso) {
+  switch (estado) {
+    case "Aprobada":
+    case "APROBADO_FINAL":
+      return { tone: "success" as const, label: "Aprobado" };
+    case "APROBADO_GESTION":
+      return { tone: "info" as const, label: "Aprobado Gestión" };
+    case "EN_REVISION_GESTION":
+      return { tone: "warning" as const, label: "En Revisión Gestión" };
+    case "EN_REVISION_NORMATIVIDAD":
+      return { tone: "warning" as const, label: "En Revisión Normatividad" };
+    case "PENDIENTE_ASIGNACION_GESTION":
+      return { tone: "neutral" as const, label: "Pend. Asignación Gestión" };
+    case "PENDIENTE_ASIGNACION_NORMATIVIDAD":
+      return { tone: "neutral" as const, label: "Pend. Asignación Normatividad" };
+    case "Rechazada":
+      return { tone: "danger" as const, label: "Rechazado" };
+    case "Cancelada":
+      return { tone: "danger" as const, label: "Cancelado" };
+    default:
+      return { tone: "neutral" as const, label: estado || "Pendiente" };
+  }
+}
+
+export function puedeReasignarSolicitud(solicitud: SolicitudIngreso | null | undefined, tipoArea?: string) {
+  if (!solicitud) return { puedeReasignar: false, esReasignacion: false, motivoBloqueo: undefined };
+  if (
+    solicitud.estado === "APROBADO_FINAL" ||
+    solicitud.estado === "Aprobada" ||
+    solicitud.estado === "Rechazada" ||
+    solicitud.estado === "Cancelada"
+  ) {
+    return { puedeReasignar: false, esReasignacion: false, motivoBloqueo: "Trámite finalizado o cancelado" };
+  }
+  const esReasignacion = Boolean(solicitud.revisorGestion || solicitud.revisorNormatividad || solicitud.revisor);
+  if (solicitud.revisionIniciada) {
+    return { puedeReasignar: false, esReasignacion, motivoBloqueo: "Revisión técnica ya iniciada" };
+  }
+  return { puedeReasignar: true, esReasignacion, motivoBloqueo: undefined };
+}
 
 // Datos Anexo A: Solicitud de Acceso al SINARP (ARP-R01)
 export interface DatosAnexoA {
   // 1.1 Solicitante
   entidadTipo: "Publica" | "Privada";
   nombreEntidad: string;
+  entidadSiglas?: string;
   rucEntidad: string;
   direccionEntidad: string;
   objetoSocial: string;
@@ -64,6 +117,7 @@ export interface DatosAnexoB {
   funcionarioNombre: string;
   funcionarioCedula: string;
   funcionarioCargo: string;
+  funcionarioEmail?: string;
   rolAsignado: "COORDINADOR TITULAR" | "SUPLENTE" | "SUPERVISOR" | "VISUALIZADOR";
   misionVisionInstitucional: string;
   clausulasAceptadas: boolean;
@@ -135,8 +189,28 @@ export interface SolicitudIngreso {
   estado: EstadoSolicitudIngreso;
   fechaRevision?: string;
   revisor?: string;
+  revisorGestion?: string;
+  revisorNormatividad?: string;
+  revisionIniciada?: boolean;
+  fechaAsignacionGestion?: string;
+  fechaAsignacionNormatividad?: string;
+  fechaAprobacionGestion?: string;
+  observacionesAsignacion?: string;
+  resolucion?: string;
   motivoRechazo?: string;
   documentos: string[];
+
+  historial?: Array<{
+    id: string;
+    fecha?: string;
+    fechaHora?: string;
+    accion: string;
+    usuario?: string;
+    realizadoPor?: string;
+    rol?: string;
+    detalle?: string;
+    detalles?: string;
+  }>;
 
   // Contenido de los anexos BPM
   anexoA?: DatosAnexoA;
@@ -719,6 +793,129 @@ export function useSolicitudesIngresoStore() {
     return { encontrado: false };
   }, []);
 
+  const actualizarEstado = useCallback((id: string, nuevoEstado: EstadoSolicitudIngreso, extras?: Partial<SolicitudIngreso>) => {
+    setSolicitudes((prev) => {
+      const updated = prev.map((item) => {
+        if (item.id === id) {
+          return {
+            ...item,
+            estado: nuevoEstado,
+            ...extras
+          };
+        }
+        return item;
+      });
+      saveStoredSolicitudesIngreso(updated);
+      return updated;
+    });
+  }, []);
+
+  const asignarRevisorGestion = useCallback((solicitudId: string, revisorNombre: string, asignadoPor?: string, observaciones?: string) => {
+    const now = new Date().toLocaleString("es-EC", { dateStyle: "short", timeStyle: "short" });
+    setSolicitudes((prev) => {
+      const updated = prev.map((item) => {
+        if (item.id === solicitudId) {
+          const esReasignacion = Boolean(item.revisorGestion || item.revisor);
+          const nuevoHistorial = [...(item.historial || [])];
+          
+          nuevoHistorial.push({
+            id: `hist-${Date.now()}`,
+            fechaHora: now,
+            accion: esReasignacion ? "Reasignación de trámite" : "Asignación de trámite",
+            realizadoPor: asignadoPor || "Director",
+            detalles: `Trámite ${esReasignacion ? 'reasignado' : 'asignado'} a ${revisorNombre}. ${observaciones ? `Observaciones: ${observaciones}` : ''}`.trim()
+          });
+
+          return {
+            ...item,
+            estado: "EN_REVISION_GESTION" as EstadoSolicitudIngreso,
+            revisorGestion: revisorNombre,
+            revisor: revisorNombre,
+            fechaAsignacionGestion: now,
+            observacionesAsignacion: observaciones,
+            revisionIniciada: false,
+            historial: nuevoHistorial
+          };
+        }
+        return item;
+      });
+      saveStoredSolicitudesIngreso(updated);
+      return updated;
+    });
+  }, []);
+
+  const asignarRevisorMasivo = useCallback((solicitudIds: string[], revisorNombre: string, asignadoPor?: string, observaciones?: string, directorRol?: string) => {
+    const now = new Date().toLocaleString("es-EC", { dateStyle: "short", timeStyle: "short" });
+    setSolicitudes((prev) => {
+      const updated = prev.map((item) => {
+        if (solicitudIds.includes(item.id)) {
+          const esReasignacion = Boolean(item.revisorGestion || item.revisor);
+          const nuevoHistorial = [...(item.historial || [])];
+          
+          nuevoHistorial.push({
+            id: `hist-${Date.now()}-${item.id}`,
+            fechaHora: now,
+            accion: esReasignacion ? "Reasignación de trámite" : "Asignación de trámite",
+            realizadoPor: asignadoPor || "Director",
+            detalles: `Trámite ${esReasignacion ? 'reasignado' : 'asignado'} a ${revisorNombre}. ${observaciones ? `Observaciones: ${observaciones}` : ''}`.trim()
+          });
+
+          return {
+            ...item,
+            estado: "EN_REVISION_GESTION" as EstadoSolicitudIngreso,
+            revisorGestion: revisorNombre,
+            revisor: revisorNombre,
+            fechaAsignacionGestion: now,
+            observacionesAsignacion: observaciones,
+            revisionIniciada: false,
+            historial: nuevoHistorial
+          };
+        }
+        return item;
+      });
+      saveStoredSolicitudesIngreso(updated);
+      return updated;
+    });
+  }, []);
+
+  const iniciarRevision = useCallback((solicitudId: string, revisorNombre?: string) => {
+    setSolicitudes((prev) => {
+      const updated = prev.map((item) => {
+        if (item.id === solicitudId) {
+          return { ...item, revisionIniciada: true, revisor: revisorNombre || item.revisor };
+        }
+        return item;
+      });
+      saveStoredSolicitudesIngreso(updated);
+      return updated;
+    });
+  }, []);
+
+  const aprobarGestion = useCallback((solicitudId: string, aprobadoPor?: string, observaciones?: string) => {
+    const now = new Date().toLocaleString("es-EC", { dateStyle: "short", timeStyle: "short" });
+    actualizarEstado(solicitudId, "PENDIENTE_ASIGNACION_NORMATIVIDAD", {
+      fechaRevision: now,
+      fechaAprobacionGestion: now
+    });
+  }, [actualizarEstado]);
+
+  const asignarRevisorNormatividad = useCallback((solicitudId: string, revisorNombre: string, asignadoPor?: string, observaciones?: string) => {
+    const now = new Date().toLocaleString("es-EC", { dateStyle: "short", timeStyle: "short" });
+    actualizarEstado(solicitudId, "EN_REVISION_NORMATIVIDAD", {
+      revisorNormatividad: revisorNombre,
+      fechaAsignacionNormatividad: now,
+      observacionesAsignacion: observaciones
+    });
+  }, [actualizarEstado]);
+
+  const aprobarNormatividad = useCallback((solicitudId: string, aprobadoPor?: string, observaciones?: string, resolucion?: string) => {
+    const now = new Date().toLocaleString("es-EC", { dateStyle: "short", timeStyle: "short" });
+    actualizarEstado(solicitudId, "APROBADO_FINAL", {
+      fechaRevision: now,
+      resolucion: resolucion
+    });
+  }, [actualizarEstado]);
+
   const resetStore = useCallback(() => {
     saveStoredSolicitudesIngreso(INITIAL_SOLICITUDES_INGRESO);
     setSolicitudes(INITIAL_SOLICITUDES_INGRESO);
@@ -729,6 +926,13 @@ export function useSolicitudesIngresoStore() {
     isLoaded,
     aprobarSolicitud,
     rechazarSolicitud,
+    actualizarEstado,
+    asignarRevisorGestion,
+    asignarRevisorMasivo,
+    iniciarRevision,
+    aprobarGestion,
+    asignarRevisorNormatividad,
+    aprobarNormatividad,
     agregarRegistroInstitucion,
     agregarEnrolamientoCoordinador,
     agregarCambioCoordinador,
