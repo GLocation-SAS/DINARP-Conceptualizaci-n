@@ -68,7 +68,7 @@ export function RechazarSolicitudDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md p-6">
+      <DialogContent variant={step === "CONFIRM" ? "warning" : "standard"} className={step === "MOTIVO" ? "max-w-md p-6" : "max-w-md"}>
         {step === "MOTIVO" ? (
           <>
             <DialogHeader className="space-y-2">
@@ -140,38 +140,36 @@ export function RechazarSolicitudDialog({
           </>
         ) : (
           <>
-            <DialogHeader className="space-y-4 flex flex-col items-center text-center pb-2">
-              <div className="size-16 rounded-full bg-warning/15 text-warning flex items-center justify-center">
-                <AlertTriangle className="size-7" />
-              </div>
-              <DialogTitle className="text-xl font-bold text-foreground">
-                ¿Confirmas el rechazo?
+            <DialogHeader>
+              <DialogTitle>
+                ¿Confirmar rechazo?
               </DialogTitle>
-              <DialogDescription className="text-sm text-muted-foreground leading-relaxed max-w-sm mx-auto">
-                Estás a punto de rechazar esta solicitud y la acción no se puede deshacer. Se notificará a la institución con el motivo: <br/> <span className="italic">"{motivo}"</span>
+              <DialogDescription>
+                Estás a punto de rechazar esta solicitud y la acción no se puede deshacer. Se notificará a la institución con el motivo registrado: <br/> <span className="italic block mt-1">"{motivo}"</span>
               </DialogDescription>
             </DialogHeader>
 
-            <DialogFooter className="gap-3 pt-6 flex flex-row w-full [&>*]:flex-1">
+            <DialogFooter className="mt-4 flex flex-row w-full gap-3 sm:gap-3 [&>*]:flex-1">
               <Button
                 type="button"
                 variant="neutral"
                 disabled={isSubmitting}
                 onClick={() => setStep("MOTIVO")}
-                className="h-12 text-sm font-semibold rounded-full bg-muted/80 hover:bg-muted text-muted-foreground hover:text-foreground border-none"
+                className="w-full"
               >
-                Volver
+                Cerrar
               </Button>
               <Button
                 type="button"
+                variant="warning"
                 disabled={isSubmitting}
                 onClick={handleReject}
-                className="h-12 text-sm font-semibold rounded-full bg-warning hover:bg-warning/90 text-warning-foreground shadow-none border-none"
+                className="w-full"
               >
                 {isSubmitting ? (
                   <Loader2 className="size-4 animate-spin" />
                 ) : (
-                  "Confirmar rechazo"
+                  "Confirmar"
                 )}
               </Button>
             </DialogFooter>
