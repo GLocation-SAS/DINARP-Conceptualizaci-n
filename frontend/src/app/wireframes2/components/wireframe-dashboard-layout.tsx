@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
@@ -167,11 +167,7 @@ const navItems: NavItem[] = [
     allowedRoles: ["DIR_NORMATIVA"]
   },
   {
-    id: "solicitudes-asignadas-normativa",
-    label: "Solicitudes asignadas",
-    icon: FileSignature,
-    href: "/wireframes2/asignacion-solicitudes",
-    allowedRoles: ["EQ_NORMATIVA"]
+    id: "revision-normativa", label: "En revisión - Normatividad", icon: FileSignature, href: "/wireframes2/revision-normativa", allowedRoles: ["EQ_NORMATIVA"]
   },
   {
     id: "resoluciones",
@@ -598,3 +594,4 @@ export function WireframeDashboardLayout({
     </TooltipProvider>
   );
 }
+
