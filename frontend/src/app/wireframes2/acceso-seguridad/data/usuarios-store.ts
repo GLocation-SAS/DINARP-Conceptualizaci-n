@@ -662,6 +662,7 @@ export function useUsuariosStore() {
         totpConfigurado: false,
         credencialesConfiguradas: false,
         fechaCreacion,
+        ultimaActualizacion: fechaCreacion,
         tareasActivas: 0,
         responsabilidades: [],
         institucionesRelacionadas: ["DINARP"],
@@ -750,6 +751,13 @@ export function useUsuariosStore() {
         nuevoAmbitoCodigo = ambitoValido.codigo;
       }
 
+      const now = new Date();
+      const fechaActualizacion = `${String(now.getDate()).padStart(2, "0")}/${String(
+        now.getMonth() + 1
+      ).padStart(2, "0")}/${now.getFullYear()} ${String(
+        now.getHours()
+      ).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+
       const usuarioActualizado: UsuarioInterno = {
         ...actual,
         nombreCompleto: cambios.nombreCompleto?.trim() || actual.nombreCompleto,
@@ -758,6 +766,7 @@ export function useUsuariosStore() {
         rolLabel: nuevoRolLabel,
         ambito: nuevoAmbito,
         ambitoCodigo: nuevoAmbitoCodigo,
+        ultimaActualizacion: fechaActualizacion,
       };
 
       const updated = [...usuarios];
@@ -817,8 +826,15 @@ export function useUsuariosStore() {
         };
       }
 
+      const now = new Date();
+      const fechaActualizacion = `${String(now.getDate()).padStart(2, "0")}/${String(
+        now.getMonth() + 1
+      ).padStart(2, "0")}/${now.getFullYear()} ${String(
+        now.getHours()
+      ).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+
       const updated = [...usuarios];
-      updated[index] = { ...u, estado: "ACTIVO" };
+      updated[index] = { ...u, estado: "ACTIVO", ultimaActualizacion: fechaActualizacion };
       persistUsers(updated);
 
       registrarAuditoria({
@@ -843,6 +859,13 @@ export function useUsuariosStore() {
       if (index === -1) return { ok: false, error: "Usuario no encontrado." };
 
       const u = usuarios[index];
+      const now = new Date();
+      const fechaActualizacion = `${String(now.getDate()).padStart(2, "0")}/${String(
+        now.getMonth() + 1
+      ).padStart(2, "0")}/${now.getFullYear()} ${String(
+        now.getHours()
+      ).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+
       const updated = [...usuarios];
       updated[index] = {
         ...u,
@@ -850,6 +873,7 @@ export function useUsuariosStore() {
         credencialesConfiguradas: true,
         totpConfigurado: true,
         correoVerificado: true,
+        ultimaActualizacion: fechaActualizacion,
       };
       persistUsers(updated);
 
@@ -886,8 +910,15 @@ export function useUsuariosStore() {
         return { ok: false, error: "No es posible suspender una cuenta en estado RETIRADO." };
       }
 
+      const now = new Date();
+      const fechaActualizacion = `${String(now.getDate()).padStart(2, "0")}/${String(
+        now.getMonth() + 1
+      ).padStart(2, "0")}/${now.getFullYear()} ${String(
+        now.getHours()
+      ).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+
       const updated = [...usuarios];
-      updated[index] = { ...u, estado: "SUSPENDIDO" };
+      updated[index] = { ...u, estado: "SUSPENDIDO", ultimaActualizacion: fechaActualizacion };
       persistUsers(updated);
 
       registrarAuditoria({
@@ -925,8 +956,15 @@ export function useUsuariosStore() {
         return { ok: false, error: "Falta segundo factor TOTP configurado. Se mantiene suspendido." };
       }
 
+      const now = new Date();
+      const fechaActualizacion = `${String(now.getDate()).padStart(2, "0")}/${String(
+        now.getMonth() + 1
+      ).padStart(2, "0")}/${now.getFullYear()} ${String(
+        now.getHours()
+      ).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+
       const updated = [...usuarios];
-      updated[index] = { ...u, estado: "ACTIVO" };
+      updated[index] = { ...u, estado: "ACTIVO", ultimaActualizacion: fechaActualizacion };
       persistUsers(updated);
 
       registrarAuditoria({
@@ -977,8 +1015,15 @@ export function useUsuariosStore() {
         };
       }
 
+      const now = new Date();
+      const fechaActualizacion = `${String(now.getDate()).padStart(2, "0")}/${String(
+        now.getMonth() + 1
+      ).padStart(2, "0")}/${now.getFullYear()} ${String(
+        now.getHours()
+      ).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+
       const updated = [...usuarios];
-      updated[index] = { ...u, estado: "RETIRADO" };
+      updated[index] = { ...u, estado: "RETIRADO", ultimaActualizacion: fechaActualizacion };
       persistUsers(updated);
 
       registrarAuditoria({

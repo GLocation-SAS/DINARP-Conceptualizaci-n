@@ -414,7 +414,8 @@ export function buildTramiteTimelineItems(solicitud: SolicitudIngreso | null | u
   }
 
   // 7. Evento sintético en curso: si el trámite tiene revisor asignado y no está concluido
-  const revisorActual = solicitud.revisorGestion || solicitud.revisorNormatividad || solicitud.revisor;
+  const isNormatividad = solicitud.estado.includes("NORMATIVIDAD") || solicitud.estado.includes("RESOLUCION");
+  const revisorActual = isNormatividad ? solicitud.revisorNormatividad : (solicitud.revisorGestion || solicitud.revisor);
   const esEstadoFinal = ["Aprobada", "APROBADO_FINAL", "Rechazada", "Cancelada"].includes(solicitud.estado);
 
   if (revisorActual && revisorActual !== "Por asignar" && !solicitud.revisionIniciada && !esEstadoFinal) {
@@ -431,7 +432,7 @@ export function buildTramiteTimelineItems(solicitud: SolicitudIngreso | null | u
         solicitud.fechaSolicitud ||
         formatTimelineDate(baseDate);
 
-      const isNormatividad = solicitud.estado.includes("NORMATIVIDAD") || (solicitud.revisorNormatividad && solicitud.revisorNormatividad === revisorActual);
+      
 
       rawItems.push({
         id: "pendiente-revision-step",

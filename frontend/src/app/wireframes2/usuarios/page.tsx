@@ -161,12 +161,6 @@ export default function GestionUsuariosPage() {
   const [filtroAuditTipo, setFiltroAuditTipo] = useState<string>("TODOS");
   const [filtroAuditPeriodo, setFiltroAuditPeriodo] = useState<string>("TODOS");
 
-  // Modal Bitácora Global de Auditoría (ID-05 Criterio 1: filtrar por persona, período y tipo de evento)
-  const [modalBitacoraGlobalOpen, setModalBitacoraGlobalOpen] = useState(false);
-  const [filtroGlobalPersona, setFiltroGlobalPersona] = useState<string>("TODAS");
-  const [filtroGlobalTipo, setFiltroGlobalTipo] = useState<string>("TODOS");
-  const [filtroGlobalPeriodo, setFiltroGlobalPeriodo] = useState<string>("TODOS");
-
   // Cómputo de KPIs
   const kpis = useMemo(() => {
     return {
@@ -519,7 +513,7 @@ export default function GestionUsuariosPage() {
       case "RETIRADO":
         return (
           <Badge tone="neutral" appearance="soft" size="sm" dot className="font-semibold">
-            Retirado
+            Baja lógica
           </Badge>
         );
     }
@@ -673,43 +667,13 @@ export default function GestionUsuariosPage() {
     return logs.map(mapEventoToTimelineItem);
   }, [selectedUser, auditoria, filtroAuditTipo, filtroAuditPeriodo]);
 
-  // Timeline items para la Bitácora Global de Auditoría (ID-05 Criterio 1 y 2)
-  const bitacoraGlobalItems: TimelineItem[] = useMemo(() => {
-    let logs = [...auditoria];
-
-    // Filtro por persona (funcionario / cédula)
-    if (filtroGlobalPersona !== "TODAS") {
-      logs = logs.filter(
-        (a) =>
-          a.usuarioAfectadoId === filtroGlobalPersona ||
-          a.usuarioAfectadoCedula === filtroGlobalPersona
-      );
-    }
-
-    // Filtro por tipo de evento
-    if (filtroGlobalTipo !== "TODOS") {
-      logs = logs.filter((a) => a.evento === filtroGlobalTipo);
-    }
-
-    // Filtro por período según HU 2.1
-    if (filtroGlobalPeriodo === "7D") {
-      logs = logs.filter((a) => a.fecha.includes("09/2026"));
-    } else if (filtroGlobalPeriodo === "30D") {
-      logs = logs.filter((a) => a.fecha.includes("09/2026") || a.fecha.includes("08/2026"));
-    } else if (filtroGlobalPeriodo === "2026") {
-      logs = logs.filter((a) => a.fecha.includes("2026"));
-    }
-
-    return logs.map(mapEventoToTimelineItem);
-  }, [auditoria, filtroGlobalPersona, filtroGlobalTipo, filtroGlobalPeriodo]);
-
   return (
     <WireframeDashboardLayout
       activeMenu="administracion-usuarios"
       currentUser={currentUser}
       breadcrumbs={[
         { label: "Administración", href: "#" },
-        { label: "Gestión de usuarios" },
+        { label: "Gestión de cuentas internas" },
       ]}
     >
       <main className="w-full pr-3 pl-2 pb-3 pt-1.5 flex-1 min-h-0 flex flex-col overflow-hidden">
@@ -722,24 +686,15 @@ export default function GestionUsuariosPage() {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 w-full">
             <div className="space-y-1 min-w-0 flex-1">
               <h1 className="font-heading font-extrabold text-2xl sm:text-3xl tracking-tight text-primary">
-                Gestión de usuarios
+                Gestión de cuentas internas
               </h1>
               <p className="text-xs sm:text-sm text-muted-foreground w-full max-w-none leading-relaxed font-normal">
                 Administra las cuentas internas, roles, ámbitos y estados de acceso al Portal.
               </p>
             </div>
 
-            {/* Acciones de Cabecera: Auditoría Global + Crear cuenta */}
+            {/* Acciones de Cabecera: Crear cuenta */}
             <div className="flex flex-wrap items-center justify-end gap-2 shrink-0 sm:self-center">
-              <Button
-                variant="neutral"
-                size="default"
-                onClick={() => setModalBitacoraGlobalOpen(true)}
-                className="gap-2 shadow-xs cursor-pointer font-medium text-xs whitespace-nowrap"
-              >
-                <History className="size-4 text-primary" />
-                <span>Bitácora de auditoría (ID-05)</span>
-              </Button>
               <Button
                 variant="primary"
                 size="default"
@@ -803,7 +758,7 @@ export default function GestionUsuariosPage() {
                       )}
                     </div>
                     <p className="text-xs text-muted-foreground font-normal truncate">
-                      Credenciales y 2FA OK
+                      Con acceso habilitado
                     </p>
                   </div>
                 </div>
@@ -859,7 +814,7 @@ export default function GestionUsuariosPage() {
                   <div className="min-w-0 space-y-0.5">
                     <div className="flex items-center gap-1.5 flex-wrap">
                       <h3 className="text-sm font-bold text-foreground group-hover:text-warning transition-colors truncate">
-                        Pendientes
+                        Pendientes de activación
                       </h3>
                       {filterEstado === "PENDIENTE_ACTIVACION" && (
                         <span className="text-[10px] font-semibold px-1.5 py-0.2 rounded-full bg-warning/20 text-warning border border-warning/30 shrink-0">
@@ -868,7 +823,7 @@ export default function GestionUsuariosPage() {
                       )}
                     </div>
                     <p className="text-xs text-muted-foreground font-normal truncate">
-                      Por activar 2FA/clave
+                      Requieren completar activación
                     </p>
                   </div>
                 </div>
@@ -989,7 +944,7 @@ export default function GestionUsuariosPage() {
                   <div className="min-w-0 space-y-0.5">
                     <div className="flex items-center gap-1.5 flex-wrap">
                       <h3 className="text-sm font-bold text-foreground group-hover:text-primary transition-colors truncate">
-                        Retirados
+                        Baja lógica
                       </h3>
                       {filterEstado === "RETIRADO" && (
                         <span className="text-[10px] font-semibold px-1.5 py-0.2 rounded-full bg-primary/20 text-primary border border-primary/30 shrink-0">
@@ -998,7 +953,7 @@ export default function GestionUsuariosPage() {
                       )}
                     </div>
                     <p className="text-xs text-muted-foreground font-normal truncate">
-                      Baja lógica histórica
+                      Sin acceso · historial conservado
                     </p>
                   </div>
                 </div>
@@ -1120,9 +1075,9 @@ export default function GestionUsuariosPage() {
                   items={[
                     { value: "TODOS", label: "Todos los estados" },
                     { value: "ACTIVO", label: "Activos" },
-                    { value: "PENDIENTE_ACTIVACION", label: "Pendientes" },
+                    { value: "PENDIENTE_ACTIVACION", label: "Pendientes de activación" },
                     { value: "SUSPENDIDO", label: "Suspendidos" },
-                    { value: "RETIRADO", label: "Retirados" },
+                    { value: "RETIRADO", label: "Baja lógica" },
                   ]}
                   value={{
                     value: filterEstado,
@@ -1132,10 +1087,10 @@ export default function GestionUsuariosPage() {
                         : filterEstado === "ACTIVO"
                         ? "Activos"
                         : filterEstado === "PENDIENTE_ACTIVACION"
-                        ? "Pendientes"
+                        ? "Pendientes de activación"
                         : filterEstado === "SUSPENDIDO"
                         ? "Suspendidos"
-                        : "Retirados",
+                        : "Baja lógica",
                   }}
                   onValueChange={(item) => {
                     if (item) {
@@ -1145,7 +1100,7 @@ export default function GestionUsuariosPage() {
                   }}
                 >
                   <ComboboxSelectTrigger className="h-9 text-xs w-full bg-surface border-border/80 rounded-full px-3.5 shadow-2xs" />
-                  <ComboboxContent className="min-w-[200px] rounded-xl">
+                  <ComboboxContent className="min-w-[220px] rounded-xl">
                     <ComboboxList>
                       <ComboboxItem value={{ value: "TODOS", label: "Todos los estados" }}>
                         Todos los estados
@@ -1153,14 +1108,14 @@ export default function GestionUsuariosPage() {
                       <ComboboxItem value={{ value: "ACTIVO", label: "Activos" }}>
                         Activos
                       </ComboboxItem>
-                      <ComboboxItem value={{ value: "PENDIENTE_ACTIVACION", label: "Pendientes" }}>
-                        Pendientes
+                      <ComboboxItem value={{ value: "PENDIENTE_ACTIVACION", label: "Pendientes de activación" }}>
+                        Pendientes de activación
                       </ComboboxItem>
                       <ComboboxItem value={{ value: "SUSPENDIDO", label: "Suspendidos" }}>
                         Suspendidos
                       </ComboboxItem>
-                      <ComboboxItem value={{ value: "RETIRADO", label: "Retirados" }}>
-                        Retirados
+                      <ComboboxItem value={{ value: "RETIRADO", label: "Baja lógica" }}>
+                        Baja lógica
                       </ComboboxItem>
                     </ComboboxList>
                   </ComboboxContent>
@@ -1211,8 +1166,8 @@ export default function GestionUsuariosPage() {
                   <TableHead className="w-[110px] px-3 py-2.5 whitespace-nowrap text-white font-bold text-xs">
                     ESTADO
                   </TableHead>
-                  <TableHead className="w-[130px] px-3 py-2.5 whitespace-nowrap text-white font-bold text-xs">
-                    ÚLTIMA ACTIVIDAD
+                  <TableHead className="w-[140px] px-3 py-2.5 whitespace-nowrap text-white font-bold text-xs">
+                    ÚLTIMA ACTUALIZACIÓN
                   </TableHead>
                   <TableHead className="w-[160px] px-3 py-2.5 whitespace-nowrap text-right text-white font-bold text-xs">
                     ACCIONES
@@ -1312,9 +1267,9 @@ export default function GestionUsuariosPage() {
                         </div>
                       </TableCell>
 
-                      {/* Última Actividad */}
+                      {/* Última Actualización */}
                       <TableCell className="px-3 py-2.5 text-xs text-muted-foreground whitespace-nowrap">
-                        {u.ultimoAcceso || "Sin ingresos"}
+                        {u.ultimaActualizacion || u.fechaCreacion}
                       </TableCell>
 
                       {/* Acciones */}
@@ -1337,7 +1292,7 @@ export default function GestionUsuariosPage() {
                             <TooltipContent side="top">Ver detalle y expediente</TooltipContent>
                           </Tooltip>
 
-                          {/* Editar usuario */}
+                          {/* Editar cuenta interna */}
                           {u.estado !== "RETIRADO" && (
                             <Tooltip>
                               <TooltipTrigger asChild>
@@ -1347,16 +1302,16 @@ export default function GestionUsuariosPage() {
                                   size="icon-sm"
                                   onClick={() => handleOpenEditar(u)}
                                   className="size-7 rounded-lg border-border/80 text-foreground hover:bg-primary/10 hover:border-primary/40 shadow-2xs"
-                                  aria-label={`Editar ${u.nombreCompleto}`}
+                                  aria-label={`Editar cuenta interna de ${u.nombreCompleto}`}
                                 >
                                   <Edit2 className="size-3.5 text-primary" />
                                 </Button>
                               </TooltipTrigger>
-                              <TooltipContent side="top">Editar usuario</TooltipContent>
+                              <TooltipContent side="top">Editar cuenta interna</TooltipContent>
                             </Tooltip>
                           )}
 
-                          {/* Suspender cuenta (si está activo) */}
+                          {/* Suspender cuenta interna (si está activo) */}
                           {u.estado === "ACTIVO" && (
                             <Tooltip>
                               <TooltipTrigger asChild>
@@ -1366,16 +1321,16 @@ export default function GestionUsuariosPage() {
                                   size="icon-sm"
                                   onClick={() => handleOpenSuspender(u)}
                                   className="size-7 rounded-lg border-border/80 text-warning hover:bg-warning/10 hover:border-warning/40 shadow-2xs"
-                                  aria-label={`Suspender cuenta de ${u.nombreCompleto}`}
+                                  aria-label={`Suspender cuenta interna de ${u.nombreCompleto}`}
                                 >
                                   <Ban className="size-3.5 text-warning" />
                                 </Button>
                               </TooltipTrigger>
-                              <TooltipContent side="top">Suspender cuenta</TooltipContent>
+                              <TooltipContent side="top">Suspender cuenta interna</TooltipContent>
                             </Tooltip>
                           )}
 
-                          {/* Reactivar cuenta (si está suspendido) */}
+                          {/* Reactivar cuenta interna (si está suspendido) */}
                           {u.estado === "SUSPENDIDO" && (
                             <Tooltip>
                               <TooltipTrigger asChild>
@@ -1385,16 +1340,16 @@ export default function GestionUsuariosPage() {
                                   size="icon-sm"
                                   onClick={() => handleOpenReactivar(u)}
                                   className="size-7 rounded-lg border-border/80 text-success hover:bg-success/10 hover:border-success/40 shadow-2xs"
-                                  aria-label={`Reactivar cuenta de ${u.nombreCompleto}`}
+                                  aria-label={`Reactivar cuenta interna de ${u.nombreCompleto}`}
                                 >
                                   <RotateCcw className="size-3.5 text-success" />
                                 </Button>
                               </TooltipTrigger>
-                              <TooltipContent side="top">Reactivar cuenta</TooltipContent>
+                              <TooltipContent side="top">Reactivar cuenta interna</TooltipContent>
                             </Tooltip>
                           )}
 
-                          {/* Dar de baja (si no está ya retirado) */}
+                          {/* Dar de baja a cuenta interna (si no está ya retirado) */}
                           {u.estado !== "RETIRADO" && (
                             <Tooltip>
                               <TooltipTrigger asChild>
@@ -1404,12 +1359,12 @@ export default function GestionUsuariosPage() {
                                   size="icon-sm"
                                   onClick={() => handleOpenBaja(u)}
                                   className="size-7 rounded-lg border-border/80 text-danger hover:bg-danger/10 hover:border-danger/40 shadow-2xs"
-                                  aria-label={`Dar de baja a ${u.nombreCompleto}`}
+                                  aria-label={`Dar de baja a cuenta interna de ${u.nombreCompleto}`}
                                 >
                                   <UserX className="size-3.5 text-danger" />
                                 </Button>
                               </TooltipTrigger>
-                              <TooltipContent side="top">Dar de baja</TooltipContent>
+                              <TooltipContent side="top">Dar de baja a cuenta interna</TooltipContent>
                             </Tooltip>
                           )}
                         </div>
@@ -1507,9 +1462,9 @@ export default function GestionUsuariosPage() {
                     </div>
 
                     <div className="flex items-center justify-between gap-2">
-                      <span className="text-[11px] text-muted-foreground">Último acceso:</span>
+                      <span className="text-[11px] text-muted-foreground">Última actualización:</span>
                       <span className="text-[11px] text-muted-foreground">
-                        {u.ultimoAcceso || "Sin ingresos"}
+                        {u.ultimaActualizacion || u.fechaCreacion}
                       </span>
                     </div>
                   </div>
@@ -1570,7 +1525,7 @@ export default function GestionUsuariosPage() {
                       </Button>
                     )}
 
-                    {/* Dar de baja */}
+                    {/* Dar de baja a cuenta interna */}
                     {u.estado !== "RETIRADO" && (
                       <Button
                         type="button"
@@ -1580,7 +1535,7 @@ export default function GestionUsuariosPage() {
                         className="h-8 px-2.5 text-xs rounded-lg border-border/80 text-danger hover:bg-danger/10 gap-1.5"
                       >
                         <UserX className="size-3.5 text-danger" />
-                        <span>Baja</span>
+                        <span>Dar de baja</span>
                       </Button>
                     )}
                   </div>
@@ -1605,7 +1560,7 @@ export default function GestionUsuariosPage() {
                   <span className="font-bold text-foreground">
                     {filteredUsuarios.length}
                   </span>{" "}
-                  usuarios registrados
+                  cuentas registradas
                 </p>
               </div>
 
@@ -1722,14 +1677,14 @@ export default function GestionUsuariosPage() {
       </main>
 
       {/* ══════════════════════════════════════════════════════════
-          MODAL 1: CREAR USUARIO (ID-01)
+          MODAL 1: CREAR CUENTA INTERNA (ID-01)
          ══════════════════════════════════════════════════════════ */}
       <Dialog open={modalCrearOpen} onOpenChange={handleCloseModalCrear}>
         <DialogContent variant="standard" size="lg" className="p-6 rounded-2xl border-border bg-surface">
           <DialogHeader className="border-b border-border/60 pb-3">
             <DialogTitle className="font-heading font-extrabold text-xl text-primary flex items-center gap-2">
               <UserPlus className="size-5 text-primary" />
-              <span>Crear cuenta de usuario interno</span>
+              <span>Crear cuenta interna</span>
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground">
               Define los datos de identidad, rol institucional y ámbito de la persona. Se validarán duplicados y coherencia antes de registrarla en estado PENDIENTE DE ACTIVACIÓN.
@@ -1949,14 +1904,14 @@ export default function GestionUsuariosPage() {
       </Dialog>
 
       {/* ══════════════════════════════════════════════════════════
-          MODAL 2: EDITAR USUARIO (ID-02)
+          MODAL 2: EDITAR CUENTA INTERNA (ID-02)
          ══════════════════════════════════════════════════════════ */}
       <Dialog open={modalEditarOpen} onOpenChange={setModalEditarOpen}>
         <DialogContent variant="standard" size="lg" className="p-6 rounded-2xl border-border bg-surface">
           <DialogHeader className="border-b border-border/60 pb-3">
             <DialogTitle className="font-heading font-extrabold text-xl text-primary flex items-center gap-2">
               <Edit2 className="size-5 text-primary" />
-              <span>Editar usuario y perfil institucional</span>
+              <span>Editar cuenta interna</span>
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground">
               Modifica los datos de contacto, rol o ámbito. La cédula es inmutable. Si modificas el rol o ámbito, debes ingresar el motivo justificativo.
@@ -2122,14 +2077,14 @@ export default function GestionUsuariosPage() {
       </Dialog>
 
       {/* ══════════════════════════════════════════════════════════
-          MODAL 3: SUSPENDER CUENTA (ID-03)
+          MODAL 3: SUSPENDER CUENTA INTERNA (ID-03)
          ══════════════════════════════════════════════════════════ */}
       <Dialog open={modalSuspenderOpen} onOpenChange={setModalSuspenderOpen}>
         <DialogContent variant="danger" size="default" className="text-left">
           <DialogHeader className="text-center sm:text-left">
             <DialogTitle className="font-heading font-extrabold text-xl text-foreground flex items-center gap-2">
               <Ban className="size-5 text-danger shrink-0" />
-              <span>Suspender cuenta institucional</span>
+              <span>Suspender cuenta interna</span>
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground mt-1">
               Se invalidará la sesión activa y se impedirá el ingreso y la asignación de nuevos trámites a la persona.
@@ -2202,17 +2157,17 @@ export default function GestionUsuariosPage() {
       </Dialog>
 
       {/* ══════════════════════════════════════════════════════════
-          MODAL 4: REACTIVAR CUENTA (ID-03)
+          MODAL 4: REACTIVAR CUENTA INTERNA (ID-03)
          ══════════════════════════════════════════════════════════ */}
       <Dialog open={modalReactivarOpen} onOpenChange={setModalReactivarOpen}>
         <DialogContent variant="standard" size="default" className="p-6 rounded-2xl border-border bg-surface">
           <DialogHeader className="border-b border-border/60 pb-3">
             <DialogTitle className="font-heading font-extrabold text-xl text-success flex items-center gap-2">
               <RotateCcw className="size-5 text-success" />
-              <span>Reactivar cuenta suspendida</span>
+              <span>Reactivar cuenta interna</span>
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground">
-              Restaura el estado ACTIVO del usuario. Conforme a ID-03: exige factor TOTP configurado, deja constancia de causa y no devuelve roles retirados por ID-02.
+              Restaura el estado ACTIVO de la cuenta interna. Conforme a ID-03: exige factor TOTP configurado, deja constancia de causa y no devuelve roles retirados por ID-02.
             </DialogDescription>
           </DialogHeader>
 
@@ -2301,17 +2256,17 @@ export default function GestionUsuariosPage() {
       </Dialog>
 
       {/* ══════════════════════════════════════════════════════════
-          MODAL 5: DAR DE BAJA LÓGICA (ID-04)
+          MODAL 5: DAR DE BAJA A CUENTA INTERNA (ID-04)
          ══════════════════════════════════════════════════════════ */}
       <Dialog open={modalBajaOpen} onOpenChange={setModalBajaOpen}>
         <DialogContent variant="standard" size="lg" className="p-6 rounded-2xl border-border bg-surface">
           <DialogHeader className="border-b border-border/60 pb-3">
             <DialogTitle className="font-heading font-extrabold text-xl text-danger flex items-center gap-2">
               <UserX className="size-5 text-danger" />
-              <span>Dar de baja a la cuenta (Baja lógica)</span>
+              <span>Dar de baja a cuenta interna</span>
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground">
-              Conforme a ID-04: Retira la cuenta conservando trazabilidad inalterable. No se ejecuta borrado físico ni se reutiliza la identidad.
+              Conforme a ID-04: Retira la cuenta interna conservando trazabilidad inalterable. No se ejecuta borrado físico ni se reutiliza la identidad.
             </DialogDescription>
           </DialogHeader>
 
@@ -2418,7 +2373,7 @@ export default function GestionUsuariosPage() {
             <div className="flex items-center justify-between">
               <DialogTitle className="font-heading font-extrabold text-xl text-primary flex items-center gap-2">
                 <Fingerprint className="size-5 text-primary" />
-                <span>Expediente de Usuario y Seguridad</span>
+                <span>Expediente de Cuenta Interna y Seguridad</span>
               </DialogTitle>
               {selectedUser && getEstadoBadge(selectedUser.estado)}
             </div>
@@ -2505,6 +2460,15 @@ export default function GestionUsuariosPage() {
                       </span>
                       <span className="font-medium text-foreground block">
                         {selectedUser.fechaCreacion}
+                      </span>
+                    </div>
+
+                    <div className="p-3 rounded-xl border border-border bg-surface space-y-1">
+                      <span className="text-[11px] text-muted-foreground font-medium block">
+                        Última Actualización Administrativa
+                      </span>
+                      <span className="font-medium text-foreground block">
+                        {selectedUser.ultimaActualizacion || selectedUser.fechaCreacion}
                       </span>
                     </div>
 
@@ -2695,205 +2659,6 @@ export default function GestionUsuariosPage() {
           <DialogFooter className="pt-3 border-t border-border/60 shrink-0">
             <Button variant="neutral" size="default" onClick={() => setModalDetalleOpen(false)}>
               Cerrar expediente
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* ══════════════════════════════════════════════════════════
-          MODAL BITÁCORA GLOBAL DE AUDITORÍA Y TRAZABILIDAD (ID-05)
-          Filtro por persona, período y tipo de evento.
-          Diferenciación explícita Coordinador vs Credenciales API.
-         ══════════════════════════════════════════════════════════ */}
-      <Dialog
-        open={modalBitacoraGlobalOpen}
-        onOpenChange={(open) => setModalBitacoraGlobalOpen(open)}
-      >
-        <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col p-6 overflow-hidden">
-          <DialogHeader className="space-y-2 border-b border-border/60 pb-3 shrink-0">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="size-8 rounded bg-primary/10 text-primary flex items-center justify-center font-bold">
-                  <History className="size-4" />
-                </div>
-                <div>
-                  <DialogTitle className="text-base font-heading font-bold text-foreground">
-                    Bitácora de Auditoría y Trazabilidad de Cuentas (ID-05)
-                  </DialogTitle>
-                  <DialogDescription className="text-xs text-muted-foreground">
-                    Inspección forense de altas, roles, bloqueos, recuperaciones, coordinaciones y accesos operativos.
-                  </DialogDescription>
-                </div>
-              </div>
-              <Badge variant="success" className="gap-1 font-mono text-[10px]">
-                <ShieldCheck className="size-3" />
-                <span>Secreto Protegido (Sin OTP/Tokens)</span>
-              </Badge>
-            </div>
-          </DialogHeader>
-
-          {/* Filtros de Auditoría según Criterios 1, 2 y 3 */}
-          <div className="py-3 border-b border-border/40 shrink-0 space-y-3">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {/* Filtro 1: Persona */}
-              <div className="space-y-1.5">
-                <Label className="text-xs font-semibold text-foreground">
-                  Funcionario / Persona
-                </Label>
-                <Combobox
-                  value={filtroGlobalPersona}
-                  onValueChange={(val) => setFiltroGlobalPersona(val || "TODAS")}
-                >
-                  <ComboboxSelectTrigger className="w-full text-xs h-9">
-                    <ComboboxValue placeholder="Todas las personas" />
-                  </ComboboxSelectTrigger>
-                  <ComboboxContent>
-                    <ComboboxList>
-                      <ComboboxItem value="TODAS">Todos los funcionarios</ComboboxItem>
-                      {usuarios.map((u) => (
-                        <ComboboxItem key={u.id} value={u.id}>
-                          {u.nombreCompleto} ({u.cedula})
-                        </ComboboxItem>
-                      ))}
-                    </ComboboxList>
-                  </ComboboxContent>
-                </Combobox>
-              </div>
-
-              {/* Filtro 2: Tipo de Evento */}
-              <div className="space-y-1.5">
-                <Label className="text-xs font-semibold text-foreground">
-                  Tipo de Evento
-                </Label>
-                <Combobox
-                  value={filtroGlobalTipo}
-                  onValueChange={(val) => setFiltroGlobalTipo(val || "TODOS")}
-                >
-                  <ComboboxSelectTrigger className="w-full text-xs h-9">
-                    <ComboboxValue placeholder="Todos los eventos" />
-                  </ComboboxSelectTrigger>
-                  <ComboboxContent>
-                    <ComboboxList>
-                      <ComboboxItem value="TODOS">Todos los eventos</ComboboxItem>
-                      <ComboboxItem value="CUENTA_CREADA">Altas / Creaciones</ComboboxItem>
-                      <ComboboxItem value="ACTIVACION">Activaciones operativas</ComboboxItem>
-                      <ComboboxItem value="CAMBIO_ROL">Cambios de rol (ID-02)</ComboboxItem>
-                      <ComboboxItem value="CAMBIO_AMBITO">Cambios de ámbito</ComboboxItem>
-                      <ComboboxItem value="INGRESO">Accesos al sistema</ComboboxItem>
-                      <ComboboxItem value="BLOQUEO">Bloqueos de sesión</ComboboxItem>
-                      <ComboboxItem value="RECUPERACION">Recuperaciones con 2do paso</ComboboxItem>
-                      <ComboboxItem value="SUSPENSION">Suspensiones (ID-03)</ComboboxItem>
-                      <ComboboxItem value="REACTIVACION">Reactivaciones (ID-03)</ComboboxItem>
-                      <ComboboxItem value="CAMBIO_COORDINADOR">Coordinación personal (CAM-03)</ComboboxItem>
-                      <ComboboxItem value="CREDENCIALES_API_REVOCADAS">Credenciales API técnicas (INS-08)</ComboboxItem>
-                      <ComboboxItem value="BAJA_LOGICA">Bajas lógicas (ID-04)</ComboboxItem>
-                    </ComboboxList>
-                  </ComboboxContent>
-                </Combobox>
-              </div>
-
-              {/* Filtro 3: Período según 2.1 */}
-              <div className="space-y-1.5">
-                <Label className="text-xs font-semibold text-foreground">
-                  Período Temporal (2.1)
-                </Label>
-                <Combobox
-                  value={filtroGlobalPeriodo}
-                  onValueChange={(val) => setFiltroGlobalPeriodo(val || "TODOS")}
-                >
-                  <ComboboxSelectTrigger className="w-full text-xs h-9">
-                    <ComboboxValue placeholder="Todo el historial" />
-                  </ComboboxSelectTrigger>
-                  <ComboboxContent>
-                    <ComboboxList>
-                      <ComboboxItem value="TODOS">Todo el historial registrado</ComboboxItem>
-                      <ComboboxItem value="7D">Últimos 7 días</ComboboxItem>
-                      <ComboboxItem value="30D">Últimos 30 días</ComboboxItem>
-                      <ComboboxItem value="2026">Año fiscal 2026</ComboboxItem>
-                    </ComboboxList>
-                  </ComboboxContent>
-                </Combobox>
-              </div>
-            </div>
-
-            {/* Aclaración visual Criterio 2: Coordinador vs Credenciales API */}
-            <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] bg-surface-raised/40 p-2.5 rounded border border-border/40">
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-1.5">
-                  <Badge variant="info" className="size-2 p-0 rounded-full" />
-                  <span className="text-muted-foreground">
-                    <strong className="text-foreground">CAM-03:</strong> Cambio de Coordinador Institucional (Persona natural)
-                  </span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <Badge variant="warning" className="size-2 p-0 rounded-full" />
-                  <span className="text-muted-foreground">
-                    <strong className="text-foreground">INS-08:</strong> Credenciales API institucionales (Entidad externa técnica)
-                  </span>
-                </div>
-              </div>
-
-              {(filtroGlobalPersona !== "TODAS" || filtroGlobalTipo !== "TODOS" || filtroGlobalPeriodo !== "TODOS") && (
-                <Button
-                  variant="neutral"
-                  size="sm"
-                  onClick={() => {
-                    setFiltroGlobalPersona("TODAS");
-                    setFiltroGlobalTipo("TODOS");
-                    setFiltroGlobalPeriodo("TODOS");
-                  }}
-                  className="h-7 text-[11px] gap-1"
-                >
-                  <RotateCcw className="size-3" />
-                  <span>Limpiar filtros</span>
-                </Button>
-              )}
-            </div>
-          </div>
-
-          {/* Timeline de la Bitácora */}
-          <div className="flex-1 overflow-y-auto pr-2 py-4 space-y-4">
-            {bitacoraGlobalItems.length === 0 ? (
-              <div className="py-14 text-center rounded-lg border border-dashed border-border/80 bg-surface-raised/20 space-y-3">
-                <div className="size-12 rounded-full bg-muted/40 text-muted-foreground mx-auto flex items-center justify-center">
-                  <History className="size-6" />
-                </div>
-                <div className="space-y-1">
-                  <p className="text-sm font-semibold text-foreground">
-                    «Sin resultados para estos filtros»
-                  </p>
-                  <p className="text-xs text-muted-foreground max-w-md mx-auto">
-                    No existen eventos de auditoría para la combinación de persona, tipo de evento y período seleccionados.
-                  </p>
-                </div>
-                <Button
-                  variant="neutral"
-                  size="sm"
-                  onClick={() => {
-                    setFiltroGlobalPersona("TODAS");
-                    setFiltroGlobalTipo("TODOS");
-                    setFiltroGlobalPeriodo("TODOS");
-                  }}
-                  className="text-xs gap-1.5"
-                >
-                  <RotateCcw className="size-3.5" />
-                  <span>Restablecer todos los filtros</span>
-                </Button>
-              </div>
-            ) : (
-              <div className="px-2">
-                <Timeline items={bitacoraGlobalItems} />
-              </div>
-            )}
-          </div>
-
-          <DialogFooter className="pt-3 border-t border-border/60 shrink-0">
-            <Button
-              variant="neutral"
-              size="default"
-              onClick={() => setModalBitacoraGlobalOpen(false)}
-            >
-              Cerrar bitácora
             </Button>
           </DialogFooter>
         </DialogContent>

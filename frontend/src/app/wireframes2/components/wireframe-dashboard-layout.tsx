@@ -188,7 +188,7 @@ const navItems: NavItem[] = [
     children: [
       {
         id: "administracion-usuarios",
-        label: "Gestión de usuarios",
+        label: "Gestión de cuentas internas",
         href: "/wireframes2/usuarios",
         exact: false
       }

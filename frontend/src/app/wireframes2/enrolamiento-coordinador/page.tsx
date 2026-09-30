@@ -20,7 +20,7 @@ import {
   KeyRound,
   FileCheck2,
   Home,
-  ChevronDown,
+  ChevronDown, ChevronUp,
   Search,
   XCircle,
   Eye,
@@ -107,6 +107,7 @@ function EnrolamientoContent() {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmittedSuccess, setIsSubmittedSuccess] = useState(false);
+  const [showDemoToolbar, setShowDemoToolbar] = useState(true);
   const [submittedSolicitudId, setSubmittedSolicitudId] = useState<string>("");
 
   // Form State Anexo B
@@ -1984,6 +1985,54 @@ function EnrolamientoContent() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+    
+          {/* Floating Demo Toolbar */}
+          <div className="fixed bottom-4 sm:bottom-6 right-4 sm:right-6 z-50 transition-all duration-300">
+            {showDemoToolbar ? (
+              <div className="flex flex-col gap-2 bg-surface/95 backdrop-blur-md p-2 rounded-2xl border border-border shadow-xl w-[280px] animate-in fade-in slide-in-from-bottom-2 duration-200">
+                <div className="flex items-center justify-between px-2 pb-1 border-b border-border/50">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Opciones de Simulación</span>
+                  <Button type="button" variant="ghost" size="icon" onClick={() => setShowDemoToolbar(false)} className="size-6 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground" title="Minimizar">
+                    <ChevronDown className="size-3" />
+                  </Button>
+                </div>
+                
+                {!preregistroCargado && (
+                  <div className="space-y-1.5">
+                    <Button type="button" variant="outline" size="sm" onClick={() => { setCedulaInput("1715489621"); ejecutarValidacionCedula("1715489621"); }} className="w-full text-xs justify-start h-8">
+                      <UserCheck className="size-3.5 mr-2 text-primary" /> Titular Habilitado
+                    </Button>
+                    <Button type="button" variant="outline" size="sm" onClick={() => { setCedulaInput("1712345602"); ejecutarValidacionCedula("1712345602"); }} className="w-full text-xs justify-start h-8">
+                      <UserCheck className="size-3.5 mr-2 text-primary" /> Suplente Habilitado
+                    </Button>
+                  </div>
+                )}
+
+                {preregistroCargado && !isSubmittedSuccess && step > 1 && (
+                  <Button type="button" variant="outline" size="sm" onClick={handleSimulateFillAnexoB} className="w-full text-xs justify-start h-8 bg-amber-500/10 text-amber-600 hover:bg-amber-500/20 border-amber-500/20">
+                    <Sparkles className="size-3.5 mr-2" /> Autocompletar Anexo B
+                  </Button>
+                )}
+
+                {step === 4 && !isSigned && (
+                  <Button type="button" variant="success" size="sm" onClick={handleFirmaElectronica} className="w-full text-xs justify-start h-8">
+                    <ShieldCheck className="size-3.5 mr-2" /> Simular Firma Válida
+                  </Button>
+                )}
+                
+                <Button type="button" variant="outline" size="sm" onClick={handleIniciarNuevaSolicitud} className="w-full text-xs justify-start h-8">
+                  <ArrowLeft className="size-3.5 mr-2" /> Reiniciar Flujo
+                </Button>
+              </div>
+            ) : (
+              <Button type="button" variant="outline" size="sm" onClick={() => setShowDemoToolbar(true)} className="rounded-full px-3.5 py-1.5 shadow-lg flex items-center gap-2 text-xs bg-surface/95 backdrop-blur-md border border-border hover:bg-muted transition-all animate-in fade-in slide-in-from-bottom-2 duration-200" title="Desplegar opciones">
+                <Sparkles className="size-3.5 text-primary" />
+                <span className="font-semibold text-foreground">Casos de Uso</span>
+                <ChevronUp className="size-3.5 text-muted-foreground" />
+              </Button>
+            )}
+          </div>
     </div>
   );
 }
