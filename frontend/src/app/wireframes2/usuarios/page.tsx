@@ -284,18 +284,20 @@ export default function GestionUsuariosPage() {
     setModalEditarOpen(true);
   };
 
-  // Dialog de Confirmación Warning UI Kit
+  // Dialog de Confirmación UI Kit
   const [confirmDialog, setConfirmDialog] = useState<{
     open: boolean;
     title: string;
     description: string;
     confirmLabel: string;
+    variant?: "danger" | "warning" | "standard";
     onConfirm: () => void;
   }>({
     open: false,
     title: "",
     description: "",
     confirmLabel: "Confirmar",
+    variant: "danger",
     onConfirm: () => {},
   });
 
@@ -354,22 +356,23 @@ export default function GestionUsuariosPage() {
     setModalSuspenderOpen(true);
   };
 
-  // Submit Suspender Usuario (ID-03)
+  // Submit Suspender Usuario
   const handleSuspenderSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedUser) return;
     setErrorAccion("");
 
     if (!motivoAccion || motivoAccion.trim().length < 5) {
-      setErrorAccion("Debes registrar una causa justificada de suspensión (mínimo 5 caracteres, conforme a 2.1/PAR-07).");
+      setErrorAccion("Debes registrar una causa justificada de suspensión (mínimo 5 caracteres).");
       return;
     }
 
     setConfirmDialog({
       open: true,
-      title: "¿Confirmar suspensión de cuenta interna?",
-      description: `¿Estás seguro de que deseas suspender la cuenta de ${selectedUser.nombreCompleto}? Conforme a ID-03: se invalidarán las sesiones activas de inmediato, se bloqueará el ingreso con OTP y se impedirán nuevas asignaciones. Los trámites asignados permanecerán visibles al Director para su reasignación oportuna.`,
-      confirmLabel: "Sí, suspender cuenta",
+      variant: "danger",
+      title: "¿Confirmar suspensión de la cuenta interna?",
+      description: `¿Estás seguro de que deseas suspender la cuenta de ${selectedUser.nombreCompleto}? Se cerrarán las sesiones activas de inmediato, se bloqueará el acceso y se impedirán nuevas asignaciones de trámites.`,
+      confirmLabel: "Suspender cuenta",
       onConfirm: () => {
         const res = suspenderUsuario(selectedUser.id, motivoAccion, currentUser.name);
         if (!res.ok) {
@@ -393,28 +396,29 @@ export default function GestionUsuariosPage() {
     setModalReactivarOpen(true);
   };
 
-  // Submit Reactivar Usuario (ID-03)
+  // Submit Reactivar Usuario
   const handleReactivarSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedUser) return;
     setErrorAccion("");
 
     if (!motivoAccion || motivoAccion.trim().length < 5) {
-      setErrorAccion("Debes registrar la causa de reactivación (mínimo 5 caracteres, conforme a 2.1/PAR-07).");
+      setErrorAccion("Debes registrar el motivo de reactivación (mínimo 5 caracteres).");
       return;
     }
 
-    // ID-03 Criterio 1 y 4: Validar factor configurado
+    // Validar factores configurados
     if (!selectedUser.totpConfigurado || !selectedUser.credencialesConfiguradas) {
-      setErrorAccion("Condición incumplida: La cuenta carece de factor de autenticación configurado o validación de identidad. Se conserva el estado SUSPENDIDO.");
+      setErrorAccion("Condición incumplida: La cuenta carece de factor de autenticación configurado o validación de identidad. Se conserva el estado suspendido.");
       return;
     }
 
     setConfirmDialog({
       open: true,
-      title: "¿Confirmar reactivación de cuenta interna?",
-      description: `¿Deseas reactivar la cuenta de ${selectedUser.nombreCompleto}? Conforme a ID-03: dejará constancia de causa y restaurará el ingreso con OTP. No se devuelven automáticamente roles retirados por ID-02.`,
-      confirmLabel: "Sí, reactivar cuenta",
+      variant: "warning",
+      title: "¿Confirmar reactivación de la cuenta interna?",
+      description: `¿Deseas reactivar la cuenta de ${selectedUser.nombreCompleto}? Se dejará constancia en el expediente y se restaurará el ingreso al sistema.`,
+      confirmLabel: "Reactivar cuenta",
       onConfirm: () => {
         const res = reactivarUsuario(selectedUser.id, motivoAccion, currentUser.name);
         if (!res.ok) {
@@ -423,7 +427,7 @@ export default function GestionUsuariosPage() {
         }
 
         toast.success("Cuenta reactivada exitosamente", {
-          description: `La cuenta de ${selectedUser.nombreCompleto} ha sido reactivada a estado ACTIVO. Causa asentada en auditoría.`,
+          description: `La cuenta de ${selectedUser.nombreCompleto} ha sido reactivada. Se registró el motivo en el expediente.`,
         });
         setModalReactivarOpen(false);
       },
@@ -438,35 +442,36 @@ export default function GestionUsuariosPage() {
     setModalBajaOpen(true);
   };
 
-  // Submit Baja Lógica (ID-04)
+  // Submit Baja Lógica
   const handleBajaSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedUser) return;
     setErrorAccion("");
 
-    // ID-04 Criterio 1: No elimina un Coordinador aún designado
+    // Validación de Coordinador
     if (selectedUser.esCoordinadorInstitucionActiva) {
-      setErrorAccion(`No es posible dar de baja: El usuario aún figura como Coordinador designado en ${selectedUser.institucionCoordinada || "una institución activa"}. Requiere trámite previo de cambio de coordinador (CAM-03 o INS-08) para retirar su último rol vigente.`);
+      setErrorAccion(`No es posible dar de baja: El usuario aún figura como Coordinador designado en ${selectedUser.institucionCoordinada || "una institución activa"}. Requiere trámite previo de sustitución o cambio de coordinador.`);
       return;
     }
 
-    // ID-04 Criterio 1 y 4: Exige reasignar o resolver tareas activas antes de la baja
+    // Validación de tareas activas
     if (selectedUser.tareasActivas > 0) {
       const tareasTxt = selectedUser.detalleTareas?.length ? ` (${selectedUser.detalleTareas.join(", ")})` : "";
-      setErrorAccion(`No es posible dar de baja: La cuenta registra ${selectedUser.tareasActivas} trámite(s) o tarea(s) activa(s) pendientes de reasignación${tareasTxt}. Debe resolver o reasignar las tareas antes de proceder.`);
+      setErrorAccion(`No es posible dar de baja: La cuenta registra ${selectedUser.tareasActivas} trámite(s) activo(s) pendientes de reasignación${tareasTxt}. Debe resolver o reasignar las tareas antes de proceder.`);
       return;
     }
 
     if (!motivoAccion || motivoAccion.trim().length < 10) {
-      setErrorAccion("La justificación de desvinculación es obligatoria y debe tener al menos 10 caracteres (conforme a 2.1/PAR-07).");
+      setErrorAccion("La justificación de desvinculación es obligatoria y debe tener al menos 10 caracteres.");
       return;
     }
 
     setConfirmDialog({
       open: true,
-      title: "¿Confirmar baja lógica de la cuenta personal?",
-      description: `¿Estás seguro de que deseas retirar la cuenta de ${selectedUser.nombreCompleto}? Conforme a ID-04: pasará a estado RETIRADO, no ingresará ni recibirá asignaciones, ni podrá reutilizarse con otra identidad. Se conservan todas las referencias a decisiones, firmas, eventos e incidentes realizados sin borrado físico de expediente.`,
-      confirmLabel: "Sí, dar de baja",
+      variant: "danger",
+      title: "¿Confirmar baja lógica de la cuenta interna?",
+      description: `¿Estás seguro de que deseas retirar la cuenta de ${selectedUser.nombreCompleto}? La cuenta quedará inhabilitada de forma permanente y no podrá recibir asignaciones. Sus registros históricos se conservarán intactos sin borrado físico.`,
+      confirmLabel: "Dar de baja",
       onConfirm: () => {
         const res = darDeBajaUsuario(selectedUser.id, motivoAccion, currentUser.name);
         if (!res.ok) {
@@ -475,7 +480,7 @@ export default function GestionUsuariosPage() {
         }
 
         toast.success("Baja lógica procesada exitosamente", {
-          description: `La cuenta de ${selectedUser.nombreCompleto} ha sido pasada a estado RETIRADO. Su histórico y auditoría permanecen inalterables.`,
+          description: `La cuenta de ${selectedUser.nombreCompleto} ha sido pasada a estado inactivo. Su histórico permanece inalterable.`,
         });
         setModalBajaOpen(false);
       },
@@ -672,7 +677,6 @@ export default function GestionUsuariosPage() {
       activeMenu="administracion-usuarios"
       currentUser={currentUser}
       breadcrumbs={[
-        { label: "Administración", href: "#" },
         { label: "Gestión de cuentas internas" },
       ]}
     >
@@ -2075,7 +2079,7 @@ export default function GestionUsuariosPage() {
       </Dialog>
 
       {/* ══════════════════════════════════════════════════════════
-          MODAL 3: SUSPENDER CUENTA INTERNA (ID-03)
+          MODAL 3: SUSPENDER CUENTA INTERNA
          ══════════════════════════════════════════════════════════ */}
       <Dialog open={modalSuspenderOpen} onOpenChange={setModalSuspenderOpen}>
         <DialogContent variant="danger" size="default" className="text-left">
@@ -2112,23 +2116,23 @@ export default function GestionUsuariosPage() {
                 </div>
               </div>
 
-              {/* Advertencia obligatoria ID-03 */}
+              {/* Advertencia obligatoria */}
               <div className="p-3 rounded-xl bg-warning/10 border border-warning/20 text-xs space-y-1.5 text-warning-foreground">
                 <span className="font-bold flex items-center gap-1.5">
                   <AlertTriangle className="size-4 text-warning" />
-                  Efectos de Suspensión (ID-03):
+                  Efectos de la suspensión:
                 </span>
                 <ul className="text-[11px] leading-relaxed list-disc list-inside space-y-0.5 pl-1">
                   <li>Invalida sesiones activas inmediatamente.</li>
-                  <li>Bloquea el ingreso con usuario y OTP.</li>
+                  <li>Bloquea el ingreso al sistema.</li>
                   <li>Impide nuevas asignaciones de trámites a la cuenta.</li>
-                  <li>Los trámites asignados permanecen visibles para reasignación por parte del Director.</li>
+                  <li>Los trámites asignados permanecen disponibles para su reasignación oportuna.</li>
                 </ul>
               </div>
 
               <div className="space-y-1.5">
                 <Label htmlFor="suspender-causa" className="text-xs font-semibold text-foreground">
-                  Causa de la suspensión (2.1/PAR-07) <span className="text-warning">*</span>
+                  Causa justificada de suspensión <span className="text-warning">*</span>
                 </Label>
                 <Textarea
                   id="suspender-causa"
@@ -2154,7 +2158,7 @@ export default function GestionUsuariosPage() {
       </Dialog>
 
       {/* ══════════════════════════════════════════════════════════
-          MODAL 4: REACTIVAR CUENTA INTERNA (ID-03)
+          MODAL 4: REACTIVAR CUENTA INTERNA
          ══════════════════════════════════════════════════════════ */}
       <Dialog open={modalReactivarOpen} onOpenChange={setModalReactivarOpen}>
         <DialogContent variant="standard" size="default" className="p-6 rounded-2xl border-border bg-surface">
@@ -2163,7 +2167,7 @@ export default function GestionUsuariosPage() {
               Reactivar cuenta interna
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground">
-              Restaura el estado ACTIVO de la cuenta interna. Conforme a ID-03: exige factor TOTP configurado, deja constancia de causa y no devuelve roles retirados por ID-02.
+              Restaura el acceso y estado activo de la cuenta interna, dejando constancia del motivo en la bitácora institucional.
             </DialogDescription>
           </DialogHeader>
 
@@ -2182,7 +2186,7 @@ export default function GestionUsuariosPage() {
                   <span className="font-semibold text-foreground">{selectedUser.nombreCompleto}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Segundo factor (TOTP):</span>
+                  <span className="text-muted-foreground">Segundo factor de seguridad:</span>
                   {selectedUser.totpConfigurado ? (
                     <Badge tone="success" appearance="soft" size="sm" className="font-semibold">
                       Configurado
@@ -2211,17 +2215,17 @@ export default function GestionUsuariosPage() {
                 <div className="p-3 rounded-xl bg-destructive/10 border border-destructive/20 text-xs space-y-1 text-destructive">
                   <div className="flex items-center gap-1.5 font-bold">
                     <AlertCircle className="size-4" />
-                    <span>Condición de reactivación incumplida</span>
+                    <span>Condición de reactivación incompleta</span>
                   </div>
                   <p className="text-[11px] leading-relaxed">
-                    ID-03 Criterio 1: Activar exige contraseña y factor configurados. Si falta factor, conserva estado suspendido sin anunciar activación.
+                    La reactivación exige que la cuenta cuente con credenciales y factor de seguridad activos para garantizar el acceso seguro.
                   </p>
                 </div>
               )}
 
               <div className="space-y-1.5">
                 <Label htmlFor="reactivar-causa" className="text-xs font-semibold text-foreground">
-                  Causa o motivo de reactivación (2.1/PAR-07) <span className="text-warning">*</span>
+                  Motivo de reactivación <span className="text-warning">*</span>
                 </Label>
                 <Textarea
                   id="reactivar-causa"
@@ -2253,7 +2257,7 @@ export default function GestionUsuariosPage() {
       </Dialog>
 
       {/* ══════════════════════════════════════════════════════════
-          MODAL 5: DAR DE BAJA A CUENTA INTERNA (ID-04)
+          MODAL 5: DAR DE BAJA A CUENTA INTERNA
          ══════════════════════════════════════════════════════════ */}
       <Dialog open={modalBajaOpen} onOpenChange={setModalBajaOpen}>
         <DialogContent variant="standard" size="lg" className="p-6 rounded-2xl border-border bg-surface">
@@ -2262,7 +2266,7 @@ export default function GestionUsuariosPage() {
               Dar de baja a cuenta interna
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground">
-              Conforme a ID-04: Retira la cuenta interna conservando trazabilidad inalterable. No se ejecuta borrado físico ni se reutiliza la identidad.
+              Retira la cuenta interna conservando su historial y trazabilidad inalterables. No se realiza borrado físico ni se reasigna la identidad.
             </DialogDescription>
           </DialogHeader>
 
@@ -2275,10 +2279,10 @@ export default function GestionUsuariosPage() {
                 </div>
               )}
 
-              {/* Verificación de responsabilidades activas ID-04 */}
+              {/* Verificación de responsabilidades activas */}
               <div className="space-y-2">
                 <span className="text-xs font-bold text-foreground block">
-                  Revisión previa de tareas, instituciones y responsabilidades (ID-04):
+                  Revisión previa de tareas, instituciones y responsabilidades:
                 </span>
 
                 {selectedUser.esCoordinadorInstitucionActiva ? (
@@ -2288,7 +2292,7 @@ export default function GestionUsuariosPage() {
                       <span>Imposible dar de baja: Coordinador designado activo</span>
                     </div>
                     <p className="text-[11px] leading-relaxed">
-                      El usuario figura como Coordinador de la institución <strong>{selectedUser.institucionCoordinada || "activa"}</strong>. Requiere trámite previo de sustitución (CAM-03 o INS-08).
+                      El usuario figura como Coordinador de la institución <strong>{selectedUser.institucionCoordinada || "activa"}</strong>. Requiere trámite previo de sustitución o cambio de coordinador.
                     </p>
                   </div>
                 ) : selectedUser.tareasActivas > 0 ? (
@@ -2298,7 +2302,7 @@ export default function GestionUsuariosPage() {
                       <span>Imposible dar de baja: {selectedUser.tareasActivas} trámite(s) activo(s)</span>
                     </div>
                     <p className="text-[11px] leading-relaxed">
-                      La persona tiene tareas activas en curso. No se permite la baja parcial:
+                      La persona tiene tareas activas en curso. No se permite la baja mientras existan trámites asignados:
                     </p>
                     {selectedUser.detalleTareas && selectedUser.detalleTareas.length > 0 && (
                       <ul className="list-disc list-inside space-y-0.5 text-[11px] font-medium pt-1">
@@ -2318,7 +2322,7 @@ export default function GestionUsuariosPage() {
                       <span>Sin trámites activos ni designación de coordinador pendiente</span>
                     </div>
                     <p className="text-[11px] leading-relaxed">
-                      El usuario no tiene trámites en curso ni coordinaciones vigentes. Cumple las condiciones para baja lógica.
+                      El usuario no tiene trámites en curso ni coordinaciones vigentes. Cumple las condiciones para la baja.
                     </p>
                   </div>
                 )}
@@ -2327,7 +2331,7 @@ export default function GestionUsuariosPage() {
               {/* Justificación obligatoria */}
               <div className="space-y-1.5">
                 <Label htmlFor="baja-justificacion" className="text-xs font-semibold text-foreground">
-                  Justificación obligatoria (2.1/PAR-07) <span className="text-warning">*</span>
+                  Justificación obligatoria <span className="text-warning">*</span>
                 </Label>
                 <Textarea
                   id="baja-justificacion"
@@ -2661,42 +2665,33 @@ export default function GestionUsuariosPage() {
       </Dialog>
 
       {/* ══════════════════════════════════════════════════════════
-          CONFIRMATION DIALOG (WARNING) - VALIDACIÓN DE SEGURIDAD
+          CONFIRMATION DIALOG - VALIDACIÓN DE SEGURIDAD
          ══════════════════════════════════════════════════════════ */}
       <Dialog
         open={confirmDialog.open}
         onOpenChange={(open) => setConfirmDialog((prev) => ({ ...prev, open }))}
       >
-        <DialogContent variant="warning" size="default" className="text-center sm:text-left">
+        <DialogContent variant={confirmDialog.variant || "danger"} size="default" className="text-center sm:text-left">
           <DialogHeader className="space-y-2">
-            <DialogTitle className="font-heading font-extrabold text-lg text-foreground">
+            <DialogTitle className="font-heading font-extrabold text-lg text-foreground text-center">
               {confirmDialog.title}
             </DialogTitle>
-            <DialogDescription className="text-xs text-muted-foreground leading-relaxed">
+            <DialogDescription className="text-xs text-muted-foreground leading-relaxed text-center">
               {confirmDialog.description}
             </DialogDescription>
           </DialogHeader>
 
-          <DialogFooter className="mt-4 flex flex-col-reverse sm:flex-row sm:justify-end gap-2.5 w-full">
+          <DialogFooter showCloseButton stacked className="pt-4 flex flex-col gap-2.5 w-full">
             <Button
               type="button"
-              variant="neutral"
-              size="default"
-              onClick={() => setConfirmDialog((prev) => ({ ...prev, open: false }))}
-              className="w-full sm:w-auto"
-            >
-              Cancelar
-            </Button>
-            <Button
-              type="button"
-              variant="warning"
+              variant={confirmDialog.variant === "warning" ? "warning" : "danger"}
               size="default"
               onClick={() => {
                 const action = confirmDialog.onConfirm;
                 setConfirmDialog((prev) => ({ ...prev, open: false }));
                 action();
               }}
-              className="w-full sm:w-auto font-semibold"
+              className="w-full font-semibold"
             >
               {confirmDialog.confirmLabel}
             </Button>
