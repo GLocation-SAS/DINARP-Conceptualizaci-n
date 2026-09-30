@@ -797,7 +797,7 @@ export default function GestionIngresosPage() {
             tone={tone}
             appearance="solid"
             size="sm"
-            dot={false}
+            dot
             className="font-semibold text-[11px] normal-case tracking-normal px-2 py-0.5 inline-flex items-center shadow-2xs cursor-pointer hover:opacity-90 transition-opacity max-w-full"
           >
             <span className="truncate max-w-[160px] sm:max-w-[200px]">{label}</span>
