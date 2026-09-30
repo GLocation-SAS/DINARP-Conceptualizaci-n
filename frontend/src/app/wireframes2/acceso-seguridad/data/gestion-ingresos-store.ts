@@ -55,7 +55,7 @@ export function getEstadoBadgeProps(
       };
     case "PENDIENTE_GENERAR_RESOLUCION":
       return {
-        tone: "info" as const,
+        tone: "secondary" as const,
         label: "Pendiente de generar resolución",
       };
     case "EN_GENERACION_RESOLUCION":
@@ -66,7 +66,7 @@ export function getEstadoBadgeProps(
       return { tone: "info" as const, label: "Pendiente de generar resolución" };
     case "GENERACION_PENDIENTE":
       return {
-        tone: "warning" as const,
+        tone: "info" as const,
         label: "Generación pendiente",
       };
     case "PENDIENTE_ASIGNACION_GESTION":
