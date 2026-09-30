@@ -2819,10 +2819,10 @@ export default function GestionIngresosPage() {
                                   </TooltipTrigger>
                                   <TooltipContent side="top" variant="surface" className="p-2.5 max-w-xs flex flex-col items-start gap-0.5">
                                     <p className="font-bold text-xs text-foreground font-sans">
-                                      {revisorAsignado ? "Revisor asignado" : "Estado de asignación"}
+                                      {revisorAsignado ? (currentUser.role === "DIR_NORMATIVA" || currentUser.role === "EQ_NORMATIVA" ? "Responsable de Normatividad" : "Revisor asignado") : "Estado de asignación"}
                                     </p>
                                     <p className="text-[11px] text-muted-foreground">
-                                      {revisorAsignado ? revisorAsignado : "Trámite pendiente de asignar a un revisor"}
+                                      {revisorAsignado ? revisorAsignado : "Trámite pendiente de asignar"}
                                     </p>
                                   </TooltipContent>
                                 </Tooltip>

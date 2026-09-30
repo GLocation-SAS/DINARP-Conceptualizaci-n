@@ -1890,12 +1890,12 @@ export default function GestionUsuariosPage() {
                 </p>
               </div>
 
-              <DialogFooter className="pt-2 gap-2 sm:gap-0">
-                <Button type="button" variant="neutral" size="default" onClick={handleCloseModalCrear}>
-                  Cancelar
-                </Button>
-                <Button type="submit" variant="primary" size="default">
+              <DialogFooter stacked className="pt-2 flex flex-col gap-2.5 w-full">
+                <Button type="submit" variant="primary" size="default" className="w-full">
                   Crear cuenta interna
+                </Button>
+                <Button type="button" variant="neutral" size="default" onClick={handleCloseModalCrear} className="w-full">
+                  Cancelar
                 </Button>
               </DialogFooter>
             </form>
@@ -2063,12 +2063,12 @@ export default function GestionUsuariosPage() {
                 </div>
               )}
 
-              <DialogFooter className="pt-2 gap-2 sm:gap-0">
-                <Button type="button" variant="neutral" size="default" onClick={() => setModalEditarOpen(false)}>
-                  Cancelar
-                </Button>
-                <Button type="submit" variant="primary" size="default">
+              <DialogFooter stacked className="pt-2 flex flex-col gap-2.5 w-full">
+                <Button type="submit" variant="primary" size="default" className="w-full">
                   Guardar cambios
+                </Button>
+                <Button type="button" variant="neutral" size="default" onClick={() => setModalEditarOpen(false)} className="w-full">
+                  Cancelar
                 </Button>
               </DialogFooter>
             </form>
@@ -2143,12 +2143,12 @@ export default function GestionUsuariosPage() {
                 />
               </div>
 
-              <DialogFooter className="pt-2 gap-2 sm:gap-0 w-full justify-end">
-                <Button type="button" variant="neutral" size="default" onClick={() => setModalSuspenderOpen(false)}>
-                  Cancelar
-                </Button>
-                <Button type="submit" variant="danger" size="default">
+              <DialogFooter stacked className="pt-2 flex flex-col gap-2.5 w-full">
+                <Button type="submit" variant="danger" size="default" className="w-full">
                   Confirmar suspensión
+                </Button>
+                <Button type="button" variant="neutral" size="default" onClick={() => setModalSuspenderOpen(false)} className="w-full">
+                  Cancelar
                 </Button>
               </DialogFooter>
             </form>
@@ -2237,17 +2237,18 @@ export default function GestionUsuariosPage() {
                 />
               </div>
 
-              <DialogFooter className="pt-2 gap-2 sm:gap-0">
-                <Button type="button" variant="neutral" size="default" onClick={() => setModalReactivarOpen(false)}>
-                  Cancelar
-                </Button>
+              <DialogFooter stacked className="pt-2 flex flex-col gap-2.5 w-full">
                 <Button
                   type="submit"
                   variant="primary"
                   size="default"
                   disabled={!selectedUser.totpConfigurado || !selectedUser.credencialesConfiguradas}
+                  className="w-full"
                 >
                   Reactivar cuenta
+                </Button>
+                <Button type="button" variant="neutral" size="default" onClick={() => setModalReactivarOpen(false)} className="w-full">
+                  Cancelar
                 </Button>
               </DialogFooter>
             </form>
@@ -2346,17 +2347,18 @@ export default function GestionUsuariosPage() {
                 </span>
               </div>
 
-              <DialogFooter className="pt-2 gap-2 sm:gap-0">
-                <Button type="button" variant="neutral" size="default" onClick={() => setModalBajaOpen(false)}>
-                  Cancelar
-                </Button>
+              <DialogFooter stacked className="pt-2 flex flex-col gap-2.5 w-full">
                 <Button
                   type="submit"
                   variant="danger"
                   size="default"
                   disabled={selectedUser.tareasActivas > 0 || !!selectedUser.esCoordinadorInstitucionActiva}
+                  className="w-full"
                 >
                   Confirmar baja lógica
+                </Button>
+                <Button type="button" variant="neutral" size="default" onClick={() => setModalBajaOpen(false)} className="w-full">
+                  Cancelar
                 </Button>
               </DialogFooter>
             </form>

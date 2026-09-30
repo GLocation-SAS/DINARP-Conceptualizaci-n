@@ -426,12 +426,6 @@ function EnrolamientoContent() {
             {/* Migas de pan y Botón Volver */}
             <div className="flex items-center justify-between gap-4 flex-wrap">
               <div className="flex items-center gap-3 flex-wrap">
-                <Link href="/wireframes2/login">
-                  <Button variant="outline" size="sm" className="text-xs font-semibold gap-1.5 shadow-xs">
-                    <ArrowLeft className="size-3.5" />
-                    <span>Volver al acceso principal</span>
-                  </Button>
-                </Link>
 
                 <nav aria-label="Breadcrumb" className="text-xs text-muted-foreground flex items-center gap-1.5 flex-wrap">
                   <Link href="/wireframes2/login" className="hover:text-foreground transition-colors flex items-center gap-1 shrink-0">
