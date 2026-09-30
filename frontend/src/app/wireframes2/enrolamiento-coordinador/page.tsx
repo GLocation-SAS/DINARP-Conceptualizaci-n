@@ -161,7 +161,8 @@ function EnrolamientoContent() {
         (s) => s.tipoTramite === "PROCESO_B_ENROLAMIENTO_COORDINADOR" && s.cedula === preregistroCargado.cedula
       );
       if (sol) {
-        setExistingSolicitud(sol);
+        // COMENTADO PARA SIMULADOR: Permitir siempre hacer la solicitud sin mostrar "Activo/Pendiente"
+        // setExistingSolicitud(sol);
       }
     }
   }, [solicitudes, preregistroCargado]);
@@ -210,8 +211,13 @@ function EnrolamientoContent() {
         setExistingSolicitud(null);
         setValidationError("No encontramos una habilitación vigente asociada a este número de cédula.");
         toast.error("Validación no exitosa", {
-          description: "La cédula ingresada no posee un prerregistro o aprobación institucional previa."
+          description: "La cédula ingresada no posee un prerregistro o aprobación institucional previa. Redirigiendo a Anexo A..."
         });
+        
+        // Redirigir al Anexo A (Registro Institución)
+        setTimeout(() => {
+          router.push("/wireframes2/registro-institucion");
+        }, 1500);
       }
     }, 600);
   };
@@ -435,9 +441,21 @@ function EnrolamientoContent() {
                 </nav>
               </div>
 
-              <Badge tone="neutral" appearance="soft" size="sm" className="border border-border">
-                Rol: Coordinador SINARP
-              </Badge>
+              <div className="flex items-center gap-2">
+                <Badge tone="neutral" appearance="soft" size="sm" className="border border-border">
+                  Rol: Coordinador SINARP
+                </Badge>
+                {preregistroCargado && !existingSolicitud && !isSubmittedSuccess && (
+                  <>
+                    <Badge tone="neutral" appearance="soft" size="sm" className="border border-border">
+                      N.º Trámite: Borrador
+                    </Badge>
+                    <Badge tone="warning" appearance="soft" size="sm" className="border border-warning/40">
+                      Estado: Borrador
+                    </Badge>
+                  </>
+                )}
+              </div>
             </div>
 
             {/* Encabezado del Trámite en Card Featured */}
@@ -447,15 +465,15 @@ function EnrolamientoContent() {
               className="bg-primary-100/30 dark:bg-primary-900/20 border-0 shadow-none hover:shadow-none hover:translate-y-0 mb-3 relative overflow-hidden"
             >
               <CardBadge className="bg-primary/20 text-primary text-[10px] uppercase font-bold tracking-wider px-2.5 py-0.5 border-0">
-                FORMULARIO OFICIAL ARP-R02
+                FORMULARIO ARP-R02
               </CardBadge>
 
               <CardTitle className="text-lg sm:text-xl font-bold font-heading text-primary">
-                Activación de Coordinador SINARP — Anexo B
+                Anexo B — Acuerdo de Uso y Confidencialidad
               </CardTitle>
 
               <CardDescription className="text-xs text-primary-800/80 dark:text-primary-200/80 font-medium">
-                Proceso B · Enrolamiento y Acuerdo de Uso y Confidencialidad para Coordinadores Prerregistrados
+                Suscripción digital para el enrolamiento del Coordinador SINARP.
               </CardDescription>
 
               <CardDecorativeIcon className="-bottom-10 -right-10 opacity-20 group-hover/card:scale-100">
@@ -863,48 +881,6 @@ function EnrolamientoContent() {
             {/* ── PANTALLA 2: FORMULARIO ANEXO B (SI SE ENCONTRÓ PRERREGISTRO Y NO TIENE TRAMITE PENDIENTE/FINALIZADO) ── */}
             {preregistroCargado && !existingSolicitud && !isSubmittedSuccess && (
               <div className="space-y-6 animate-in fade-in duration-300">
-                {/* Resumen del contexto del trámite */}
-                <div className="bg-surface border border-border rounded-2xl p-4 sm:p-6 flex flex-col md:flex-row sm:items-center justify-between gap-4 shadow-xs">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <Badge tone="neutral" appearance="soft" size="sm" className="border border-border">
-                        N.º Trámite: Borrador
-                      </Badge>
-                      <Badge tone="warning" appearance="soft" size="sm" className="border border-warning/40">
-                        Estado: Borrador
-                      </Badge>
-                    </div>
-                    <h2 className="text-base font-bold text-foreground">
-                      {formData.nombreEntidad}
-                    </h2>
-                    <p className="text-xs text-muted-foreground">
-                      Coordinador: <strong className="text-foreground">{formData.funcionarioNombre}</strong> ({formData.funcionarioCedula})
-                    </p>
-                  </div>
-
-                  <div className="flex items-center gap-2 flex-wrap self-start md:self-auto">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={handleSimulateFillAnexoB}
-                      className="text-xs font-semibold gap-1.5 shadow-xs bg-background hover:bg-muted"
-                    >
-                      <Sparkles className="size-3.5 text-amber-500" />
-                      <span>Autocompletar Anexo B</span>
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={handleIniciarNuevaSolicitud}
-                      className="text-xs text-muted-foreground hover:text-foreground"
-                    >
-                      Cambiar Cédula
-                    </Button>
-                  </div>
-                </div>
-
                 {/* Stepper Oficial UI Kit */}
                 <div className="bg-surface border border-border rounded-2xl p-4 sm:p-6 shadow-xs overflow-x-auto">
                   <Stepper
