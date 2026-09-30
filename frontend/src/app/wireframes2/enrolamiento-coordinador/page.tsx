@@ -390,7 +390,7 @@ function EnrolamientoContent() {
     <div className="min-h-screen bg-background text-foreground flex flex-col">
       {/* Header Superior Principal */}
       <header className="border-b border-border bg-surface/50 backdrop-blur-md sticky top-0 z-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between gap-4">
+        <div className="w-full max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <Link href="/wireframes2/login" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
               <img
@@ -417,7 +417,7 @@ function EnrolamientoContent() {
 
       {/* Contenido Principal */}
       <main className="flex-1 w-full pb-8">
-        <div className="layout-container py-8">
+        <div className="w-full max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* ========================================================= */}
         {/* EXPERIENCIA 1: COORDINADOR SINARP                          */}
         {/* ========================================================= */}
@@ -482,7 +482,7 @@ function EnrolamientoContent() {
             {/* ── PANTALLA 1: VALIDACIÓN DEL COORDINADOR (SI NO SE HA CARGADO O NO EXISTE SOLICITUD) ── */}
             {!preregistroCargado && (
               <div className="space-y-6 animate-in fade-in duration-300">
-                <div className="bg-surface border border-border rounded-2xl p-6 sm:p-8 space-y-6 shadow-xs max-w-2xl mx-auto">
+                <div className="bg-surface border border-border rounded-2xl p-6 sm:p-8 space-y-6 shadow-xs max-w-4xl mx-auto">
                   <div className="space-y-2 text-center sm:text-left">
                     <div className="size-12 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary mb-3">
                       <UserCheck className="size-6" />
@@ -1221,7 +1221,7 @@ function EnrolamientoContent() {
                       </div>
 
                         {/* Vista previa tipo Hoja de Oficio del Documento Anexo B (ARP-R02) */}
-                        <div className="bg-surface border border-border rounded-2xl p-6 sm:p-8 space-y-6 shadow-md max-w-3xl mx-auto border-t-4 border-t-primary">
+                        <div className="bg-surface border border-border rounded-2xl p-6 sm:p-8 space-y-6 shadow-md max-w-5xl mx-auto border-t-4 border-t-primary">
                           {/* Encabezado Institucional Oficial DINARP */}
                           <div className="flex items-center justify-between border-b border-border/80 pb-4 gap-4">
                             <div className="flex items-center gap-3">

@@ -1890,7 +1890,7 @@ export default function GestionUsuariosPage() {
                 </p>
               </div>
 
-              <DialogFooter stacked className="pt-2 flex flex-col gap-2.5 w-full">
+              <DialogFooter stacked className="pt-4 border-t border-border flex flex-col gap-2.5 w-full">
                 <Button type="submit" variant="primary" size="default" className="w-full">
                   Crear cuenta interna
                 </Button>
@@ -2063,7 +2063,7 @@ export default function GestionUsuariosPage() {
                 </div>
               )}
 
-              <DialogFooter stacked className="pt-2 flex flex-col gap-2.5 w-full">
+              <DialogFooter stacked className="pt-4 border-t border-border flex flex-col gap-2.5 w-full">
                 <Button type="submit" variant="primary" size="default" className="w-full">
                   Guardar cambios
                 </Button>
@@ -2143,7 +2143,7 @@ export default function GestionUsuariosPage() {
                 />
               </div>
 
-              <DialogFooter stacked className="pt-2 flex flex-col gap-2.5 w-full">
+              <DialogFooter stacked className="pt-4 border-t border-border flex flex-col gap-2.5 w-full">
                 <Button type="submit" variant="danger" size="default" className="w-full">
                   Confirmar suspensión
                 </Button>
@@ -2237,7 +2237,7 @@ export default function GestionUsuariosPage() {
                 />
               </div>
 
-              <DialogFooter stacked className="pt-2 flex flex-col gap-2.5 w-full">
+              <DialogFooter stacked className="pt-4 border-t border-border flex flex-col gap-2.5 w-full">
                 <Button
                   type="submit"
                   variant="primary"
@@ -2347,7 +2347,7 @@ export default function GestionUsuariosPage() {
                 </span>
               </div>
 
-              <DialogFooter stacked className="pt-2 flex flex-col gap-2.5 w-full">
+              <DialogFooter stacked className="pt-4 border-t border-border flex flex-col gap-2.5 w-full">
                 <Button
                   type="submit"
                   variant="danger"

@@ -2724,29 +2724,31 @@ export default function GestionIngresosPage() {
                               </TableCell>
 
                               {/* Solicitante */}
-                              <TableCell className="px-2 overflow-hidden">
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <div className="flex flex-col min-w-0 group/sol cursor-pointer">
-                                      <span className="font-bold text-foreground text-xs leading-snug truncate" title={row.nombreCompleto}>
-                                        {row.nombreCompleto}
-                                      </span>
-                                      <div className="flex items-center gap-1 text-[10px] text-muted-foreground font-mono">
-                                        <span className="truncate">{row.cedula}</span>
-                                        <span className="text-[9px] px-1 rounded bg-muted/60 text-muted-foreground font-sans font-semibold group-hover/sol:bg-primary/10 group-hover/sol:text-primary transition-colors shrink-0">
-                                          +
+                              {!(currentUser.role === "DIR_NORMATIVA" || currentUser.role === "EQ_NORMATIVA") && (
+                                <TableCell className="px-2 overflow-hidden">
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <div className="flex flex-col min-w-0 group/sol cursor-pointer">
+                                        <span className="font-bold text-foreground text-xs leading-snug truncate" title={row.nombreCompleto}>
+                                          {row.nombreCompleto}
                                         </span>
+                                        <div className="flex items-center gap-1 text-[10px] text-muted-foreground font-mono">
+                                          <span className="truncate">{row.cedula}</span>
+                                          <span className="text-[9px] px-1 rounded bg-muted/60 text-muted-foreground font-sans font-semibold group-hover/sol:bg-primary/10 group-hover/sol:text-primary transition-colors shrink-0">
+                                            +
+                                          </span>
+                                        </div>
                                       </div>
-                                    </div>
-                                  </TooltipTrigger>
-                                  <TooltipContent side="top" variant="surface" className="p-3 max-w-xs flex-col items-start gap-1">
-                                    <p className="font-bold text-xs text-foreground">{row.nombreCompleto}</p>
-                                    <p className="font-mono text-[11px] text-muted-foreground">C.I. {row.cedula}</p>
-                                    <p className="text-[11px] text-primary font-medium">{row.correo}</p>
-                                    <p className="text-[10px] text-muted-foreground border-t border-border/60 pt-1 mt-1">{row.institucion}</p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              </TableCell>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="top" variant="surface" className="p-3 max-w-xs flex-col items-start gap-1">
+                                      <p className="font-bold text-xs text-foreground">{row.nombreCompleto}</p>
+                                      <p className="font-mono text-[11px] text-muted-foreground">C.I. {row.cedula}</p>
+                                      <p className="text-[11px] text-primary font-medium">{row.correo}</p>
+                                      <p className="text-[10px] text-muted-foreground border-t border-border/60 pt-1 mt-1">{row.institucion}</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TableCell>
+                              )}
 
                               {/* Institución */}
                               <TableCell className="px-2 overflow-hidden">
