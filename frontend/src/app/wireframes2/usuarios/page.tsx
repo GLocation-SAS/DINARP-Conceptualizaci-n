@@ -9,9 +9,8 @@ import {
   ShieldCheck,
   UserCheck,
   UserX,
-  Search,
+  Search as SearchIcon,
   Filter,
-  MoreVertical,
   CheckCircle2,
   Clock,
   AlertTriangle,
@@ -38,6 +37,17 @@ import { WireframeDashboardLayout } from "../components/wireframe-dashboard-layo
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Search } from "@/components/ui/search";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationPrevious,
+  PaginationNext,
+  PaginationFirst,
+  PaginationLast,
+} from "@/components/ui/pagination";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -63,14 +73,6 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
   Combobox,
   ComboboxSelectTrigger,
   ComboboxContent,
@@ -89,6 +91,7 @@ import {
   UsuarioInterno,
   EstadoUsuario,
   RolInterno,
+  TipoEventoAuditoria,
   ROLES_INTERNOS_CATALOGO,
 } from "../acceso-seguridad/data/usuarios-store";
 import { MOCK_USERS_BY_ROLE } from "../catalogo-interoperabilidad/data/catalogo-data";
@@ -117,7 +120,7 @@ export default function GestionUsuariosPage() {
 
   // Paginación
   const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 7;
+  const [pageSize, setPageSize] = useState(10);
 
   // Modales
   const [modalCrearOpen, setModalCrearOpen] = useState(false);
@@ -153,6 +156,16 @@ export default function GestionUsuariosPage() {
 
   // Tabs de detalle
   const [activeDetailTab, setActiveDetailTab] = useState("info");
+
+  // Filtros de Auditoría y Trazabilidad (ID-05)
+  const [filtroAuditTipo, setFiltroAuditTipo] = useState<string>("TODOS");
+  const [filtroAuditPeriodo, setFiltroAuditPeriodo] = useState<string>("TODOS");
+
+  // Modal Bitácora Global de Auditoría (ID-05 Criterio 1: filtrar por persona, período y tipo de evento)
+  const [modalBitacoraGlobalOpen, setModalBitacoraGlobalOpen] = useState(false);
+  const [filtroGlobalPersona, setFiltroGlobalPersona] = useState<string>("TODAS");
+  const [filtroGlobalTipo, setFiltroGlobalTipo] = useState<string>("TODOS");
+  const [filtroGlobalPeriodo, setFiltroGlobalPeriodo] = useState<string>("TODOS");
 
   // Cómputo de KPIs
   const kpis = useMemo(() => {
@@ -277,6 +290,21 @@ export default function GestionUsuariosPage() {
     setModalEditarOpen(true);
   };
 
+  // Dialog de Confirmación Warning UI Kit
+  const [confirmDialog, setConfirmDialog] = useState<{
+    open: boolean;
+    title: string;
+    description: string;
+    confirmLabel: string;
+    onConfirm: () => void;
+  }>({
+    open: false,
+    title: "",
+    description: "",
+    confirmLabel: "Confirmar",
+    onConfirm: () => {},
+  });
+
   // Submit Editar Usuario (ID-02)
   const handleEditarSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -296,24 +324,32 @@ export default function GestionUsuariosPage() {
       return;
     }
 
-    const res = editarUsuario(selectedUser.id, {
-      nombreCompleto: formEditNombre,
-      correo: formEditCorreo,
-      rol: formEditRol,
-      ambitoCodigo: formEditAmbito,
-      motivoCambio: formEditMotivo,
-      actor: currentUser.name,
-    });
+    setConfirmDialog({
+      open: true,
+      title: "¿Guardar cambios del usuario?",
+      description: `¿Estás seguro de que deseas actualizar la información de ${selectedUser.nombreCompleto}? Los cambios de rol o ámbito quedarán asentados en la trazabilidad inalterable de auditoría.`,
+      confirmLabel: "Sí, guardar cambios",
+      onConfirm: () => {
+        const res = editarUsuario(selectedUser.id, {
+          nombreCompleto: formEditNombre,
+          correo: formEditCorreo,
+          rol: formEditRol,
+          ambitoCodigo: formEditAmbito,
+          motivoCambio: formEditMotivo,
+          actor: currentUser.name,
+        });
 
-    if (!res.ok) {
-      setFormEditError(res.error || "No se pudo actualizar el usuario.");
-      return;
-    }
+        if (!res.ok) {
+          setFormEditError(res.error || "No se pudo actualizar el usuario.");
+          return;
+        }
 
-    toast.success("Usuario actualizado", {
-      description: `Se actualizaron los datos y se registró la trazabilidad de auditoría.`,
+        toast.success("Usuario actualizado exitosamente", {
+          description: `Se actualizaron los datos de ${formEditNombre} y se registró la trazabilidad de auditoría.`,
+        });
+        setModalEditarOpen(false);
+      },
     });
-    setModalEditarOpen(false);
   };
 
   // Abrir Modal Suspender
@@ -330,16 +366,29 @@ export default function GestionUsuariosPage() {
     if (!selectedUser) return;
     setErrorAccion("");
 
-    const res = suspenderUsuario(selectedUser.id, motivoAccion, currentUser.name);
-    if (!res.ok) {
-      setErrorAccion(res.error || "Error al suspender.");
+    if (!motivoAccion || motivoAccion.trim().length < 5) {
+      setErrorAccion("Debes registrar una causa justificada de suspensión (mínimo 5 caracteres, conforme a 2.1/PAR-07).");
       return;
     }
 
-    toast.warning("Cuenta suspendida", {
-      description: `La cuenta de ${selectedUser.nombreCompleto} ha sido suspendida. Sesiones invalidadas de inmediato.`,
+    setConfirmDialog({
+      open: true,
+      title: "¿Confirmar suspensión de cuenta interna?",
+      description: `¿Estás seguro de que deseas suspender la cuenta de ${selectedUser.nombreCompleto}? Conforme a ID-03: se invalidarán las sesiones activas de inmediato, se bloqueará el ingreso con OTP y se impedirán nuevas asignaciones. Los trámites asignados permanecerán visibles al Director para su reasignación oportuna.`,
+      confirmLabel: "Sí, suspender cuenta",
+      onConfirm: () => {
+        const res = suspenderUsuario(selectedUser.id, motivoAccion, currentUser.name);
+        if (!res.ok) {
+          setErrorAccion(res.error || "Fallo en la operación. Se conserva el estado anterior.");
+          return;
+        }
+
+        toast.success("Cuenta suspendida exitosamente", {
+          description: `La cuenta de ${selectedUser.nombreCompleto} ha sido suspendida. Sesiones invalidadas y bloqueadas nuevas asignaciones.`,
+        });
+        setModalSuspenderOpen(false);
+      },
     });
-    setModalSuspenderOpen(false);
   };
 
   // Abrir Modal Reactivar
@@ -356,16 +405,35 @@ export default function GestionUsuariosPage() {
     if (!selectedUser) return;
     setErrorAccion("");
 
-    const res = reactivarUsuario(selectedUser.id, motivoAccion, currentUser.name);
-    if (!res.ok) {
-      setErrorAccion(res.error || "Error al reactivar.");
+    if (!motivoAccion || motivoAccion.trim().length < 5) {
+      setErrorAccion("Debes registrar la causa de reactivación (mínimo 5 caracteres, conforme a 2.1/PAR-07).");
       return;
     }
 
-    toast.success("Cuenta reactivada", {
-      description: `La cuenta de ${selectedUser.nombreCompleto} ha sido reactivada a estado ACTIVO.`,
+    // ID-03 Criterio 1 y 4: Validar factor configurado
+    if (!selectedUser.totpConfigurado || !selectedUser.credencialesConfiguradas) {
+      setErrorAccion("Condición incumplida: La cuenta carece de factor de autenticación configurado o validación de identidad. Se conserva el estado SUSPENDIDO.");
+      return;
+    }
+
+    setConfirmDialog({
+      open: true,
+      title: "¿Confirmar reactivación de cuenta interna?",
+      description: `¿Deseas reactivar la cuenta de ${selectedUser.nombreCompleto}? Conforme a ID-03: dejará constancia de causa y restaurará el ingreso con OTP. No se devuelven automáticamente roles retirados por ID-02.`,
+      confirmLabel: "Sí, reactivar cuenta",
+      onConfirm: () => {
+        const res = reactivarUsuario(selectedUser.id, motivoAccion, currentUser.name);
+        if (!res.ok) {
+          setErrorAccion(res.error || "Fallo en la reactivación. Se conserva el estado anterior.");
+          return;
+        }
+
+        toast.success("Cuenta reactivada exitosamente", {
+          description: `La cuenta de ${selectedUser.nombreCompleto} ha sido reactivada a estado ACTIVO. Causa asentada en auditoría.`,
+        });
+        setModalReactivarOpen(false);
+      },
     });
-    setModalReactivarOpen(false);
   };
 
   // Abrir Modal Baja Lógica
@@ -382,16 +450,42 @@ export default function GestionUsuariosPage() {
     if (!selectedUser) return;
     setErrorAccion("");
 
-    const res = darDeBajaUsuario(selectedUser.id, motivoAccion, currentUser.name);
-    if (!res.ok) {
-      setErrorAccion(res.error || "Error al dar de baja.");
+    // ID-04 Criterio 1: No elimina un Coordinador aún designado
+    if (selectedUser.esCoordinadorInstitucionActiva) {
+      setErrorAccion(`No es posible dar de baja: El usuario aún figura como Coordinador designado en ${selectedUser.institucionCoordinada || "una institución activa"}. Requiere trámite previo de cambio de coordinador (CAM-03 o INS-08) para retirar su último rol vigente.`);
       return;
     }
 
-    toast.error("Baja lógica procesada", {
-      description: `La cuenta ha sido pasada a estado RETIRADO. Su histórico y auditoría permanecen inalterables.`,
+    // ID-04 Criterio 1 y 4: Exige reasignar o resolver tareas activas antes de la baja
+    if (selectedUser.tareasActivas > 0) {
+      const tareasTxt = selectedUser.detalleTareas?.length ? ` (${selectedUser.detalleTareas.join(", ")})` : "";
+      setErrorAccion(`No es posible dar de baja: La cuenta registra ${selectedUser.tareasActivas} trámite(s) o tarea(s) activa(s) pendientes de reasignación${tareasTxt}. Debe resolver o reasignar las tareas antes de proceder.`);
+      return;
+    }
+
+    if (!motivoAccion || motivoAccion.trim().length < 10) {
+      setErrorAccion("La justificación de desvinculación es obligatoria y debe tener al menos 10 caracteres (conforme a 2.1/PAR-07).");
+      return;
+    }
+
+    setConfirmDialog({
+      open: true,
+      title: "¿Confirmar baja lógica de la cuenta personal?",
+      description: `¿Estás seguro de que deseas retirar la cuenta de ${selectedUser.nombreCompleto}? Conforme a ID-04: pasará a estado RETIRADO, no ingresará ni recibirá asignaciones, ni podrá reutilizarse con otra identidad. Se conservan todas las referencias a decisiones, firmas, eventos e incidentes realizados sin borrado físico de expediente.`,
+      confirmLabel: "Sí, dar de baja",
+      onConfirm: () => {
+        const res = darDeBajaUsuario(selectedUser.id, motivoAccion, currentUser.name);
+        if (!res.ok) {
+          setErrorAccion(res.error || "Fallo en la reasignación o retiro. No se ejecuta la baja parcial.");
+          return;
+        }
+
+        toast.success("Baja lógica procesada exitosamente", {
+          description: `La cuenta de ${selectedUser.nombreCompleto} ha sido pasada a estado RETIRADO. Su histórico y auditoría permanecen inalterables.`,
+        });
+        setModalBajaOpen(false);
+      },
     });
-    setModalBajaOpen(false);
   };
 
   // Abrir Detalle y Auditoría
@@ -431,51 +525,183 @@ export default function GestionUsuariosPage() {
     }
   };
 
-  // Timeline items para el modal de detalle
+  // Helper de badges de rol con colores diferenciados según jerarquía y área
+  const getRolBadge = (rol: RolInterno, label: string) => {
+    switch (rol) {
+      case "ADMIN":
+        return (
+          <Badge tone="danger" appearance="soft" size="sm" className="font-semibold text-[11px] truncate max-w-full inline-flex">
+            <span className="truncate">{label}</span>
+          </Badge>
+        );
+      case "DIR_GESTION":
+        return (
+          <Badge tone="primary" appearance="soft" size="sm" className="font-semibold text-[11px] truncate max-w-full inline-flex">
+            <span className="truncate">{label}</span>
+          </Badge>
+        );
+      case "EQ_GESTION":
+        return (
+          <Badge tone="info" appearance="soft" size="sm" className="font-semibold text-[11px] truncate max-w-full inline-flex">
+            <span className="truncate">{label}</span>
+          </Badge>
+        );
+      case "DIR_NORMATIVA":
+        return (
+          <Badge tone="secondary" appearance="soft" size="sm" className="font-semibold text-[11px] truncate max-w-full inline-flex">
+            <span className="truncate">{label}</span>
+          </Badge>
+        );
+      case "EQ_NORMATIVA":
+        return (
+          <Badge tone="warning" appearance="soft" size="sm" className="font-semibold text-[11px] truncate max-w-full inline-flex">
+            <span className="truncate">{label}</span>
+          </Badge>
+        );
+      case "DTD":
+        return (
+          <Badge tone="success" appearance="soft" size="sm" className="font-semibold text-[11px] truncate max-w-full inline-flex">
+            <span className="truncate">{label}</span>
+          </Badge>
+        );
+      case "DPI":
+        return (
+          <Badge tone="primary" appearance="outline" size="sm" className="font-semibold text-[11px] truncate max-w-full inline-flex">
+            <span className="truncate">{label}</span>
+          </Badge>
+        );
+      case "APROBADOR":
+        return (
+          <Badge tone="success" appearance="outline" size="sm" className="font-semibold text-[11px] truncate max-w-full inline-flex">
+            <span className="truncate">{label}</span>
+          </Badge>
+        );
+      case "FACTURACION":
+        return (
+          <Badge tone="secondary" appearance="outline" size="sm" className="font-semibold text-[11px] truncate max-w-full inline-flex">
+            <span className="truncate">{label}</span>
+          </Badge>
+        );
+      default:
+        return (
+          <Badge tone="neutral" appearance="soft" size="sm" className="font-semibold text-[11px] truncate max-w-full inline-flex">
+            <span className="truncate">{label}</span>
+          </Badge>
+        );
+    }
+  };
+
+  // Helper para mapear evento de auditoría a TimelineItem con icono y status exacto
+  const mapEventoToTimelineItem = (log: any): TimelineItem => {
+    let icon = <KeyRound className="size-4" />;
+    let status: TimelineItem["status"] = "primary";
+
+    if (log.resultado !== "Éxito") {
+      status = "danger";
+      icon = <AlertTriangle className="size-4" />;
+    } else if (log.evento === "BLOQUEO") {
+      status = "danger";
+      icon = <ShieldAlert className="size-4" />;
+    } else if (log.evento === "SUSPENSION" || log.evento === "BAJA_LOGICA") {
+      status = "danger";
+      icon = log.evento === "SUSPENSION" ? <Ban className="size-4" /> : <UserX className="size-4" />;
+    } else if (log.evento === "ACTIVACION" || log.evento === "REACTIVACION") {
+      status = "success";
+      icon = <ShieldCheck className="size-4" />;
+    } else if (log.evento === "CAMBIO_COORDINADOR") {
+      status = "info";
+      icon = <UserCheck className="size-4" />;
+    } else if (log.evento === "CREDENCIALES_API_REVOCADAS") {
+      status = "warning";
+      icon = <Lock className="size-4" />;
+    } else if (log.evento === "CUENTA_CREADA") {
+      status = "primary";
+      icon = <UserPlus className="size-4" />;
+    } else if (log.evento === "CAMBIO_ROL") {
+      status = "primary";
+      icon = <Briefcase className="size-4" />;
+    } else if (log.evento === "RECUPERACION") {
+      status = "info";
+      icon = <RotateCcw className="size-4" />;
+    } else {
+      status = "neutral";
+      icon = <CheckCircle2 className="size-4" />;
+    }
+
+    const descParts: string[] = [];
+    if (log.detalles) descParts.push(log.detalles);
+    if (log.motivo) descParts.push(`Causa/Motivo: ${log.motivo}`);
+    if (log.valorAnterior && log.valorNuevo) {
+      descParts.push(`Transición: "${log.valorAnterior}" → "${log.valorNuevo}"`);
+    }
+
+    return {
+      id: log.id,
+      title: log.eventoLabel,
+      description: descParts.join(" • "),
+      date: log.fecha,
+      user: log.actor,
+      status,
+      statusLabel: log.resultado,
+      icon,
+    };
+  };
+
+  // Timeline items filtrados para el modal de detalle del usuario (ID-05)
   const timelineItems: TimelineItem[] = useMemo(() => {
     if (!selectedUser) return [];
-    const logs = auditoria.filter(
+    let logs = auditoria.filter(
       (a) =>
         a.usuarioAfectadoId === selectedUser.id ||
         a.usuarioAfectadoCedula === selectedUser.cedula
     );
 
-    return logs.map((log) => ({
-      id: log.id,
-      title: log.eventoLabel,
-      description:
-        log.detalles ||
-        (log.motivo ? `Motivo: ${log.motivo}` : undefined) ||
-        (log.valorAnterior && log.valorNuevo
-          ? `De "${log.valorAnterior}" a "${log.valorNuevo}"`
-          : undefined),
-      date: log.fecha,
-      user: log.actor,
-      status:
-        log.resultado === "Éxito"
-          ? log.evento === "SUSPENSION" || log.evento === "BAJA_LOGICA"
-            ? "danger"
-            : log.evento === "ACTIVACION"
-            ? "success"
-            : "primary"
-          : "error",
-      statusLabel: log.resultado,
-      icon:
-        log.evento === "CUENTA_CREADA" ? (
-          <UserPlus className="size-4" />
-        ) : log.evento === "ACTIVACION" ? (
-          <ShieldCheck className="size-4" />
-        ) : log.evento === "SUSPENSION" ? (
-          <Ban className="size-4" />
-        ) : log.evento === "BAJA_LOGICA" ? (
-          <UserX className="size-4" />
-        ) : log.evento === "CAMBIO_ROL" ? (
-          <Briefcase className="size-4" />
-        ) : (
-          <KeyRound className="size-4" />
-        ),
-    }));
-  }, [selectedUser, auditoria]);
+    // Filtro por tipo de evento
+    if (filtroAuditTipo !== "TODOS") {
+      logs = logs.filter((a) => a.evento === filtroAuditTipo);
+    }
+
+    // Filtro por período según HU 2.1
+    if (filtroAuditPeriodo === "7D") {
+      logs = logs.filter((a) => a.fecha.includes("09/2026") || a.fecha.includes("2026"));
+    } else if (filtroAuditPeriodo === "30D") {
+      logs = logs.filter((a) => a.fecha.includes("09/2026") || a.fecha.includes("08/2026"));
+    } else if (filtroAuditPeriodo === "2026") {
+      logs = logs.filter((a) => a.fecha.includes("2026"));
+    }
+
+    return logs.map(mapEventoToTimelineItem);
+  }, [selectedUser, auditoria, filtroAuditTipo, filtroAuditPeriodo]);
+
+  // Timeline items para la Bitácora Global de Auditoría (ID-05 Criterio 1 y 2)
+  const bitacoraGlobalItems: TimelineItem[] = useMemo(() => {
+    let logs = [...auditoria];
+
+    // Filtro por persona (funcionario / cédula)
+    if (filtroGlobalPersona !== "TODAS") {
+      logs = logs.filter(
+        (a) =>
+          a.usuarioAfectadoId === filtroGlobalPersona ||
+          a.usuarioAfectadoCedula === filtroGlobalPersona
+      );
+    }
+
+    // Filtro por tipo de evento
+    if (filtroGlobalTipo !== "TODOS") {
+      logs = logs.filter((a) => a.evento === filtroGlobalTipo);
+    }
+
+    // Filtro por período según HU 2.1
+    if (filtroGlobalPeriodo === "7D") {
+      logs = logs.filter((a) => a.fecha.includes("09/2026"));
+    } else if (filtroGlobalPeriodo === "30D") {
+      logs = logs.filter((a) => a.fecha.includes("09/2026") || a.fecha.includes("08/2026"));
+    } else if (filtroGlobalPeriodo === "2026") {
+      logs = logs.filter((a) => a.fecha.includes("2026"));
+    }
+
+    return logs.map(mapEventoToTimelineItem);
+  }, [auditoria, filtroGlobalPersona, filtroGlobalTipo, filtroGlobalPeriodo]);
 
   return (
     <WireframeDashboardLayout
@@ -483,41 +709,45 @@ export default function GestionUsuariosPage() {
       currentUser={currentUser}
       breadcrumbs={[
         { label: "Administración", href: "#" },
-        { label: "Usuarios" },
+        { label: "Gestión de usuarios" },
       ]}
     >
-      <div className="flex flex-col gap-6 w-full max-w-full">
+      <main className="w-full pr-3 pl-2 pb-3 pt-1.5 flex-1 min-h-0 flex flex-col overflow-hidden">
         {/* ── 1. Contenedor Principal (Tarjetas, Encabezado y Tabla) ── */}
         <Card
           className="bg-surface rounded-2xl border border-border shadow-xs flex-1 min-h-0 overflow-hidden flex flex-col my-0"
-          innerClassName="p-4 sm:p-6 lg:p-8 flex flex-col gap-6 w-full"
+          innerClassName="p-4 sm:p-6 lg:p-8 pr-6 sm:pr-8 lg:pr-10 flex flex-col gap-6 overflow-y-auto flex-1 min-h-0 w-full"
         >
-          {/* ── Encabezado Principal ── */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border/60 pb-5">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <h1 className="font-heading font-extrabold text-2xl sm:text-3xl tracking-tight text-primary">
-                  Gestión de usuarios
-                </h1>
-                <Badge tone="primary" appearance="soft" size="sm" className="font-bold">
-                  DINARP · Seguridad
-                </Badge>
-              </div>
-              <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed font-normal">
+          {/* ── 1. Encabezado Principal ── */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 w-full">
+            <div className="space-y-1 min-w-0 flex-1">
+              <h1 className="font-heading font-extrabold text-2xl sm:text-3xl tracking-tight text-primary">
+                Gestión de usuarios
+              </h1>
+              <p className="text-xs sm:text-sm text-muted-foreground w-full max-w-none leading-relaxed font-normal">
                 Administra las cuentas internas, roles, ámbitos y estados de acceso al Portal.
               </p>
             </div>
 
-            {/* Acción Principal */}
-            <div className="flex items-center gap-2 shrink-0">
+            {/* Acciones de Cabecera: Auditoría Global + Crear cuenta */}
+            <div className="flex flex-wrap items-center justify-end gap-2 shrink-0 sm:self-center">
+              <Button
+                variant="neutral"
+                size="default"
+                onClick={() => setModalBitacoraGlobalOpen(true)}
+                className="gap-2 shadow-xs cursor-pointer font-medium text-xs whitespace-nowrap"
+              >
+                <History className="size-4 text-primary" />
+                <span>Bitácora de auditoría (ID-05)</span>
+              </Button>
               <Button
                 variant="primary"
                 size="default"
                 onClick={() => setModalCrearOpen(true)}
-                className="gap-2 shadow-xs cursor-pointer font-semibold text-xs"
+                className="gap-2 shadow-xs cursor-pointer font-semibold text-xs whitespace-nowrap"
               >
                 <UserPlus className="size-4" />
-                <span>+ Crear usuario</span>
+                <span>+ Crear cuenta interna</span>
               </Button>
             </div>
           </div>
@@ -785,36 +1015,30 @@ export default function GestionUsuariosPage() {
             </Card>
           </div>
 
-          {/* ── 3. Buscador y Filtros (Sin contenedor caja envolvente, anchos holgados) ── */}
-          <div className="flex flex-col xl:flex-row gap-3 items-stretch xl:items-end justify-between w-full">
-            {/* Buscador amplio */}
+          {/* ── Línea separadora entre KPI Cards y Filtros ── */}
+          <div className="w-full h-[1.5px] bg-border my-4 shrink-0" />
+
+          {/* ── 3. Buscador y Filtros por Combobox en Una Fila Sin Caja ── */}
+          <div className="space-y-3">
+            <div className="flex flex-col xl:flex-row gap-3 items-stretch xl:items-end justify-between w-full">
+            {/* Buscador amplio con bordes redondeados completos */}
             <div className="flex-1 min-w-[280px]">
-              <InputGroup className="bg-surface border-border/80 shadow-2xs h-10 rounded-xl focus-within:ring-2 focus-within:ring-primary/20 transition-all">
-                <InputGroupAddon className="pl-3.5">
-                  <Search className="size-4 text-muted-foreground" />
-                </InputGroupAddon>
-                <InputGroupInput
-                  placeholder="Buscar por cédula, nombre completo o correo institucional..."
-                  value={searchQuery}
-                  onChange={(e) => {
-                    setSearchQuery(e.target.value);
-                    setCurrentPage(1);
-                  }}
-                  className="text-xs"
-                />
-                {searchQuery && (
-                  <InputGroupButton
-                    onClick={() => setSearchQuery("")}
-                    className="pr-3 text-muted-foreground hover:text-foreground"
-                    aria-label="Borrar búsqueda"
-                  >
-                    <X className="size-3.5" />
-                  </InputGroupButton>
-                )}
-              </InputGroup>
+              <Search
+                placeholder="Buscar por cédula, nombre completo o correo institucional..."
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setCurrentPage(1);
+                }}
+                onClear={() => {
+                  setSearchQuery("");
+                  setCurrentPage(1);
+                }}
+                className="bg-surface border-border/80 shadow-2xs h-9 text-xs w-full rounded-full"
+              />
             </div>
 
-            {/* Filtros Selectores con ancho amplio */}
+            {/* Filtros Selectores con ancho amplio y redondeo completo */}
             <div className="flex flex-wrap sm:flex-nowrap items-center gap-2.5">
               {/* Filtro Rol */}
               <div className="w-full sm:w-[220px]">
@@ -840,8 +1064,8 @@ export default function GestionUsuariosPage() {
                     }
                   }}
                 >
-                  <ComboboxSelectTrigger className="h-10 text-xs w-full bg-surface border-border/80 rounded-xl shadow-2xs" />
-                  <ComboboxContent className="min-w-[260px]">
+                  <ComboboxSelectTrigger className="h-9 text-xs w-full bg-surface border-border/80 rounded-full px-3.5 shadow-2xs" />
+                  <ComboboxContent className="min-w-[260px] rounded-xl">
                     <ComboboxList>
                       <ComboboxItem value={{ value: "TODOS", label: "Todos los roles" }}>
                         Todos los roles
@@ -874,8 +1098,8 @@ export default function GestionUsuariosPage() {
                     }
                   }}
                 >
-                  <ComboboxSelectTrigger className="h-10 text-xs w-full bg-surface border-border/80 rounded-xl shadow-2xs" />
-                  <ComboboxContent className="min-w-[280px]">
+                  <ComboboxSelectTrigger className="h-9 text-xs w-full bg-surface border-border/80 rounded-full px-3.5 shadow-2xs" />
+                  <ComboboxContent className="min-w-[280px] rounded-xl">
                     <ComboboxList>
                       <ComboboxItem value={{ value: "TODOS", label: "Todos los ámbitos" }}>
                         Todos los ámbitos
@@ -920,8 +1144,8 @@ export default function GestionUsuariosPage() {
                     }
                   }}
                 >
-                  <ComboboxSelectTrigger className="h-10 text-xs w-full bg-surface border-border/80 rounded-xl shadow-2xs" />
-                  <ComboboxContent className="min-w-[200px]">
+                  <ComboboxSelectTrigger className="h-9 text-xs w-full bg-surface border-border/80 rounded-full px-3.5 shadow-2xs" />
+                  <ComboboxContent className="min-w-[200px] rounded-xl">
                     <ComboboxList>
                       <ComboboxItem value={{ value: "TODOS", label: "Todos los estados" }}>
                         Todos los estados
@@ -955,266 +1179,553 @@ export default function GestionUsuariosPage() {
                     setFilterEstado("TODOS");
                     setCurrentPage(1);
                   }}
-                  className="h-10 text-xs text-muted-foreground hover:text-foreground cursor-pointer px-3 shrink-0"
+                  className="h-9 text-xs text-muted-foreground hover:text-foreground cursor-pointer px-3 shrink-0 rounded-full"
                 >
                   Limpiar filtros
                 </Button>
               )}
             </div>
           </div>
+          </div>
 
-          {/* ── 4. Tabla de Usuarios ── */}
-          <div className="w-full overflow-hidden rounded-xl border border-border bg-surface shadow-2xs">
-            <div className="overflow-x-auto">
-              <Table className="w-full min-w-[1080px] table-fixed">
-                <TableHeader>
-                  <TableRow className="border-0 h-11">
-                    <TableHead className="w-[220px] px-3 py-2.5 whitespace-nowrap text-white font-bold text-xs">
-                      USUARIO / PERSONA
-                    </TableHead>
-                    <TableHead className="w-[120px] px-3 py-2.5 whitespace-nowrap text-white font-bold text-xs">
-                      CÉDULA
-                    </TableHead>
-                    <TableHead className="w-[210px] px-3 py-2.5 whitespace-nowrap text-white font-bold text-xs">
-                      CORREO INSTITUCIONAL
-                    </TableHead>
-                    <TableHead className="w-[170px] px-3 py-2.5 whitespace-nowrap text-white font-bold text-xs">
-                      ROL ASIGNADO
-                    </TableHead>
-                    <TableHead className="w-[190px] px-3 py-2.5 whitespace-nowrap text-white font-bold text-xs">
-                      ÁMBITO INSTITUCIONAL
-                    </TableHead>
-                    <TableHead className="w-[130px] px-3 py-2.5 whitespace-nowrap text-white font-bold text-xs">
-                      ESTADO
-                    </TableHead>
-                    <TableHead className="w-[140px] px-3 py-2.5 whitespace-nowrap text-white font-bold text-xs">
-                      ÚLTIMA ACTIVIDAD
-                    </TableHead>
-                    <TableHead className="w-[100px] px-3 py-2.5 whitespace-nowrap text-right text-white font-bold text-xs">
-                      ACCIONES
-                    </TableHead>
+          {/* ── 4. Tabla de Usuarios (Desktop md+) ── */}
+          <div className="hidden md:block w-full">
+            <Table className="w-full min-w-[1120px] table-fixed" containerClassName="w-full overflow-x-auto rounded-xl pb-2 pr-2">
+              <TableHeader>
+                <TableRow className="border-0 h-11">
+                  <TableHead className="w-[210px] px-3 py-2.5 whitespace-nowrap text-white font-bold text-xs">
+                    USUARIO / PERSONA
+                  </TableHead>
+                  <TableHead className="w-[110px] px-3 py-2.5 whitespace-nowrap text-white font-bold text-xs">
+                    CÉDULA
+                  </TableHead>
+                  <TableHead className="w-[220px] px-3 py-2.5 whitespace-nowrap text-white font-bold text-xs">
+                    CORREO INSTITUCIONAL
+                  </TableHead>
+                  <TableHead className="w-[170px] px-3 py-2.5 whitespace-nowrap text-white font-bold text-xs">
+                    ROL ASIGNADO
+                  </TableHead>
+                  <TableHead className="w-[170px] px-3 py-2.5 whitespace-nowrap text-white font-bold text-xs">
+                    ÁMBITO INSTITUCIONAL
+                  </TableHead>
+                  <TableHead className="w-[110px] px-3 py-2.5 whitespace-nowrap text-white font-bold text-xs">
+                    ESTADO
+                  </TableHead>
+                  <TableHead className="w-[130px] px-3 py-2.5 whitespace-nowrap text-white font-bold text-xs">
+                    ÚLTIMA ACTIVIDAD
+                  </TableHead>
+                  <TableHead className="w-[160px] px-3 py-2.5 whitespace-nowrap text-right text-white font-bold text-xs">
+                    ACCIONES
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {paginatedUsuarios.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={8} className="text-center py-12">
+                      <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
+                        <Users className="size-8 stroke-[1.5] text-muted-foreground/60" />
+                        <p className="text-sm font-medium">No se encontraron cuentas de usuario</p>
+                        <p className="text-xs">
+                          Ajusta los filtros de búsqueda o registra un nuevo usuario interno.
+                        </p>
+                      </div>
+                    </TableCell>
                   </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {paginatedUsuarios.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={8} className="text-center py-12">
-                        <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
-                          <Users className="size-8 stroke-[1.5] text-muted-foreground/60" />
-                          <p className="text-sm font-medium">No se encontraron cuentas de usuario</p>
-                          <p className="text-xs">
-                            Ajusta los filtros de búsqueda o registra un nuevo usuario interno.
-                          </p>
+                ) : (
+                  paginatedUsuarios.map((u) => (
+                    <TableRow key={u.id} className="hover:bg-muted/20 transition-colors">
+                      {/* Usuario */}
+                      <TableCell className="px-3 py-2.5 overflow-hidden">
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div className="flex flex-col min-w-0 cursor-default">
+                              <span className="text-xs font-bold text-foreground truncate">
+                                {u.nombreCompleto}
+                              </span>
+                              <span className="text-[10px] text-muted-foreground font-mono truncate">
+                                ID: {u.id}
+                              </span>
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent side="top" className="max-w-xs break-words">
+                            <p className="font-bold text-xs">{u.nombreCompleto}</p>
+                            <p className="text-[10px] text-muted-foreground font-mono">ID interno: {u.id}</p>
+                            <p className="text-[10px] text-muted-foreground font-mono">Cédula: {u.cedula}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TableCell>
+
+                      {/* Cédula */}
+                      <TableCell className="px-3 py-2.5 text-xs font-mono font-medium text-foreground whitespace-nowrap">
+                        {u.cedula}
+                      </TableCell>
+
+                      {/* Correo */}
+                      <TableCell className="px-3 py-2.5 overflow-hidden">
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div className="flex items-center gap-1.5 text-xs text-foreground/80 min-w-0 cursor-default">
+                              <Mail className="size-3 text-muted-foreground shrink-0" />
+                              <span className="truncate">{u.correo}</span>
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent side="top" className="max-w-xs break-all">
+                            <p className="text-xs font-medium">{u.correo}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TableCell>
+
+                      {/* Rol */}
+                      <TableCell className="px-3 py-2.5 overflow-hidden">
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div className="inline-flex max-w-full cursor-default">
+                              {getRolBadge(u.rol, u.rolLabel)}
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent side="top" className="max-w-xs">
+                            <p className="text-xs font-bold">{u.rolLabel}</p>
+                            <p className="text-[10px] text-muted-foreground">Código de rol: {u.rol}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TableCell>
+
+                      {/* Ámbito */}
+                      <TableCell className="px-3 py-2.5 text-xs text-muted-foreground overflow-hidden">
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className="truncate block cursor-default">
+                              {u.ambito}
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent side="top" className="max-w-xs break-words">
+                            <p className="text-xs font-medium">{u.ambito}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TableCell>
+
+                      {/* Estado */}
+                      <TableCell className="px-3 py-2.5 whitespace-nowrap overflow-hidden">
+                        <div className="inline-flex min-w-0">
+                          {getEstadoBadge(u.estado)}
                         </div>
                       </TableCell>
-                    </TableRow>
-                  ) : (
-                    paginatedUsuarios.map((u) => (
-                      <TableRow key={u.id} className="hover:bg-muted/20 transition-colors">
-                        {/* Usuario */}
-                        <TableCell className="py-3">
-                          <div className="flex flex-col min-w-0">
-                            <span className="text-xs font-bold text-foreground truncate max-w-[200px]">
-                              {u.nombreCompleto}
-                            </span>
-                            <span className="text-[10px] text-muted-foreground font-mono">
-                              ID: {u.id}
-                            </span>
-                          </div>
-                        </TableCell>
 
-                        {/* Cédula */}
-                        <TableCell className="py-3 text-xs font-mono font-medium text-foreground">
-                          {u.cedula}
-                        </TableCell>
+                      {/* Última Actividad */}
+                      <TableCell className="px-3 py-2.5 text-xs text-muted-foreground whitespace-nowrap">
+                        {u.ultimoAcceso || "Sin ingresos"}
+                      </TableCell>
 
-                        {/* Correo */}
-                        <TableCell className="py-3">
-                          <div className="flex items-center gap-1.5 text-xs text-foreground/80">
-                            <Mail className="size-3 text-muted-foreground shrink-0" />
-                            <span className="truncate max-w-[190px]">{u.correo}</span>
-                          </div>
-                        </TableCell>
+                      {/* Acciones */}
+                      <TableCell className="px-3 py-2.5 text-right whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex items-center justify-end gap-1 shrink-0">
+                          {/* Ver detalle y auditoría */}
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="icon-sm"
+                                onClick={() => handleOpenDetalle(u)}
+                                className="size-7 rounded-lg border-border/80 text-foreground hover:bg-muted shadow-2xs"
+                                aria-label={`Ver detalle de ${u.nombreCompleto}`}
+                              >
+                                <Eye className="size-3.5 text-muted-foreground" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent side="top">Ver detalle y expediente</TooltipContent>
+                          </Tooltip>
 
-                        {/* Rol */}
-                        <TableCell className="py-3">
-                          <Badge tone="neutral" appearance="soft" size="sm" className="font-semibold text-[11px]">
-                            {u.rolLabel}
-                          </Badge>
-                        </TableCell>
-
-                        {/* Ámbito */}
-                        <TableCell className="py-3 text-xs text-muted-foreground max-w-[200px] truncate">
-                          {u.ambito}
-                        </TableCell>
-
-                        {/* Estado */}
-                        <TableCell className="py-3">
-                          {getEstadoBadge(u.estado)}
-                        </TableCell>
-
-                        {/* Última Actividad */}
-                        <TableCell className="py-3 text-xs text-muted-foreground">
-                          {u.ultimoAcceso || "Sin ingresos"}
-                        </TableCell>
-
-                        {/* Acciones */}
-                        <TableCell className="px-3 py-2.5 text-right" onClick={(e) => e.stopPropagation()}>
-                          <div className="flex items-center justify-end gap-1">
-                            {/* Icon Button directo: Ver detalle */}
+                          {/* Editar usuario */}
+                          {u.estado !== "RETIRADO" && (
                             <Tooltip>
                               <TooltipTrigger asChild>
                                 <Button
                                   type="button"
                                   variant="outline"
                                   size="icon-sm"
-                                  onClick={() => handleOpenDetalle(u)}
-                                  className="size-7 rounded-lg border-border/80 text-foreground hover:bg-muted shadow-2xs"
-                                  aria-label={`Ver detalle y expediente de ${u.nombreCompleto}`}
+                                  onClick={() => handleOpenEditar(u)}
+                                  className="size-7 rounded-lg border-border/80 text-foreground hover:bg-primary/10 hover:border-primary/40 shadow-2xs"
+                                  aria-label={`Editar ${u.nombreCompleto}`}
                                 >
-                                  <Eye className="size-3.5" />
+                                  <Edit2 className="size-3.5 text-primary" />
                                 </Button>
                               </TooltipTrigger>
-                              <TooltipContent side="top">Ver detalle y expediente</TooltipContent>
+                              <TooltipContent side="top">Editar usuario</TooltipContent>
                             </Tooltip>
+                          )}
 
-                            {/* Icon Button dropdown para acciones contextuales */}
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
+                          {/* Suspender cuenta (si está activo) */}
+                          {u.estado === "ACTIVO" && (
+                            <Tooltip>
+                              <TooltipTrigger asChild>
                                 <Button
                                   type="button"
-                                  variant="ghost"
+                                  variant="outline"
                                   size="icon-sm"
-                                  className="size-7 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground"
-                                  aria-label="Más opciones"
+                                  onClick={() => handleOpenSuspender(u)}
+                                  className="size-7 rounded-lg border-border/80 text-warning hover:bg-warning/10 hover:border-warning/40 shadow-2xs"
+                                  aria-label={`Suspender cuenta de ${u.nombreCompleto}`}
                                 >
-                                  <MoreVertical className="size-3.5" />
+                                  <Ban className="size-3.5 text-warning" />
                                 </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end" className="w-56 p-1.5 shadow-md">
-                                <DropdownMenuLabel className="text-[11px] text-muted-foreground px-2 py-1">
-                                  Opciones de cuenta
-                                </DropdownMenuLabel>
+                              </TooltipTrigger>
+                              <TooltipContent side="top">Suspender cuenta</TooltipContent>
+                            </Tooltip>
+                          )}
 
-                                <DropdownMenuItem
-                                  onClick={() => handleOpenDetalle(u)}
-                                  className="gap-2 text-xs py-2 cursor-pointer"
+                          {/* Reactivar cuenta (si está suspendido) */}
+                          {u.estado === "SUSPENDIDO" && (
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="icon-sm"
+                                  onClick={() => handleOpenReactivar(u)}
+                                  className="size-7 rounded-lg border-border/80 text-success hover:bg-success/10 hover:border-success/40 shadow-2xs"
+                                  aria-label={`Reactivar cuenta de ${u.nombreCompleto}`}
                                 >
-                                  <Eye className="size-3.5 text-muted-foreground" />
-                                  <span>Ver detalle y auditoría</span>
-                                </DropdownMenuItem>
+                                  <RotateCcw className="size-3.5 text-success" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent side="top">Reactivar cuenta</TooltipContent>
+                            </Tooltip>
+                          )}
 
-                                {u.estado !== "RETIRADO" && (
-                                  <DropdownMenuItem
-                                    onClick={() => handleOpenEditar(u)}
-                                    className="gap-2 text-xs py-2 cursor-pointer"
-                                  >
-                                    <Edit2 className="size-3.5 text-primary" />
-                                    <span>Editar usuario</span>
-                                  </DropdownMenuItem>
-                                )}
+                          {/* Dar de baja (si no está ya retirado) */}
+                          {u.estado !== "RETIRADO" && (
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="icon-sm"
+                                  onClick={() => handleOpenBaja(u)}
+                                  className="size-7 rounded-lg border-border/80 text-danger hover:bg-danger/10 hover:border-danger/40 shadow-2xs"
+                                  aria-label={`Dar de baja a ${u.nombreCompleto}`}
+                                >
+                                  <UserX className="size-3.5 text-danger" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent side="top">Dar de baja</TooltipContent>
+                            </Tooltip>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
 
-                                <DropdownMenuSeparator />
+          {/* ── 4.1 Vista Mobile Cards (<md) ── */}
+          <div className="block md:hidden w-full space-y-3">
+            {paginatedUsuarios.length === 0 ? (
+              <div className="flex flex-col items-center justify-center p-8 bg-surface border border-border rounded-xl text-center space-y-2">
+                <Users className="size-8 stroke-[1.5] text-muted-foreground/60" />
+                <p className="text-sm font-semibold text-foreground">No se encontraron cuentas de usuario</p>
+                <p className="text-xs text-muted-foreground">
+                  Ajusta los filtros de búsqueda o registra un nuevo usuario interno.
+                </p>
+              </div>
+            ) : (
+              paginatedUsuarios.map((u) => (
+                <div
+                  key={u.id}
+                  className="p-4 rounded-xl border border-border bg-surface space-y-3 text-left transition-all duration-200 hover:border-primary/40 hover:shadow-2xs"
+                >
+                  {/* Encabezado Card: Nombre + ID + Badge de Estado */}
+                  <div className="flex items-start justify-between gap-2 pb-2.5 border-b border-border/60">
+                    <div className="min-w-0 space-y-0.5">
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <p className="text-sm font-bold text-foreground leading-snug line-clamp-1 cursor-default">
+                            {u.nombreCompleto}
+                          </p>
+                        </TooltipTrigger>
+                        <TooltipContent side="top" className="max-w-xs break-words">
+                          <p className="font-bold text-xs">{u.nombreCompleto}</p>
+                          <p className="text-[10px] text-muted-foreground font-mono">ID interno: {u.id}</p>
+                          <p className="text-[10px] text-muted-foreground font-mono">Cédula: {u.cedula}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                      <div className="flex items-center gap-2 text-[11px] text-muted-foreground font-mono">
+                        <span>{u.id}</span>
+                        <span>•</span>
+                        <span>C.I. {u.cedula}</span>
+                      </div>
+                    </div>
+                    <div className="shrink-0">
+                      {getEstadoBadge(u.estado)}
+                    </div>
+                  </div>
 
-                                {/* Activar cuenta si está pendiente */}
-                                {u.estado === "PENDIENTE_ACTIVACION" && (
-                                  <DropdownMenuItem
-                                    onClick={() => {
-                                      const res = simularActivacionDemo(u.id, currentUser.name);
-                                      if (res.ok) {
-                                        toast.success("Cuenta activada en simulación", {
-                                          description: `Se completaron credenciales y segundo factor TOTP para ${u.nombreCompleto}.`,
-                                        });
-                                      }
-                                    }}
-                                    className="gap-2 text-xs py-2 text-success focus:text-success cursor-pointer font-medium"
-                                  >
-                                    <CheckCircle2 className="size-3.5 text-success" />
-                                    <span>Simular activación (2FA)</span>
-                                  </DropdownMenuItem>
-                                )}
+                  {/* Cuerpo Card: Rol, Ámbito, Correo y Último Acceso */}
+                  <div className="space-y-2 text-xs">
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="flex items-center gap-1.5 text-muted-foreground truncate cursor-default">
+                          <Mail className="size-3.5 text-muted-foreground shrink-0" />
+                          <span className="truncate text-foreground/90">{u.correo}</span>
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="max-w-xs break-all">
+                        <p className="text-xs font-medium">{u.correo}</p>
+                      </TooltipContent>
+                    </Tooltip>
 
-                                {/* Suspender cuenta */}
-                                {u.estado === "ACTIVO" && (
-                                  <DropdownMenuItem
-                                    onClick={() => handleOpenSuspender(u)}
-                                    className="gap-2 text-xs py-2 text-warning-foreground focus:text-warning cursor-pointer font-medium"
-                                  >
-                                    <Ban className="size-3.5 text-warning" />
-                                    <span>Suspender cuenta</span>
-                                  </DropdownMenuItem>
-                                )}
-
-                                {/* Reactivar cuenta */}
-                                {u.estado === "SUSPENDIDO" && (
-                                  <DropdownMenuItem
-                                    onClick={() => handleOpenReactivar(u)}
-                                    className="gap-2 text-xs py-2 text-success focus:text-success cursor-pointer font-medium"
-                                  >
-                                    <RotateCcw className="size-3.5 text-success" />
-                                    <span>Reactivar cuenta</span>
-                                  </DropdownMenuItem>
-                                )}
-
-                                {/* Dar de baja (prohibido 'Eliminar') */}
-                                {u.estado !== "RETIRADO" && (
-                                  <DropdownMenuItem
-                                    onClick={() => handleOpenBaja(u)}
-                                    className="gap-2 text-xs py-2 text-danger focus:text-danger cursor-pointer font-medium"
-                                  >
-                                    <UserX className="size-3.5 text-danger" />
-                                    <span>Dar de baja</span>
-                                  </DropdownMenuItem>
-                                )}
-                              </DropdownMenuContent>
-                            </DropdownMenu>
+                    <div className="flex items-center justify-between gap-2 pt-1">
+                      <span className="text-[11px] text-muted-foreground">Rol:</span>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="inline-flex max-w-[70%] cursor-default">
+                            {getRolBadge(u.rol, u.rolLabel)}
                           </div>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </div>
+                        </TooltipTrigger>
+                        <TooltipContent side="top" className="max-w-xs">
+                          <p className="text-xs font-bold">{u.rolLabel}</p>
+                          <p className="text-[10px] text-muted-foreground">Código de rol: {u.rol}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </div>
 
-            {/* Paginación */}
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-3.5 border-t border-border bg-surface text-xs text-muted-foreground">
-              <span>
-                Mostrando {paginatedUsuarios.length} de {filteredUsuarios.length} usuarios registrados
-              </span>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={currentPage <= 1}
-                  onClick={() => setCurrentPage((p) => p - 1)}
-                  className="h-8 text-xs px-3"
-                >
-                  Anterior
-                </Button>
-                <span className="font-semibold px-2">
-                  Página {currentPage} de {totalPages}
-                </span>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={currentPage >= totalPages}
-                  onClick={() => setCurrentPage((p) => p + 1)}
-                  className="h-8 text-xs px-3"
-                >
-                  Siguiente
-                </Button>
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-[11px] text-muted-foreground">Ámbito:</span>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className="text-xs font-medium text-foreground text-right truncate max-w-[60%] cursor-default">
+                            {u.ambito}
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent side="top" className="max-w-xs break-words">
+                          <p className="text-xs font-medium">{u.ambito}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </div>
+
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-[11px] text-muted-foreground">Último acceso:</span>
+                      <span className="text-[11px] text-muted-foreground">
+                        {u.ultimoAcceso || "Sin ingresos"}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Pie Card: Botones de Acción */}
+                  <div className="flex items-center justify-end gap-1.5 pt-2.5 border-t border-border/60">
+                    {/* Ver detalle */}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleOpenDetalle(u)}
+                      className="h-8 px-2.5 text-xs rounded-lg border-border/80 text-foreground hover:bg-muted gap-1.5"
+                    >
+                      <Eye className="size-3.5 text-muted-foreground" />
+                      <span>Expediente</span>
+                    </Button>
+
+                    {/* Editar */}
+                    {u.estado !== "RETIRADO" && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleOpenEditar(u)}
+                        className="h-8 px-2.5 text-xs rounded-lg border-border/80 text-primary hover:bg-primary/10 gap-1.5"
+                      >
+                        <Edit2 className="size-3.5 text-primary" />
+                        <span>Editar</span>
+                      </Button>
+                    )}
+
+                    {/* Suspender */}
+                    {u.estado === "ACTIVO" && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleOpenSuspender(u)}
+                        className="h-8 px-2.5 text-xs rounded-lg border-border/80 text-warning hover:bg-warning/10 gap-1.5"
+                      >
+                        <Ban className="size-3.5 text-warning" />
+                        <span>Suspender</span>
+                      </Button>
+                    )}
+
+                    {/* Reactivar */}
+                    {u.estado === "SUSPENDIDO" && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleOpenReactivar(u)}
+                        className="h-8 px-2.5 text-xs rounded-lg border-border/80 text-success hover:bg-success/10 gap-1.5"
+                      >
+                        <RotateCcw className="size-3.5 text-success" />
+                        <span>Reactivar</span>
+                      </Button>
+                    )}
+
+                    {/* Dar de baja */}
+                    {u.estado !== "RETIRADO" && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleOpenBaja(u)}
+                        className="h-8 px-2.5 text-xs rounded-lg border-border/80 text-danger hover:bg-danger/10 gap-1.5"
+                      >
+                        <UserX className="size-3.5 text-danger" />
+                        <span>Baja</span>
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+
+            {/* Paginación UI Kit */}
+            <div className="flex flex-col md:flex-row items-center justify-center md:justify-between gap-3 sm:gap-4 pt-4 pb-2 w-full border-t border-border/50">
+              {/* Información de registros a la izquierda */}
+              <div className="flex items-center justify-center md:justify-start w-full md:w-auto text-center md:text-left">
+                <p className="text-xs text-muted-foreground font-medium text-center md:text-left">
+                  Mostrando{" "}
+                  <span className="font-bold text-foreground">
+                    {filteredUsuarios.length === 0
+                      ? 0
+                      : (currentPage - 1) * pageSize + 1}{" "}
+                    - {Math.min(currentPage * pageSize, filteredUsuarios.length)}
+                  </span>{" "}
+                  de{" "}
+                  <span className="font-bold text-foreground">
+                    {filteredUsuarios.length}
+                  </span>{" "}
+                  usuarios registrados
+                </p>
+              </div>
+
+              {/* Selector de filas por página + Controles de paginación a la derecha */}
+              <div className="w-full md:w-auto flex flex-wrap items-center justify-center md:justify-end gap-3 sm:gap-4 overflow-x-auto py-1">
+                {/* Selector de filas por página */}
+                <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
+                  <span>Filas:</span>
+                  <div className="inline-flex rounded-full border border-border/80 p-0.5 bg-surface shadow-2xs">
+                    {[5, 10, 20, 50].map((size) => (
+                      <button
+                        key={size}
+                        type="button"
+                        onClick={() => {
+                          setPageSize(size);
+                          setCurrentPage(1);
+                        }}
+                        className={cn(
+                          "px-2.5 py-0.5 text-xs font-semibold rounded-full transition-all cursor-pointer",
+                          pageSize === size
+                            ? "bg-surface text-primary shadow-2xs font-bold border border-border/80"
+                            : "text-muted-foreground hover:text-foreground"
+                        )}
+                      >
+                        {size}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <Pagination className="mx-auto md:mx-0 w-auto justify-center">
+                  <PaginationContent className="gap-1 sm:gap-1.5 flex-nowrap justify-center">
+                    <PaginationItem className="hidden sm:inline-flex">
+                      <PaginationFirst
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          if (currentPage > 1) setCurrentPage(1);
+                        }}
+                        className={cn(
+                          "size-8 rounded-full border border-border/70 hover:bg-muted/30 transition-colors",
+                          currentPage <= 1 ? "pointer-events-none opacity-40 cursor-not-allowed" : ""
+                        )}
+                      />
+                    </PaginationItem>
+
+                    <PaginationItem>
+                      <PaginationPrevious
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          if (currentPage > 1) setCurrentPage(currentPage - 1);
+                        }}
+                        className={cn(
+                          "size-8 rounded-full border border-border/70 hover:bg-muted/30 transition-colors",
+                          currentPage <= 1 ? "pointer-events-none opacity-40 cursor-not-allowed" : ""
+                        )}
+                      />
+                    </PaginationItem>
+
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                      <PaginationItem key={page}>
+                        <PaginationLink
+                          href="#"
+                          isActive={page === currentPage}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            setCurrentPage(page);
+                          }}
+                          className={cn(
+                            "size-8 rounded-full font-semibold text-xs transition-all",
+                            page === currentPage
+                              ? "bg-primary text-white font-bold shadow-2xs"
+                              : "border border-border/70 hover:bg-muted/30 text-foreground"
+                          )}
+                        >
+                          {page}
+                        </PaginationLink>
+                      </PaginationItem>
+                    ))}
+
+                    <PaginationItem>
+                      <PaginationNext
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          if (currentPage < totalPages) setCurrentPage(currentPage + 1);
+                        }}
+                        className={cn(
+                          "size-8 rounded-full border border-border/70 hover:bg-muted/30 transition-colors",
+                          currentPage >= totalPages ? "pointer-events-none opacity-40 cursor-not-allowed" : ""
+                        )}
+                      />
+                    </PaginationItem>
+
+                    <PaginationItem className="hidden sm:inline-flex">
+                      <PaginationLast
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          if (currentPage < totalPages) setCurrentPage(totalPages);
+                        }}
+                        className={cn(
+                          "size-8 rounded-full border border-border/70 hover:bg-muted/30 transition-colors",
+                          currentPage >= totalPages ? "pointer-events-none opacity-40 cursor-not-allowed" : ""
+                        )}
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
               </div>
             </div>
-          </div>
         </Card>
-      </div>
+      </main>
 
       {/* ══════════════════════════════════════════════════════════
           MODAL 1: CREAR USUARIO (ID-01)
          ══════════════════════════════════════════════════════════ */}
       <Dialog open={modalCrearOpen} onOpenChange={handleCloseModalCrear}>
-        <DialogContent className="max-w-2xl p-6 rounded-2xl border-border bg-surface">
+        <DialogContent variant="standard" size="lg" className="p-6 rounded-2xl border-border bg-surface">
           <DialogHeader className="border-b border-border/60 pb-3">
             <DialogTitle className="font-heading font-extrabold text-xl text-primary flex items-center gap-2">
               <UserPlus className="size-5 text-primary" />
@@ -1283,9 +1794,9 @@ export default function GestionUsuariosPage() {
                 {/* Cédula */}
                 <div className="space-y-1.5">
                   <Label htmlFor="crear-cedula" className="text-xs font-semibold text-foreground">
-                    Cédula de Identidad *
+                    Cédula de Identidad <span className="text-warning">*</span>
                   </Label>
-                  <InputGroup className="bg-background border-border h-10">
+                  <InputGroup leftIcon={<Fingerprint className="size-4 text-muted-foreground" />}>
                     <InputGroupInput
                       id="crear-cedula"
                       type="text"
@@ -1305,9 +1816,9 @@ export default function GestionUsuariosPage() {
                 {/* Nombre Completo */}
                 <div className="space-y-1.5">
                   <Label htmlFor="crear-nombre" className="text-xs font-semibold text-foreground">
-                    Nombre Completo / Funcionario *
+                    Nombre Completo / Funcionario <span className="text-warning">*</span>
                   </Label>
-                  <InputGroup className="bg-background border-border h-10">
+                  <InputGroup leftIcon={<Users className="size-4 text-muted-foreground" />}>
                     <InputGroupInput
                       id="crear-nombre"
                       type="text"
@@ -1323,12 +1834,9 @@ export default function GestionUsuariosPage() {
                 {/* Correo Electrónico Institucional */}
                 <div className="space-y-1.5 md:col-span-2">
                   <Label htmlFor="crear-correo" className="text-xs font-semibold text-foreground">
-                    Correo Electrónico Institucional *
+                    Correo Electrónico Institucional <span className="text-warning">*</span>
                   </Label>
-                  <InputGroup className="bg-background border-border h-10">
-                    <InputGroupAddon className="pl-3">
-                      <Mail className="size-4 text-muted-foreground" />
-                    </InputGroupAddon>
+                  <InputGroup leftIcon={<Mail className="size-4 text-muted-foreground" />}>
                     <InputGroupInput
                       id="crear-correo"
                       type="email"
@@ -1347,7 +1855,7 @@ export default function GestionUsuariosPage() {
                 {/* Rol (Catálogo Oficial DINARP) */}
                 <div className="space-y-1.5">
                   <Label className="text-xs font-semibold text-foreground">
-                    Rol Interno Institucional *
+                    Rol Interno Institucional <span className="text-warning">*</span>
                   </Label>
                   <Combobox
                     items={ROLES_INTERNOS_CATALOGO.map((r) => ({
@@ -1363,7 +1871,7 @@ export default function GestionUsuariosPage() {
                       if (item) handleRolChangeCrear(item.value as RolInterno);
                     }}
                   >
-                    <ComboboxSelectTrigger className="h-10 text-xs w-full bg-surface border-border/80 rounded-xl shadow-2xs" />
+                    <ComboboxSelectTrigger className="h-10 text-xs w-full bg-surface border-border/80 rounded-full px-3.5 shadow-2xs" />
                     <ComboboxContent className="min-w-[280px]">
                       <ComboboxList>
                         {ROLES_INTERNOS_CATALOGO.map((r) => (
@@ -1382,7 +1890,7 @@ export default function GestionUsuariosPage() {
                 {/* Ámbito Institucional Permitido */}
                 <div className="space-y-1.5">
                   <Label className="text-xs font-semibold text-foreground">
-                    Ámbito Institucional Asignado *
+                    Ámbito Institucional Asignado <span className="text-warning">*</span>
                   </Label>
                   {(() => {
                     const rolCfg = ROLES_INTERNOS_CATALOGO.find((r) => r.id === formCrearRol);
@@ -1397,7 +1905,7 @@ export default function GestionUsuariosPage() {
                           if (item) setFormCrearAmbito(item.value);
                         }}
                       >
-                        <ComboboxSelectTrigger className="h-10 text-xs w-full bg-surface border-border/80 rounded-xl shadow-2xs" />
+                        <ComboboxSelectTrigger className="h-10 text-xs w-full bg-surface border-border/80 rounded-full px-3.5 shadow-2xs" />
                         <ComboboxContent className="min-w-[280px]">
                           <ComboboxList>
                             {ambitos.map((a) => (
@@ -1428,7 +1936,7 @@ export default function GestionUsuariosPage() {
               </div>
 
               <DialogFooter className="pt-2 gap-2 sm:gap-0">
-                <Button type="button" variant="outline" size="default" onClick={handleCloseModalCrear}>
+                <Button type="button" variant="neutral" size="default" onClick={handleCloseModalCrear}>
                   Cancelar
                 </Button>
                 <Button type="submit" variant="primary" size="default">
@@ -1444,7 +1952,7 @@ export default function GestionUsuariosPage() {
           MODAL 2: EDITAR USUARIO (ID-02)
          ══════════════════════════════════════════════════════════ */}
       <Dialog open={modalEditarOpen} onOpenChange={setModalEditarOpen}>
-        <DialogContent className="max-w-xl p-6 rounded-2xl border-border bg-surface">
+        <DialogContent variant="standard" size="lg" className="p-6 rounded-2xl border-border bg-surface">
           <DialogHeader className="border-b border-border/60 pb-3">
             <DialogTitle className="font-heading font-extrabold text-xl text-primary flex items-center gap-2">
               <Edit2 className="size-5 text-primary" />
@@ -1470,11 +1978,13 @@ export default function GestionUsuariosPage() {
                   <Lock className="size-3 text-muted-foreground" />
                   <span>Cédula de Identidad (Inmutable)</span>
                 </Label>
-                <Input
-                  disabled
-                  value={selectedUser.cedula}
-                  className="h-10 text-xs font-mono bg-muted/60 opacity-80 cursor-not-allowed"
-                />
+                <InputGroup leftIcon={<Lock className="size-4 text-muted-foreground" />}>
+                  <InputGroupInput
+                    disabled
+                    value={selectedUser.cedula}
+                    className="bg-muted/30 cursor-not-allowed text-xs font-mono font-semibold text-foreground"
+                  />
+                </InputGroup>
               </div>
 
               {/* Nombre y Correo */}
@@ -1483,27 +1993,31 @@ export default function GestionUsuariosPage() {
                   <Label htmlFor="edit-nombre" className="text-xs font-semibold text-foreground">
                     Nombre Completo
                   </Label>
-                  <Input
-                    id="edit-nombre"
-                    value={formEditNombre}
-                    onChange={(e) => setFormEditNombre(e.target.value)}
-                    className="h-10 text-xs"
-                    required
-                  />
+                  <InputGroup leftIcon={<Users className="size-4 text-muted-foreground" />}>
+                    <InputGroupInput
+                      id="edit-nombre"
+                      value={formEditNombre}
+                      onChange={(e) => setFormEditNombre(e.target.value)}
+                      className="text-xs"
+                      required
+                    />
+                  </InputGroup>
                 </div>
 
                 <div className="space-y-1.5">
                   <Label htmlFor="edit-correo" className="text-xs font-semibold text-foreground">
                     Correo Electrónico
                   </Label>
-                  <Input
-                    id="edit-correo"
-                    type="email"
-                    value={formEditCorreo}
-                    onChange={(e) => setFormEditCorreo(e.target.value)}
-                    className="h-10 text-xs"
-                    required
-                  />
+                  <InputGroup leftIcon={<Mail className="size-4 text-muted-foreground" />}>
+                    <InputGroupInput
+                      id="edit-correo"
+                      type="email"
+                      value={formEditCorreo}
+                      onChange={(e) => setFormEditCorreo(e.target.value)}
+                      className="text-xs"
+                      required
+                    />
+                  </InputGroup>
                 </div>
               </div>
 
@@ -1527,7 +2041,7 @@ export default function GestionUsuariosPage() {
                       if (item) handleRolChangeEditar(item.value as RolInterno);
                     }}
                   >
-                    <ComboboxSelectTrigger className="h-10 text-xs w-full bg-surface border-border/80 rounded-xl shadow-2xs" />
+                    <ComboboxSelectTrigger className="h-10 text-xs w-full bg-surface border-border/80 rounded-full px-3.5 shadow-2xs" />
                     <ComboboxContent className="min-w-[260px]">
                       <ComboboxList>
                         {ROLES_INTERNOS_CATALOGO.map((r) => (
@@ -1557,7 +2071,7 @@ export default function GestionUsuariosPage() {
                           if (item) setFormEditAmbito(item.value);
                         }}
                       >
-                        <ComboboxSelectTrigger className="h-10 text-xs w-full bg-surface border-border/80 rounded-xl shadow-2xs" />
+                        <ComboboxSelectTrigger className="h-10 text-xs w-full bg-surface border-border/80 rounded-full px-3.5 shadow-2xs" />
                         <ComboboxContent className="min-w-[260px]">
                           <ComboboxList>
                             {ambitos.map((a) => (
@@ -1578,7 +2092,7 @@ export default function GestionUsuariosPage() {
                 <div className="space-y-1.5 p-3 rounded-xl bg-warning/10 border border-warning/20">
                   <Label htmlFor="edit-motivo" className="text-xs font-bold text-warning-foreground flex items-center gap-1.5">
                     <AlertTriangle className="size-3.5 text-warning" />
-                    <span>Motivo del cambio de rol o ámbito (Obligatorio por Auditoría) *</span>
+                    <span>Motivo del cambio de rol o ámbito (Obligatorio por Auditoría) <span className="text-warning">*</span></span>
                   </Label>
                   <Textarea
                     id="edit-motivo"
@@ -1595,7 +2109,7 @@ export default function GestionUsuariosPage() {
               )}
 
               <DialogFooter className="pt-2 gap-2 sm:gap-0">
-                <Button type="button" variant="outline" size="default" onClick={() => setModalEditarOpen(false)}>
+                <Button type="button" variant="neutral" size="default" onClick={() => setModalEditarOpen(false)}>
                   Cancelar
                 </Button>
                 <Button type="submit" variant="primary" size="default">
@@ -1647,19 +2161,22 @@ export default function GestionUsuariosPage() {
               </div>
 
               {/* Advertencia obligatoria ID-03 */}
-              <div className="p-3 rounded-xl bg-warning/10 border border-warning/20 text-xs space-y-1 text-warning-foreground">
+              <div className="p-3 rounded-xl bg-warning/10 border border-warning/20 text-xs space-y-1.5 text-warning-foreground">
                 <span className="font-bold flex items-center gap-1.5">
                   <AlertTriangle className="size-4 text-warning" />
-                  Advertencia de Trámites Asignados:
+                  Efectos de Suspensión (ID-03):
                 </span>
-                <p className="text-[11px] leading-relaxed">
-                  Los trámites que el usuario tenga asignados actualmente continuarán visibles en el sistema para que su Dirección pueda reasignarlos oportunamente.
-                </p>
+                <ul className="text-[11px] leading-relaxed list-disc list-inside space-y-0.5 pl-1">
+                  <li>Invalida sesiones activas inmediatamente.</li>
+                  <li>Bloquea el ingreso con usuario y OTP.</li>
+                  <li>Impide nuevas asignaciones de trámites a la cuenta.</li>
+                  <li>Los trámites asignados permanecen visibles para reasignación por parte del Director.</li>
+                </ul>
               </div>
 
               <div className="space-y-1.5">
                 <Label htmlFor="suspender-causa" className="text-xs font-semibold text-foreground">
-                  Causa de la suspensión *
+                  Causa de la suspensión (2.1/PAR-07) <span className="text-warning">*</span>
                 </Label>
                 <Textarea
                   id="suspender-causa"
@@ -1672,7 +2189,7 @@ export default function GestionUsuariosPage() {
               </div>
 
               <DialogFooter className="pt-2 gap-2 sm:gap-0 w-full justify-end">
-                <Button type="button" variant="outline" size="default" onClick={() => setModalSuspenderOpen(false)}>
+                <Button type="button" variant="neutral" size="default" onClick={() => setModalSuspenderOpen(false)}>
                   Cancelar
                 </Button>
                 <Button type="submit" variant="danger" size="default">
@@ -1688,14 +2205,14 @@ export default function GestionUsuariosPage() {
           MODAL 4: REACTIVAR CUENTA (ID-03)
          ══════════════════════════════════════════════════════════ */}
       <Dialog open={modalReactivarOpen} onOpenChange={setModalReactivarOpen}>
-        <DialogContent className="max-w-md p-6 rounded-2xl border-border bg-surface">
+        <DialogContent variant="standard" size="default" className="p-6 rounded-2xl border-border bg-surface">
           <DialogHeader className="border-b border-border/60 pb-3">
             <DialogTitle className="font-heading font-extrabold text-xl text-success flex items-center gap-2">
               <RotateCcw className="size-5 text-success" />
               <span>Reactivar cuenta suspendida</span>
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground">
-              Restaura el estado ACTIVO del usuario. La persona podrá volver a autenticarse con sus credenciales y factor TOTP previamente configurados.
+              Restaura el estado ACTIVO del usuario. Conforme a ID-03: exige factor TOTP configurado, deja constancia de causa y no devuelve roles retirados por ID-02.
             </DialogDescription>
           </DialogHeader>
 
@@ -1715,31 +2232,66 @@ export default function GestionUsuariosPage() {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Segundo factor (TOTP):</span>
-                  <Badge tone="success" appearance="soft" size="sm" className="font-semibold">
-                    Configurado
-                  </Badge>
+                  {selectedUser.totpConfigurado ? (
+                    <Badge tone="success" appearance="soft" size="sm" className="font-semibold">
+                      Configurado
+                    </Badge>
+                  ) : (
+                    <Badge tone="danger" appearance="soft" size="sm" className="font-semibold">
+                      Pendiente / Incompleto
+                    </Badge>
+                  )}
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Credenciales de acceso:</span>
+                  {selectedUser.credencialesConfiguradas ? (
+                    <Badge tone="success" appearance="soft" size="sm" className="font-semibold">
+                      Establecidas
+                    </Badge>
+                  ) : (
+                    <Badge tone="warning" appearance="soft" size="sm" className="font-semibold">
+                      Pendiente
+                    </Badge>
+                  )}
                 </div>
               </div>
 
+              {(!selectedUser.totpConfigurado || !selectedUser.credencialesConfiguradas) && (
+                <div className="p-3 rounded-xl bg-destructive/10 border border-destructive/20 text-xs space-y-1 text-destructive">
+                  <div className="flex items-center gap-1.5 font-bold">
+                    <AlertCircle className="size-4" />
+                    <span>Condición de reactivación incumplida</span>
+                  </div>
+                  <p className="text-[11px] leading-relaxed">
+                    ID-03 Criterio 1: Activar exige contraseña y factor configurados. Si falta factor, conserva estado suspendido sin anunciar activación.
+                  </p>
+                </div>
+              )}
+
               <div className="space-y-1.5">
                 <Label htmlFor="reactivar-causa" className="text-xs font-semibold text-foreground">
-                  Causa o motivo de reactivación *
+                  Causa o motivo de reactivación (2.1/PAR-07) <span className="text-warning">*</span>
                 </Label>
                 <Textarea
                   id="reactivar-causa"
-                  placeholder="Ej. Reincorporación de funciones tras finalización de licencia médica..."
+                  placeholder="Ej. Reincorporación de funciones tras finalización de licencia médica o comisión..."
                   value={motivoAccion}
                   onChange={(e) => setMotivoAccion(e.target.value)}
-                  className="text-xs min-h-[70px]"
+                  className="text-xs min-h-[70px] bg-background"
                   required
                 />
               </div>
 
               <DialogFooter className="pt-2 gap-2 sm:gap-0">
-                <Button type="button" variant="outline" size="default" onClick={() => setModalReactivarOpen(false)}>
+                <Button type="button" variant="neutral" size="default" onClick={() => setModalReactivarOpen(false)}>
                   Cancelar
                 </Button>
-                <Button type="submit" variant="primary" size="default">
+                <Button
+                  type="submit"
+                  variant="primary"
+                  size="default"
+                  disabled={!selectedUser.totpConfigurado || !selectedUser.credencialesConfiguradas}
+                >
                   Reactivar cuenta
                 </Button>
               </DialogFooter>
@@ -1752,14 +2304,14 @@ export default function GestionUsuariosPage() {
           MODAL 5: DAR DE BAJA LÓGICA (ID-04)
          ══════════════════════════════════════════════════════════ */}
       <Dialog open={modalBajaOpen} onOpenChange={setModalBajaOpen}>
-        <DialogContent className="max-w-lg p-6 rounded-2xl border-border bg-surface">
+        <DialogContent variant="standard" size="lg" className="p-6 rounded-2xl border-border bg-surface">
           <DialogHeader className="border-b border-border/60 pb-3">
             <DialogTitle className="font-heading font-extrabold text-xl text-danger flex items-center gap-2">
               <UserX className="size-5 text-danger" />
               <span>Dar de baja a la cuenta (Baja lógica)</span>
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground">
-              Pasa la cuenta a estado RETIRADO. No se borra ningún registro histórico ni auditoría previa.
+              Conforme a ID-04: Retira la cuenta conservando trazabilidad inalterable. No se ejecuta borrado físico ni se reutiliza la identidad.
             </DialogDescription>
           </DialogHeader>
 
@@ -1775,26 +2327,47 @@ export default function GestionUsuariosPage() {
               {/* Verificación de responsabilidades activas ID-04 */}
               <div className="space-y-2">
                 <span className="text-xs font-bold text-foreground block">
-                  Revisión previa de tareas y responsabilidades:
+                  Revisión previa de tareas, instituciones y responsabilidades (ID-04):
                 </span>
-                {selectedUser.tareasActivas > 0 ? (
+
+                {selectedUser.esCoordinadorInstitucionActiva ? (
                   <div className="p-3 rounded-xl bg-destructive/10 border border-destructive/20 text-xs space-y-1.5 text-destructive">
                     <div className="flex items-center gap-1.5 font-bold">
                       <AlertCircle className="size-4" />
-                      <span>Imposible dar de baja: Trámites activos pendientes</span>
+                      <span>Imposible dar de baja: Coordinador designado activo</span>
                     </div>
                     <p className="text-[11px] leading-relaxed">
-                      El usuario tiene <strong>{selectedUser.tareasActivas} trámite(s)</strong> activo(s) asignados en su bandeja. Deben ser reasignados a otro revisor antes de procesar la baja.
+                      El usuario figura como Coordinador de la institución <strong>{selectedUser.institucionCoordinada || "activa"}</strong>. Requiere trámite previo de sustitución (CAM-03 o INS-08).
+                    </p>
+                  </div>
+                ) : selectedUser.tareasActivas > 0 ? (
+                  <div className="p-3 rounded-xl bg-destructive/10 border border-destructive/20 text-xs space-y-1.5 text-destructive">
+                    <div className="flex items-center gap-1.5 font-bold">
+                      <AlertCircle className="size-4" />
+                      <span>Imposible dar de baja: {selectedUser.tareasActivas} trámite(s) activo(s)</span>
+                    </div>
+                    <p className="text-[11px] leading-relaxed">
+                      La persona tiene tareas activas en curso. No se permite la baja parcial:
+                    </p>
+                    {selectedUser.detalleTareas && selectedUser.detalleTareas.length > 0 && (
+                      <ul className="list-disc list-inside space-y-0.5 text-[11px] font-medium pt-1">
+                        {selectedUser.detalleTareas.map((t, idx) => (
+                          <li key={idx}>{t}</li>
+                        ))}
+                      </ul>
+                    )}
+                    <p className="text-[10px] text-muted-foreground pt-1">
+                      Reasigne o resuelva estas tareas con su Director antes de reintentar la baja.
                     </p>
                   </div>
                 ) : (
                   <div className="p-3 rounded-xl bg-success/10 border border-success/20 text-xs space-y-1 text-success">
                     <div className="flex items-center gap-1.5 font-bold">
                       <CheckCircle2 className="size-4" />
-                      <span>Sin trámites activos pendientes</span>
+                      <span>Sin trámites activos ni designación de coordinador pendiente</span>
                     </div>
                     <p className="text-[11px] leading-relaxed">
-                      El usuario no tiene trámites en curso. Cumple con los requisitos para dar de baja lógica.
+                      El usuario no tiene trámites en curso ni coordinaciones vigentes. Cumple las condiciones para baja lógica.
                     </p>
                   </div>
                 )}
@@ -1803,30 +2376,30 @@ export default function GestionUsuariosPage() {
               {/* Justificación obligatoria */}
               <div className="space-y-1.5">
                 <Label htmlFor="baja-justificacion" className="text-xs font-semibold text-foreground">
-                  Justificación obligatoria de la desvinculación *
+                  Justificación obligatoria (2.1/PAR-07) <span className="text-warning">*</span>
                 </Label>
                 <Textarea
                   id="baja-justificacion"
-                  placeholder="Detalla el memorando, acción de personal o resolución de desvinculación institucional..."
+                  placeholder="Detalla el memorando, acción de personal o resolución administrativa de desvinculación institucional..."
                   value={motivoAccion}
                   onChange={(e) => setMotivoAccion(e.target.value)}
-                  className="text-xs min-h-[80px]"
+                  className="text-xs min-h-[80px] bg-background"
                   required
                 />
                 <span className="text-[10px] text-muted-foreground">
-                  Mínimo 10 caracteres. Esta justificación será auditada por las áreas de control y normatividad.
+                  Mínimo 10 caracteres. Se conservan decisiones, firmas, eventos e incidentes realizados sin borrado físico.
                 </span>
               </div>
 
               <DialogFooter className="pt-2 gap-2 sm:gap-0">
-                <Button type="button" variant="outline" size="default" onClick={() => setModalBajaOpen(false)}>
+                <Button type="button" variant="neutral" size="default" onClick={() => setModalBajaOpen(false)}>
                   Cancelar
                 </Button>
                 <Button
                   type="submit"
                   variant="danger"
                   size="default"
-                  disabled={selectedUser.tareasActivas > 0}
+                  disabled={selectedUser.tareasActivas > 0 || !!selectedUser.esCoordinadorInstitucionActiva}
                 >
                   Confirmar baja lógica
                 </Button>
@@ -1840,7 +2413,7 @@ export default function GestionUsuariosPage() {
           MODAL 6: DETALLE Y AUDITORÍA DE USUARIO (ID-01, ID-02, ID-05)
          ══════════════════════════════════════════════════════════ */}
       <Dialog open={modalDetalleOpen} onOpenChange={setModalDetalleOpen}>
-        <DialogContent className="max-w-2xl p-6 rounded-2xl border-border bg-surface max-h-[85vh] flex flex-col">
+        <DialogContent variant="standard" size="2xl" className="p-6 rounded-2xl border-border bg-surface max-h-[85vh] flex flex-col">
           <DialogHeader className="border-b border-border/60 pb-3 shrink-0">
             <div className="flex items-center justify-between">
               <DialogTitle className="font-heading font-extrabold text-xl text-primary flex items-center gap-2">
@@ -1873,15 +2446,30 @@ export default function GestionUsuariosPage() {
                 <TabsContent value="info" className="space-y-4">
                   <div className="p-4 rounded-xl bg-muted/40 border border-border">
                     <div className="min-w-0">
-                      <h3 className="font-heading font-bold text-base text-foreground truncate">
-                        {selectedUser.nombreCompleto}
-                      </h3>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <h3 className="font-heading font-bold text-base text-foreground truncate cursor-default">
+                            {selectedUser.nombreCompleto}
+                          </h3>
+                        </TooltipTrigger>
+                        <TooltipContent side="top" className="max-w-xs break-words">
+                          <p className="font-bold text-xs">{selectedUser.nombreCompleto}</p>
+                          <p className="text-[10px] text-muted-foreground font-mono">ID interno: {selectedUser.id}</p>
+                        </TooltipContent>
+                      </Tooltip>
                       <p className="text-xs text-muted-foreground font-mono mt-0.5">
                         Cédula: {selectedUser.cedula}
                       </p>
-                      <p className="text-xs text-muted-foreground">
-                        Correo: {selectedUser.correo}
-                      </p>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <p className="text-xs text-muted-foreground truncate cursor-default">
+                            Correo: {selectedUser.correo}
+                          </p>
+                        </TooltipTrigger>
+                        <TooltipContent side="top" className="max-w-xs break-all">
+                          <p className="text-xs font-medium">{selectedUser.correo}</p>
+                        </TooltipContent>
+                      </Tooltip>
                     </div>
                   </div>
 
@@ -1890,18 +2478,25 @@ export default function GestionUsuariosPage() {
                       <span className="text-[11px] text-muted-foreground font-medium block">
                         Rol Institucional
                       </span>
-                      <span className="font-bold text-foreground block">
-                        {selectedUser.rolLabel}
-                      </span>
+                      <div className="pt-0.5">
+                        {getRolBadge(selectedUser.rol, selectedUser.rolLabel)}
+                      </div>
                     </div>
 
                     <div className="p-3 rounded-xl border border-border bg-surface space-y-1">
                       <span className="text-[11px] text-muted-foreground font-medium block">
                         Ámbito Asignado
                       </span>
-                      <span className="font-bold text-foreground block">
-                        {selectedUser.ambito}
-                      </span>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className="font-bold text-foreground block truncate cursor-default">
+                            {selectedUser.ambito}
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent side="top" className="max-w-xs break-words">
+                          <p className="text-xs font-medium">{selectedUser.ambito}</p>
+                        </TooltipContent>
+                      </Tooltip>
                     </div>
 
                     <div className="p-3 rounded-xl border border-border bg-surface space-y-1">
@@ -1984,18 +2579,108 @@ export default function GestionUsuariosPage() {
 
                 {/* Tab 3: Auditoría y Trazabilidad (ID-05) */}
                 <TabsContent value="auditoria" className="space-y-4">
-                  <div className="space-y-2">
-                    <span className="text-xs font-bold text-foreground block">
-                      Trazabilidad Inalterable de Seguridad (Eventos Registrados)
-                    </span>
-                    <p className="text-[11px] text-muted-foreground">
-                      Historial cronológico de creaciones, cambios de rol, ámbito, suspensiones y reactivaciones.
-                    </p>
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 rounded-md bg-surface-raised/40 border border-border/60">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <History className="size-4 text-primary" />
+                        <span className="text-xs font-bold text-foreground block">
+                          Trazabilidad de Seguridad (HU ID-05)
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-muted-foreground">
+                        Historial inalterable de altas, roles, bloqueos, recuperaciones y accesos.
+                      </p>
+                    </div>
+
+                    {/* Nota de Secreto ID-05 Criterio 1 */}
+                    <div className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-success/10 border border-success/20 text-success text-[10px] font-medium shrink-0">
+                      <ShieldCheck className="size-3.5 shrink-0" />
+                      <span>Sin exposición de contraseña, OTP ni tokens</span>
+                    </div>
                   </div>
 
+                  {/* Filtros avanzados del expediente (ID-05 Criterio 1 y 3) */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 rounded-md bg-surface-raised/20 border border-border/40">
+                    <div className="space-y-1.5">
+                      <Label className="text-[11px] font-medium text-foreground">
+                        Tipo de evento
+                      </Label>
+                      <Combobox
+                        value={filtroAuditTipo}
+                        onValueChange={(val) => setFiltroAuditTipo(val || "TODOS")}
+                      >
+                        <ComboboxSelectTrigger className="w-full text-xs h-8">
+                          <ComboboxValue placeholder="Todos los eventos" />
+                        </ComboboxSelectTrigger>
+                        <ComboboxContent>
+                          <ComboboxList>
+                            <ComboboxItem value="TODOS">Todos los eventos</ComboboxItem>
+                            <ComboboxItem value="CUENTA_CREADA">Alta / Cuenta creada</ComboboxItem>
+                            <ComboboxItem value="ACTIVACION">Activación con factores</ComboboxItem>
+                            <ComboboxItem value="CAMBIO_ROL">Cambio de rol (ID-02)</ComboboxItem>
+                            <ComboboxItem value="CAMBIO_AMBITO">Cambio de ámbito</ComboboxItem>
+                            <ComboboxItem value="INGRESO">Ingresos y accesos</ComboboxItem>
+                            <ComboboxItem value="BLOQUEO">Bloqueos de sesión</ComboboxItem>
+                            <ComboboxItem value="RECUPERACION">Recuperación de acceso</ComboboxItem>
+                            <ComboboxItem value="SUSPENSION">Suspensión de cuenta (ID-03)</ComboboxItem>
+                            <ComboboxItem value="REACTIVACION">Reactivación de cuenta (ID-03)</ComboboxItem>
+                            <ComboboxItem value="CAMBIO_COORDINADOR">Cambio de Coordinador (CAM-03)</ComboboxItem>
+                            <ComboboxItem value="CREDENCIALES_API_REVOCADAS">Credenciales API institucionales (INS-08)</ComboboxItem>
+                            <ComboboxItem value="BAJA_LOGICA">Baja lógica definitiva (ID-04)</ComboboxItem>
+                          </ComboboxList>
+                        </ComboboxContent>
+                      </Combobox>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <Label className="text-[11px] font-medium text-foreground">
+                        Período (según 2.1)
+                      </Label>
+                      <Combobox
+                        value={filtroAuditPeriodo}
+                        onValueChange={(val) => setFiltroAuditPeriodo(val || "TODOS")}
+                      >
+                        <ComboboxSelectTrigger className="w-full text-xs h-8">
+                          <ComboboxValue placeholder="Todo el historial" />
+                        </ComboboxSelectTrigger>
+                        <ComboboxContent>
+                          <ComboboxList>
+                            <ComboboxItem value="TODOS">Todo el período registrado</ComboboxItem>
+                            <ComboboxItem value="7D">Últimos 7 días</ComboboxItem>
+                            <ComboboxItem value="30D">Últimos 30 días</ComboboxItem>
+                            <ComboboxItem value="2026">Año fiscal 2026</ComboboxItem>
+                          </ComboboxList>
+                        </ComboboxContent>
+                      </Combobox>
+                    </div>
+                  </div>
+
+                  {/* Lista de Timeline con manejo de estado vacío ID-05 Criterio 3 */}
                   {timelineItems.length === 0 ? (
-                    <div className="py-8 text-center text-xs text-muted-foreground">
-                      No hay eventos registrados para este usuario.
+                    <div className="py-10 px-4 text-center rounded-lg border border-dashed border-border/80 bg-surface-raised/20 space-y-3">
+                      <div className="size-10 rounded-full bg-muted/30 text-muted-foreground mx-auto flex items-center justify-center">
+                        <History className="size-5" />
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-xs font-semibold text-foreground">
+                          «Sin resultados para estos filtros»
+                        </p>
+                        <p className="text-[11px] text-muted-foreground max-w-sm mx-auto">
+                          No existen registros que coincidan con el tipo de evento y período seleccionados para este usuario.
+                        </p>
+                      </div>
+                      <Button
+                        variant="neutral"
+                        size="sm"
+                        onClick={() => {
+                          setFiltroAuditTipo("TODOS");
+                          setFiltroAuditPeriodo("TODOS");
+                        }}
+                        className="text-xs gap-1.5"
+                      >
+                        <RotateCcw className="size-3.5" />
+                        <span>Restablecer filtros del expediente</span>
+                      </Button>
                     </div>
                   ) : (
                     <div className="pt-2">
@@ -2008,8 +2693,251 @@ export default function GestionUsuariosPage() {
           )}
 
           <DialogFooter className="pt-3 border-t border-border/60 shrink-0">
-            <Button variant="outline" size="default" onClick={() => setModalDetalleOpen(false)}>
+            <Button variant="neutral" size="default" onClick={() => setModalDetalleOpen(false)}>
               Cerrar expediente
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ══════════════════════════════════════════════════════════
+          MODAL BITÁCORA GLOBAL DE AUDITORÍA Y TRAZABILIDAD (ID-05)
+          Filtro por persona, período y tipo de evento.
+          Diferenciación explícita Coordinador vs Credenciales API.
+         ══════════════════════════════════════════════════════════ */}
+      <Dialog
+        open={modalBitacoraGlobalOpen}
+        onOpenChange={(open) => setModalBitacoraGlobalOpen(open)}
+      >
+        <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col p-6 overflow-hidden">
+          <DialogHeader className="space-y-2 border-b border-border/60 pb-3 shrink-0">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="size-8 rounded bg-primary/10 text-primary flex items-center justify-center font-bold">
+                  <History className="size-4" />
+                </div>
+                <div>
+                  <DialogTitle className="text-base font-heading font-bold text-foreground">
+                    Bitácora de Auditoría y Trazabilidad de Cuentas (ID-05)
+                  </DialogTitle>
+                  <DialogDescription className="text-xs text-muted-foreground">
+                    Inspección forense de altas, roles, bloqueos, recuperaciones, coordinaciones y accesos operativos.
+                  </DialogDescription>
+                </div>
+              </div>
+              <Badge variant="success" className="gap-1 font-mono text-[10px]">
+                <ShieldCheck className="size-3" />
+                <span>Secreto Protegido (Sin OTP/Tokens)</span>
+              </Badge>
+            </div>
+          </DialogHeader>
+
+          {/* Filtros de Auditoría según Criterios 1, 2 y 3 */}
+          <div className="py-3 border-b border-border/40 shrink-0 space-y-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {/* Filtro 1: Persona */}
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold text-foreground">
+                  Funcionario / Persona
+                </Label>
+                <Combobox
+                  value={filtroGlobalPersona}
+                  onValueChange={(val) => setFiltroGlobalPersona(val || "TODAS")}
+                >
+                  <ComboboxSelectTrigger className="w-full text-xs h-9">
+                    <ComboboxValue placeholder="Todas las personas" />
+                  </ComboboxSelectTrigger>
+                  <ComboboxContent>
+                    <ComboboxList>
+                      <ComboboxItem value="TODAS">Todos los funcionarios</ComboboxItem>
+                      {usuarios.map((u) => (
+                        <ComboboxItem key={u.id} value={u.id}>
+                          {u.nombreCompleto} ({u.cedula})
+                        </ComboboxItem>
+                      ))}
+                    </ComboboxList>
+                  </ComboboxContent>
+                </Combobox>
+              </div>
+
+              {/* Filtro 2: Tipo de Evento */}
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold text-foreground">
+                  Tipo de Evento
+                </Label>
+                <Combobox
+                  value={filtroGlobalTipo}
+                  onValueChange={(val) => setFiltroGlobalTipo(val || "TODOS")}
+                >
+                  <ComboboxSelectTrigger className="w-full text-xs h-9">
+                    <ComboboxValue placeholder="Todos los eventos" />
+                  </ComboboxSelectTrigger>
+                  <ComboboxContent>
+                    <ComboboxList>
+                      <ComboboxItem value="TODOS">Todos los eventos</ComboboxItem>
+                      <ComboboxItem value="CUENTA_CREADA">Altas / Creaciones</ComboboxItem>
+                      <ComboboxItem value="ACTIVACION">Activaciones operativas</ComboboxItem>
+                      <ComboboxItem value="CAMBIO_ROL">Cambios de rol (ID-02)</ComboboxItem>
+                      <ComboboxItem value="CAMBIO_AMBITO">Cambios de ámbito</ComboboxItem>
+                      <ComboboxItem value="INGRESO">Accesos al sistema</ComboboxItem>
+                      <ComboboxItem value="BLOQUEO">Bloqueos de sesión</ComboboxItem>
+                      <ComboboxItem value="RECUPERACION">Recuperaciones con 2do paso</ComboboxItem>
+                      <ComboboxItem value="SUSPENSION">Suspensiones (ID-03)</ComboboxItem>
+                      <ComboboxItem value="REACTIVACION">Reactivaciones (ID-03)</ComboboxItem>
+                      <ComboboxItem value="CAMBIO_COORDINADOR">Coordinación personal (CAM-03)</ComboboxItem>
+                      <ComboboxItem value="CREDENCIALES_API_REVOCADAS">Credenciales API técnicas (INS-08)</ComboboxItem>
+                      <ComboboxItem value="BAJA_LOGICA">Bajas lógicas (ID-04)</ComboboxItem>
+                    </ComboboxList>
+                  </ComboboxContent>
+                </Combobox>
+              </div>
+
+              {/* Filtro 3: Período según 2.1 */}
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold text-foreground">
+                  Período Temporal (2.1)
+                </Label>
+                <Combobox
+                  value={filtroGlobalPeriodo}
+                  onValueChange={(val) => setFiltroGlobalPeriodo(val || "TODOS")}
+                >
+                  <ComboboxSelectTrigger className="w-full text-xs h-9">
+                    <ComboboxValue placeholder="Todo el historial" />
+                  </ComboboxSelectTrigger>
+                  <ComboboxContent>
+                    <ComboboxList>
+                      <ComboboxItem value="TODOS">Todo el historial registrado</ComboboxItem>
+                      <ComboboxItem value="7D">Últimos 7 días</ComboboxItem>
+                      <ComboboxItem value="30D">Últimos 30 días</ComboboxItem>
+                      <ComboboxItem value="2026">Año fiscal 2026</ComboboxItem>
+                    </ComboboxList>
+                  </ComboboxContent>
+                </Combobox>
+              </div>
+            </div>
+
+            {/* Aclaración visual Criterio 2: Coordinador vs Credenciales API */}
+            <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] bg-surface-raised/40 p-2.5 rounded border border-border/40">
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-1.5">
+                  <Badge variant="info" className="size-2 p-0 rounded-full" />
+                  <span className="text-muted-foreground">
+                    <strong className="text-foreground">CAM-03:</strong> Cambio de Coordinador Institucional (Persona natural)
+                  </span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <Badge variant="warning" className="size-2 p-0 rounded-full" />
+                  <span className="text-muted-foreground">
+                    <strong className="text-foreground">INS-08:</strong> Credenciales API institucionales (Entidad externa técnica)
+                  </span>
+                </div>
+              </div>
+
+              {(filtroGlobalPersona !== "TODAS" || filtroGlobalTipo !== "TODOS" || filtroGlobalPeriodo !== "TODOS") && (
+                <Button
+                  variant="neutral"
+                  size="sm"
+                  onClick={() => {
+                    setFiltroGlobalPersona("TODAS");
+                    setFiltroGlobalTipo("TODOS");
+                    setFiltroGlobalPeriodo("TODOS");
+                  }}
+                  className="h-7 text-[11px] gap-1"
+                >
+                  <RotateCcw className="size-3" />
+                  <span>Limpiar filtros</span>
+                </Button>
+              )}
+            </div>
+          </div>
+
+          {/* Timeline de la Bitácora */}
+          <div className="flex-1 overflow-y-auto pr-2 py-4 space-y-4">
+            {bitacoraGlobalItems.length === 0 ? (
+              <div className="py-14 text-center rounded-lg border border-dashed border-border/80 bg-surface-raised/20 space-y-3">
+                <div className="size-12 rounded-full bg-muted/40 text-muted-foreground mx-auto flex items-center justify-center">
+                  <History className="size-6" />
+                </div>
+                <div className="space-y-1">
+                  <p className="text-sm font-semibold text-foreground">
+                    «Sin resultados para estos filtros»
+                  </p>
+                  <p className="text-xs text-muted-foreground max-w-md mx-auto">
+                    No existen eventos de auditoría para la combinación de persona, tipo de evento y período seleccionados.
+                  </p>
+                </div>
+                <Button
+                  variant="neutral"
+                  size="sm"
+                  onClick={() => {
+                    setFiltroGlobalPersona("TODAS");
+                    setFiltroGlobalTipo("TODOS");
+                    setFiltroGlobalPeriodo("TODOS");
+                  }}
+                  className="text-xs gap-1.5"
+                >
+                  <RotateCcw className="size-3.5" />
+                  <span>Restablecer todos los filtros</span>
+                </Button>
+              </div>
+            ) : (
+              <div className="px-2">
+                <Timeline items={bitacoraGlobalItems} />
+              </div>
+            )}
+          </div>
+
+          <DialogFooter className="pt-3 border-t border-border/60 shrink-0">
+            <Button
+              variant="neutral"
+              size="default"
+              onClick={() => setModalBitacoraGlobalOpen(false)}
+            >
+              Cerrar bitácora
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ══════════════════════════════════════════════════════════
+          CONFIRMATION DIALOG (WARNING) - VALIDACIÓN DE SEGURIDAD
+         ══════════════════════════════════════════════════════════ */}
+      <Dialog
+        open={confirmDialog.open}
+        onOpenChange={(open) => setConfirmDialog((prev) => ({ ...prev, open }))}
+      >
+        <DialogContent variant="warning" size="default" className="text-center sm:text-left">
+          <DialogHeader className="space-y-2">
+            <DialogTitle className="font-heading font-extrabold text-lg text-foreground">
+              {confirmDialog.title}
+            </DialogTitle>
+            <DialogDescription className="text-xs text-muted-foreground leading-relaxed">
+              {confirmDialog.description}
+            </DialogDescription>
+          </DialogHeader>
+
+          <DialogFooter className="mt-4 flex flex-col-reverse sm:flex-row sm:justify-end gap-2.5 w-full">
+            <Button
+              type="button"
+              variant="neutral"
+              size="default"
+              onClick={() => setConfirmDialog((prev) => ({ ...prev, open: false }))}
+              className="w-full sm:w-auto"
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="button"
+              variant="warning"
+              size="default"
+              onClick={() => {
+                const action = confirmDialog.onConfirm;
+                setConfirmDialog((prev) => ({ ...prev, open: false }));
+                action();
+              }}
+              className="w-full sm:w-auto font-semibold"
+            >
+              {confirmDialog.confirmLabel}
             </Button>
           </DialogFooter>
         </DialogContent>

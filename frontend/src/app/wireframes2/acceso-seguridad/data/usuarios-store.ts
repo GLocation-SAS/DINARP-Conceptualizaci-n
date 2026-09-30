@@ -20,18 +20,23 @@ export type RolInterno =
   | "APROBADOR"
   | "FACTURACION";
 
+export type TipoEventoAuditoria =
+  | "CUENTA_CREADA"
+  | "ACTIVACION"
+  | "CAMBIO_ROL"
+  | "CAMBIO_AMBITO"
+  | "INGRESO"
+  | "BLOQUEO"
+  | "SUSPENSION"
+  | "REACTIVACION"
+  | "RECUPERACION"
+  | "CAMBIO_COORDINADOR"
+  | "CREDENCIALES_API_REVOCADAS"
+  | "BAJA_LOGICA";
+
 export interface EventoAuditoria {
   id: string;
-  evento:
-    | "CUENTA_CREADA"
-    | "ACTIVACION"
-    | "CAMBIO_ROL"
-    | "CAMBIO_AMBITO"
-    | "INGRESO"
-    | "SUSPENSION"
-    | "REACTIVACION"
-    | "RECUPERACION"
-    | "BAJA_LOGICA";
+  evento: TipoEventoAuditoria;
   eventoLabel: string;
   actor: string;
   fecha: string; // ISO or DD/MM/YYYY HH:mm
@@ -59,10 +64,14 @@ export interface UsuarioInterno {
   credencialesConfiguradas: boolean;
   fechaCreacion: string;
   ultimoAcceso?: string;
+  ultimaActualizacion?: string;
   // Para validación de baja lógica (ID-04)
   tareasActivas: number;
+  detalleTareas?: string[];
   responsabilidades: string[];
   institucionesRelacionadas: string[];
+  esCoordinadorInstitucionActiva?: boolean;
+  institucionCoordinada?: string;
 }
 
 export const ROLES_INTERNOS_CATALOGO: {
@@ -152,6 +161,7 @@ const INITIAL_USUARIOS: UsuarioInterno[] = [
     credencialesConfiguradas: true,
     fechaCreacion: "01/01/2026 08:00",
     ultimoAcceso: "29/09/2026 23:30",
+    ultimaActualizacion: "28/09/2026 10:15",
     tareasActivas: 0,
     responsabilidades: ["Gestión integral de usuarios", "Configuración del sistema"],
     institucionesRelacionadas: ["DINARP"],
@@ -171,7 +181,9 @@ const INITIAL_USUARIOS: UsuarioInterno[] = [
     credencialesConfiguradas: true,
     fechaCreacion: "15/01/2026 09:30",
     ultimoAcceso: "28/09/2026 18:20",
+    ultimaActualizacion: "25/09/2026 11:40",
     tareasActivas: 2,
+    detalleTareas: ["TRM-2026-001: Asignación pendiente Registro Civil", "TRM-2026-004: Supervisión expediente SRI"],
     responsabilidades: ["Asignación de trámites Anexo A", "Supervisión de revisores"],
     institucionesRelacionadas: ["DINARP", "Registro Civil", "SRI"],
   },
@@ -190,7 +202,9 @@ const INITIAL_USUARIOS: UsuarioInterno[] = [
     credencialesConfiguradas: true,
     fechaCreacion: "20/01/2026 10:15",
     ultimoAcceso: "29/09/2026 14:10",
+    ultimaActualizacion: "20/01/2026 10:15",
     tareasActivas: 1,
+    detalleTareas: ["TRM-2026-089: Revisión de requisitos técnicos de interoperabilidad"],
     responsabilidades: ["Revisión documental TRM-2026-089"],
     institucionesRelacionadas: ["DINARP"],
   },
@@ -209,6 +223,7 @@ const INITIAL_USUARIOS: UsuarioInterno[] = [
     credencialesConfiguradas: true,
     fechaCreacion: "18/01/2026 11:00",
     ultimoAcceso: "27/09/2026 17:45",
+    ultimaActualizacion: "18/01/2026 11:30",
     tareasActivas: 0,
     responsabilidades: ["Asignación jurídica"],
     institucionesRelacionadas: ["DINARP"],
@@ -228,6 +243,7 @@ const INITIAL_USUARIOS: UsuarioInterno[] = [
     credencialesConfiguradas: true,
     fechaCreacion: "22/01/2026 12:00",
     ultimoAcceso: "29/09/2026 09:25",
+    ultimaActualizacion: "22/01/2026 12:00",
     tareasActivas: 0,
     responsabilidades: ["Emisión de Resoluciones"],
     institucionesRelacionadas: ["DINARP"],
@@ -247,6 +263,7 @@ const INITIAL_USUARIOS: UsuarioInterno[] = [
     credencialesConfiguradas: false,
     fechaCreacion: "28/09/2026 16:30",
     ultimoAcceso: undefined,
+    ultimaActualizacion: "28/09/2026 16:30",
     tareasActivas: 0,
     responsabilidades: [],
     institucionesRelacionadas: ["DINARP"],
@@ -266,6 +283,7 @@ const INITIAL_USUARIOS: UsuarioInterno[] = [
     credencialesConfiguradas: true,
     fechaCreacion: "05/02/2026 08:45",
     ultimoAcceso: "14/09/2026 11:20",
+    ultimaActualizacion: "14/09/2026 11:20",
     tareasActivas: 0,
     responsabilidades: ["Revisión de confidencialidad de campos"],
     institucionesRelacionadas: ["DINARP"],
@@ -285,9 +303,32 @@ const INITIAL_USUARIOS: UsuarioInterno[] = [
     credencialesConfiguradas: true,
     fechaCreacion: "10/01/2025 09:00",
     ultimoAcceso: "30/06/2026 17:00",
+    ultimaActualizacion: "30/06/2026 17:00",
     tareasActivas: 0,
     responsabilidades: [],
     institucionesRelacionadas: [],
+  },
+  {
+    id: "USR-INT-009",
+    cedula: "0912345678",
+    nombreCompleto: "Ing. Marco Guamán",
+    correo: "marco.guaman@registrocivil.gob.ec",
+    correoVerificado: true,
+    rol: "APROBADOR",
+    rolLabel: "Aprobador Técnico Institucional",
+    ambito: "Dirección de Gestión y Registro (DGR)",
+    ambitoCodigo: "DGR",
+    estado: "ACTIVO",
+    totpConfigurado: true,
+    credencialesConfiguradas: true,
+    fechaCreacion: "01/03/2026 10:00",
+    ultimoAcceso: "29/09/2026 17:15",
+    ultimaActualizacion: "20/09/2026 15:30",
+    tareasActivas: 0,
+    responsabilidades: ["Coordinación institucional Registro Civil"],
+    institucionesRelacionadas: ["Registro Civil"],
+    esCoordinadorInstitucionActiva: true,
+    institucionCoordinada: "Dirección General de Registro Civil, Identificación y Cedulación",
   },
 ];
 
@@ -299,7 +340,7 @@ const INITIAL_AUDITORIA: EventoAuditoria[] = [
     actor: "Administrador DINARP",
     fecha: "28/09/2026 16:30",
     resultado: "Éxito",
-    detalles: "Creación de cuenta para cédula 1723456789 con rol DTD",
+    detalles: "Creación de cuenta para cédula 1723456789 con rol DTD. Contraseña y TOTP pendientes de configuración inicial.",
     usuarioAfectadoId: "USR-INT-006",
     usuarioAfectadoCedula: "1723456789",
   },
@@ -311,7 +352,7 @@ const INITIAL_AUDITORIA: EventoAuditoria[] = [
     fecha: "15/09/2026 09:14",
     resultado: "Éxito",
     motivo: "Licencia médica temporal de 30 días sin goce de funciones.",
-    detalles: "Sesiones invalidadas y acceso bloqueado para Dr. Patricio Alarcón",
+    detalles: "Sesiones invalidadas y acceso bloqueado para Dr. Patricio Alarcón. Trámites permanecen visibles a la Dirección.",
     usuarioAfectadoId: "USR-INT-007",
     usuarioAfectadoCedula: "1719876543",
   },
@@ -323,7 +364,7 @@ const INITIAL_AUDITORIA: EventoAuditoria[] = [
     fecha: "30/06/2026 17:05",
     resultado: "Éxito",
     motivo: "Desvinculación institucional formal mediante Acción de Personal N° 459-2026.",
-    detalles: "Tareas reasignadas previamente a Ana Torres. Estado cambiado a RETIRADO.",
+    detalles: "Tareas activas reasignadas previamente (0 pendientes). Estado pasado a RETIRADO sin borrado físico ni reutilización.",
     usuarioAfectadoId: "USR-INT-008",
     usuarioAfectadoCedula: "1708765432",
   },
@@ -347,14 +388,144 @@ const INITIAL_AUDITORIA: EventoAuditoria[] = [
     actor: "Revisor Gestión (Ana Torres)",
     fecha: "29/09/2026 14:10",
     resultado: "Éxito",
-    detalles: "Validación de 1er factor y TOTP Google Authenticator correctos.",
+    detalles: "Validación de 1er factor y TOTP Google Authenticator correctos (sin exposición de claves ni tokens).",
     usuarioAfectadoId: "USR-INT-003",
     usuarioAfectadoCedula: "1111111111",
   },
+  {
+    id: "AUD-006",
+    evento: "BLOQUEO",
+    eventoLabel: "Bloqueo por intentos fallidos",
+    actor: "Sistema Identity Platform",
+    fecha: "25/09/2026 08:42",
+    resultado: "Denegado",
+    motivo: "5 intentos consecutivos de contraseña incorrecta desde IP 192.168.10.45.",
+    detalles: "Bloqueo preventivo de sesión y requerimiento de validación OTP institucional.",
+    usuarioAfectadoId: "USR-INT-002",
+    usuarioAfectadoCedula: "1711223344",
+  },
+  {
+    id: "AUD-007",
+    evento: "RECUPERACION",
+    eventoLabel: "Recuperación de acceso",
+    actor: "Director Gestión",
+    fecha: "25/09/2026 09:05",
+    resultado: "Éxito",
+    detalles: "Enlace de recuperación validado con verificación de factor de segundo paso.",
+    usuarioAfectadoId: "USR-INT-002",
+    usuarioAfectadoCedula: "1711223344",
+  },
+  {
+    id: "AUD-008",
+    evento: "CAMBIO_COORDINADOR",
+    eventoLabel: "Cambio de Coordinador Institucional",
+    actor: "Administrador DINARP",
+    fecha: "20/09/2026 15:30",
+    resultado: "Éxito",
+    motivo: "Designación de nuevo Coordinador en Registro Civil (Acuerdo Institucional RC-2026-03).",
+    detalles: "Trámite CAM-03: Cese de rol de coordinación personal. No altera ni revoca credenciales API del sistema interoperable.",
+    usuarioAfectadoId: "USR-INT-002",
+    usuarioAfectadoCedula: "1711223344",
+  },
+  {
+    id: "AUD-009",
+    evento: "CREDENCIALES_API_REVOCADAS",
+    eventoLabel: "Revocación de credenciales API institucional",
+    actor: "Administrador DINARP",
+    fecha: "18/09/2026 16:00",
+    resultado: "Éxito",
+    motivo: "Rotación programada de claves de consumo REST para interoperabilidad con SRI.",
+    detalles: "Revocación de Client Secret de la entidad SRI (INS-08). Operación a nivel técnico institucional sin afectar cuentas de personas naturales.",
+    usuarioAfectadoId: "USR-INT-002",
+    usuarioAfectadoCedula: "1711223344",
+  },
+  {
+    id: "AUD-010",
+    evento: "ACTIVACION",
+    eventoLabel: "Activación de cuenta",
+    actor: "Director Normatividad",
+    fecha: "18/01/2026 11:30",
+    resultado: "Éxito",
+    detalles: "Contraseña inicial robusta y factor TOTP configurados exitosamente.",
+    usuarioAfectadoId: "USR-INT-004",
+    usuarioAfectadoCedula: "2222222222",
+  },
+  {
+    id: "AUD-011",
+    evento: "REACTIVACION",
+    eventoLabel: "Reactivación de cuenta",
+    actor: "Administrador DINARP",
+    fecha: "22/08/2026 10:00",
+    resultado: "Éxito",
+    motivo: "Reincorporación laboral luego de culminación de comisión de servicios.",
+    detalles: "Factor TOTP validado. Restaurado estado ACTIVO sin alterar roles asignados.",
+    usuarioAfectadoId: "USR-INT-005",
+    usuarioAfectadoCedula: "3333333333",
+  },
+  {
+    id: "AUD-012",
+    evento: "CAMBIO_COORDINADOR",
+    eventoLabel: "Designación de Coordinador Institucional",
+    actor: "Administrador DINARP",
+    fecha: "01/03/2026 10:05",
+    resultado: "Éxito",
+    motivo: "Designación oficial como Coordinador Técnico de Registro Civil mediante oficio RC-DIN-2026-012.",
+    detalles: "Asignación de rol de enlace interinstitucional. Credenciales API institucionales del Registro Civil se gestionan por separado bajo trámite INS-08.",
+    usuarioAfectadoId: "USR-INT-009",
+    usuarioAfectadoCedula: "0912345678",
+  },
+  {
+    id: "AUD-013",
+    evento: "INGRESO",
+    eventoLabel: "Ingreso al sistema",
+    actor: "Aprobador Técnico (Marco Guamán)",
+    fecha: "29/09/2026 17:15",
+    resultado: "Éxito",
+    detalles: "Acceso exitoso al módulo de aprobaciones con autenticación multifactor TOTP.",
+    usuarioAfectadoId: "USR-INT-009",
+    usuarioAfectadoCedula: "0912345678",
+  },
+  {
+    id: "AUD-014",
+    evento: "CAMBIO_AMBITO",
+    eventoLabel: "Cambio de ámbito operativo",
+    actor: "Administrador DINARP",
+    fecha: "15/02/2026 14:00",
+    resultado: "Éxito",
+    valorAnterior: "DINARP Central",
+    valorNuevo: "DINARP · Tecnologías de la Información",
+    motivo: "Reestructuración orgánica de la Dirección de TI.",
+    detalles: "Ajuste de alcance institucional y permisos departamentales.",
+    usuarioAfectadoId: "USR-INT-001",
+    usuarioAfectadoCedula: "1799887766",
+  },
+  {
+    id: "AUD-015",
+    evento: "INGRESO",
+    eventoLabel: "Ingreso al sistema",
+    actor: "Administrador DINARP",
+    fecha: "29/09/2026 23:30",
+    resultado: "Éxito",
+    detalles: "Inicio de sesión administrativo con factor TOTP verificado.",
+    usuarioAfectadoId: "USR-INT-001",
+    usuarioAfectadoCedula: "1799887766",
+  },
+  {
+    id: "AUD-016",
+    evento: "BLOQUEO",
+    eventoLabel: "Intento fallido de segundo factor",
+    actor: "Sistema Identity Platform",
+    fecha: "14/09/2026 11:22",
+    resultado: "Denegado",
+    motivo: "Código TOTP expirado tras 3 reintentos.",
+    detalles: "Reintento bloqueado por política de seguridad; no se expusieron secretos ni hashes.",
+    usuarioAfectadoId: "USR-INT-007",
+    usuarioAfectadoCedula: "1719876543",
+  },
 ];
 
-const STORAGE_USERS_KEY = "dinarp_usuarios_internos_v1";
-const STORAGE_AUDIT_KEY = "dinarp_auditoria_usuarios_v1";
+const STORAGE_USERS_KEY = "dinarp_usuarios_internos_v2";
+const STORAGE_AUDIT_KEY = "dinarp_auditoria_usuarios_v2";
 
 export function useUsuariosStore() {
   const [usuarios, setUsuarios] = useState<UsuarioInterno[]>(INITIAL_USUARIOS);
@@ -789,11 +960,20 @@ export function useUsuariosStore() {
         return { ok: false, error: "Debe ingresar una justificación detallada (mínimo 10 caracteres)." };
       }
 
-      // Validar si tiene tareas o responsabilidades pendientes
-      if (u.tareasActivas > 0) {
+      // Validar si es Coordinador Institucional activo (ID-04 Criterio 1: No elimina un Coordinador aún designado)
+      if (u.esCoordinadorInstitucionActiva) {
         return {
           ok: false,
-          error: `No es posible dar de baja. El usuario tiene ${u.tareasActivas} trámite(s) o tarea(s) activa(s) pendientes de reasignación previa.`,
+          error: `No es posible dar de baja: El usuario aún figura como Coordinador designado en ${u.institucionCoordinada || "una institución activa"}. Requiere previo cambio de coordinador (CAM-03 o INS-08) para retirar su último rol vigente.`,
+        };
+      }
+
+      // Validar si tiene tareas o responsabilidades pendientes (ID-04 Criterio 1 y 4)
+      if (u.tareasActivas > 0) {
+        const tareasList = u.detalleTareas?.length ? ` [${u.detalleTareas.join(", ")}]` : "";
+        return {
+          ok: false,
+          error: `No es posible dar de baja: La cuenta registra ${u.tareasActivas} tarea(s)/trámite(s) activo(s) pendiente(s) de reasignación${tareasList}. Resuelva o reasigne antes de reintentar.`,
         };
       }
 
@@ -807,7 +987,7 @@ export function useUsuariosStore() {
         actor,
         resultado: "Éxito",
         motivo: justificacion,
-        detalles: "Baja lógica procesada. Estado RETIRADO. Se conservan decisiones, firmas e historial de auditoría intactos.",
+        detalles: "Baja lógica procesada (ID-04). Estado RETIRADO. Cuenta no ingresa ni recibe asignaciones. Se conservan decisiones, firmas, eventos e incidentes intactos sin borrado físico.",
         usuarioAfectadoId: u.id,
         usuarioAfectadoCedula: u.cedula,
       });

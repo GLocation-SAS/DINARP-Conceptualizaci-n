@@ -374,8 +374,8 @@ export function AsignarRevisorPanel({
                   : esTramiteAprobado
                     ? `Expediente Concluido — ${areaTitle}`
                     : puedeReasignar
-                      ? `Reasignar Revisor — ${areaTitle}`
-                      : `Asignar Revisor — ${areaTitle}`}
+                      ? (tipoArea === "NORMATIVIDAD" ? `Reasignar responsable — ${areaTitle}` : `Reasignar Revisor — ${areaTitle}`)
+                      : (tipoArea === "NORMATIVIDAD" ? `Asignar responsable — ${areaTitle}` : `Asignar Revisor — ${areaTitle}`)}
             </h3>
             {!yaEmpezoRevision && (
               <p className="text-xs text-muted-foreground dark:text-neutral-400 mt-0.5 leading-snug">
@@ -388,7 +388,7 @@ export function AsignarRevisorPanel({
                         ? "El funcionario aún no ha iniciado la formulación de resolución. Puedes reasignar este expediente."
                         : "El revisor aún no ha iniciado la revisión. Puedes reasignar este expediente a otro funcionario.")
                     : (tipoArea === "NORMATIVIDAD"
-                        ? "Selecciona el funcionario facultado para formular y emitir la resolución institucional."
+                        ? "Selecciona el funcionario facultado que gestionará la resolución institucional."
                         : "Selecciona el funcionario encargado de revisar y validar el trámite.")}
               </p>
             )}
@@ -515,8 +515,8 @@ export function AsignarRevisorPanel({
               <h4 className="text-sm font-bold text-foreground truncate">{revisorActual || (solicitud?.estado === "Rechazada" ? "Solicitud rechazada" : "Trámite finalizado")}</h4>
               <p className="text-xs text-muted-foreground">
                 {solicitud?.estado === "Cancelada" || (solicitud?.estado as string) === "Cerrada" || solicitud?.estado === "Rechazada"
-                  ? "Revisión técnica de Gestión finalizada"
-                  : "Revisor Técnico de Gestión de Ingresos"}
+                  ? (tipoArea === "NORMATIVIDAD" ? "Responsabilidad de Normatividad finalizada" : "Revisión técnica de Gestión finalizada")
+                  : (tipoArea === "NORMATIVIDAD" ? "Funcionario de Normatividad" : "Revisor Técnico de Gestión de Ingresos")}
               </p>
             </div>
             {solicitud?.fechaRevision && (
@@ -539,8 +539,12 @@ export function AsignarRevisorPanel({
 
           <p className="text-xs text-muted-foreground leading-relaxed">
             {solicitud?.estado === "Cancelada" || (solicitud?.estado as string) === "Cerrada" || solicitud?.estado === "Rechazada"
-              ? "La revisión del Anexo A ha finalizado. La solicitud fue rechazada y las observaciones registradas fueron enviadas a la institución para su conocimiento y, cuando corresponda, subsanación."
-              : "El expediente completó su revisión técnica satisfactoriamente. Al haber sido aprobado, el proceso se encuentra concluido en esta etapa y no admite reasignación de revisores."}
+              ? (tipoArea === "NORMATIVIDAD" 
+                  ? "La formulación de resolución ha finalizado. La solicitud fue denegada/observada y no admite reasignación de funcionario."
+                  : "La revisión del Anexo A ha finalizado. La solicitud fue rechazada y las observaciones registradas fueron enviadas a la institución para su conocimiento y, cuando corresponda, subsanación.")
+              : (tipoArea === "NORMATIVIDAD"
+                  ? "El expediente cuenta con una resolución institucional emitida satisfactoriamente. Al haber sido suscrita, el proceso se encuentra concluido y no admite reasignación de responsables."
+                  : "El expediente completó su revisión técnica satisfactoriamente. Al haber sido aprobado, el proceso se encuentra concluido en esta etapa y no admite reasignación de revisores.")}
           </p>
         </div>
       ) : isCardMode ? (
@@ -877,12 +881,12 @@ export function AsignarRevisorPanel({
               {puedeReasignar ? <RotateCcw className="size-4" /> : <UserPlus className="size-4" />}
               <span>
                 {isMasiva
-                  ? `Asignar ${solicitudesMasivas.length} solicitudes`
+                  ? (tipoArea === "NORMATIVIDAD" ? `Asignar responsable a ${solicitudesMasivas.length} solicitudes` : `Asignar ${solicitudesMasivas.length} solicitudes`)
                   : yaEmpezoRevision
                     ? "Reasignación no permitida"
                     : puedeReasignar
                       ? `Reasignar a ${selectedRevisor ? selectedRevisor.nombre.split(" ")[0] : "revisor"}`
-                      : "Asignar revisión"}
+                      : (tipoArea === "NORMATIVIDAD" ? "Asignar responsable" : "Asignar revisión")}
               </span>
             </Button>
           )}

@@ -188,7 +188,7 @@ const navItems: NavItem[] = [
     children: [
       {
         id: "administracion-usuarios",
-        label: "Usuarios",
+        label: "Gestión de usuarios",
         href: "/wireframes2/usuarios",
         exact: false
       }
@@ -375,7 +375,7 @@ export function WireframeDashboardLayout({
         <SidebarContent className="flex-1 overflow-y-auto py-3 px-2 group-data-[collapsible=icon]:px-2 space-y-1">
           <div className="px-2 pb-1.5 group-data-[collapsible=icon]:hidden">
             <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/70 dark:text-white/50 px-2">
-              Principal
+              {(currentRole || resolvedUser?.role) === "ADMIN" ? "Administración" : "Principal"}
             </p>
           </div>
           <SidebarMenu>

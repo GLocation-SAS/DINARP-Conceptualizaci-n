@@ -392,7 +392,7 @@ export function buildTramiteTimelineItems(solicitud: SolicitudIngreso | null | u
       let cleanTitle = h.accion;
       if (isAsignado && !isReasignado) {
         if (!accionLower.includes("normativ")) {
-          cleanTitle = "Asignación Revisor de Gestión";
+          cleanTitle = "Asignación de trámite a Gestión";
         }
       } else if (isReasignado) {
         if (!accionLower.includes("normativ")) {
@@ -431,10 +431,14 @@ export function buildTramiteTimelineItems(solicitud: SolicitudIngreso | null | u
         solicitud.fechaSolicitud ||
         formatTimelineDate(baseDate);
 
+      const isNormatividad = solicitud.estado.includes("NORMATIVIDAD") || (solicitud.revisorNormatividad && solicitud.revisorNormatividad === revisorActual);
+
       rawItems.push({
         id: "pendiente-revision-step",
-        title: "Pendiente de revisión",
-        description: `Trámite asignado al funcionario ${revisorActual}. En espera de verificación documental y análisis técnico.`,
+        title: isNormatividad ? "Pendiente de formulación de resolución" : "Pendiente de revisión",
+        description: isNormatividad 
+          ? `Trámite asignado al funcionario ${revisorActual}. En espera de formulación y emisión de la resolución institucional.` 
+          : `Trámite asignado al funcionario ${revisorActual}. En espera de verificación documental y análisis técnico.`,
         date: fechaAsig,
         status: "warning",
         statusLabel: "EN REVISIÓN",

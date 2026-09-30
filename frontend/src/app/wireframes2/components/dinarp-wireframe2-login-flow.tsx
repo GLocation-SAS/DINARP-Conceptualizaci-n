@@ -316,50 +316,14 @@ export function DinarpWireframe2LoginFlow({
 
           {/* Cédula */}
           <div className="space-y-1.5">
-            <div className="flex items-center justify-between flex-wrap gap-1">
-              <Label htmlFor="login-cedula" className="text-xs font-semibold text-foreground">
-                Cédula o correo institucional
-              </Label>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setCedula("1799999999");
-                    setPassword("admin2026*");
-                  }}
-                  className="text-[11px] font-bold text-primary hover:underline cursor-pointer"
-                >
-                  Administrador (1799999999)
-                </button>
-                <span className="text-muted-foreground text-[10px]">·</span>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setCedula("1111111111");
-                    setPassword("password123");
-                  }}
-                  className="text-[11px] font-semibold text-muted-foreground hover:text-foreground hover:underline cursor-pointer"
-                >
-                  Revisor Gestión
-                </button>
-                <span className="text-muted-foreground text-[10px]">·</span>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setCedula("gestion.director@gmail.com");
-                    setPassword("password123");
-                  }}
-                  className="text-[11px] font-medium text-muted-foreground hover:text-foreground hover:underline cursor-pointer"
-                >
-                  Director Gestión
-                </button>
-              </div>
-            </div>
+            <Label htmlFor="login-cedula" className="text-xs font-semibold text-foreground">
+              Cédula
+            </Label>
             <InputGroup className="bg-background border-border hover:border-primary/50 focus-within:border-primary h-11">
               <InputGroupInput
                 id="login-cedula"
                 type="text"
-                placeholder="Cédula (10 dígitos) o correo institucional"
+                placeholder="Cédula (10 dígitos)"
                 value={cedula}
                 onChange={(e) => setCedula(e.target.value)}
                 className="text-xs sm:text-sm px-0"
@@ -394,6 +358,11 @@ export function DinarpWireframe2LoginFlow({
                 {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
               </InputGroupButton>
             </InputGroup>
+            <div className="flex justify-end pt-1">
+              <Link href="/wireframes2/recuperar-contrasena" className="text-[11px] font-semibold text-primary hover:underline">
+                ¿Olvidaste tu contraseña?
+              </Link>
+            </div>
           </div>
 
           <Button
@@ -714,21 +683,6 @@ export function DinarpWireframe2LoginFlow({
             )}
           </Button>
 
-          {/* Ayuda discreta contextual mediante Accordion del UI Kit */}
-          <Accordion type="single" collapsible className="w-full">
-            <AccordionItem value="ayuda-codigo" className="border border-border/70 rounded-xl px-3 py-0 bg-muted/15 data-[state=open]:bg-muted/25 data-[state=open]:border-primary/40 border-l-border/70 data-[state=open]:border-l-primary transition-all">
-              <AccordionTrigger className="py-2.5 px-0 text-xs font-semibold text-primary hover:no-underline">
-                <span className="flex items-center gap-2">
-                  <Info className="size-4 shrink-0 text-primary" />
-                  <span>¿Dónde encuentro mi código?</span>
-                </span>
-              </AccordionTrigger>
-              <AccordionContent className="pb-3 px-0 text-[11px] leading-relaxed text-muted-foreground border-t border-border/40 pt-2.5">
-                Debes abrir la aplicación <strong>Google Authenticator</strong> en el teléfono móvil o dispositivo donde vinculaste previamente tu cuenta institucional. Allí verás el código temporal de 6 dígitos asociado al portal.
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
-
           <div className="flex flex-col sm:flex-row items-center gap-2 pt-1">
             {otpError && (
               <Button
@@ -765,6 +719,21 @@ export function DinarpWireframe2LoginFlow({
               <span>Volver al acceso principal</span>
             </Button>
           </div>
+
+          {/* Ayuda discreta contextual mediante Accordion del UI Kit debajo de los botones */}
+          <Accordion type="single" collapsible className="w-full pt-1">
+            <AccordionItem value="ayuda-codigo" className="border border-border/70 rounded-xl px-3 py-0 bg-muted/15 data-[state=open]:bg-muted/25 data-[state=open]:border-primary/40 border-l-border/70 data-[state=open]:border-l-primary transition-all">
+              <AccordionTrigger className="py-2.5 px-0 text-xs font-semibold text-primary hover:no-underline">
+                <span className="flex items-center gap-2">
+                  <Info className="size-4 shrink-0 text-primary" />
+                  <span>¿Dónde encuentro mi código?</span>
+                </span>
+              </AccordionTrigger>
+              <AccordionContent className="pb-3 px-0 text-[11px] leading-relaxed text-muted-foreground border-t border-border/40 pt-2.5">
+                Debes abrir la aplicación <strong>Google Authenticator</strong> en el teléfono móvil o dispositivo donde vinculaste previamente tu cuenta institucional. Allí verás el código temporal de 6 dígitos asociado al portal.
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
         </div>
       )}
 

@@ -129,7 +129,7 @@ const buttonVariants = cva(
           "border-0",
           "bg-neutral-500 dark:bg-neutral-500",
           "text-white",
-          "[--radial-bg:var(--primitive-neutral-600)] dark:[--radial-bg:var(--primitive-neutral-700)]",
+          "[--radial-bg:var(--primitive-neutral-600)] dark:[--radial-bg:var(--primitive-neutral-600)]",
           "[--glow:color-mix(in_srgb,var(--primitive-neutral-600)_50%,white)]",
           "hover:border-0",
           "hover:bg-neutral-700 dark:hover:bg-neutral-700",

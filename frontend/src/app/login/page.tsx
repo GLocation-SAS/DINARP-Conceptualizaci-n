@@ -265,7 +265,7 @@ export default function LoginPage() {
                     htmlFor="institutional-email"
                     className="text-xs sm:text-sm font-semibold text-foreground cursor-pointer"
                   >
-                    Cédula o correo institucional
+                    Cédula
                   </Label>
                   <InputGroup
                     state={emailState}
@@ -282,7 +282,7 @@ export default function LoginPage() {
                     <InputGroupInput
                       id="institutional-email"
                       type="text"
-                      placeholder="1712345602 o nombre@institucion.gob.ec"
+                      placeholder="1712345602"
                       value={email}
                       onChange={(e) => handleEmailChange(e.target.value)}
                       onBlur={handleEmailBlur}
@@ -291,7 +291,7 @@ export default function LoginPage() {
                   </InputGroup>
                   {emailState === "error" && (
                     <p className="text-xs text-danger font-medium mt-0.5 animate-in fade-in slide-in-from-top-1">
-                      Ingresa una cédula de 10 dígitos (ej. 1712345602) o correo institucional válido.
+                      Ingresa una cédula de 10 dígitos (ej. 1712345602).
                     </p>
                   )}
                   {emailState === "success" && (

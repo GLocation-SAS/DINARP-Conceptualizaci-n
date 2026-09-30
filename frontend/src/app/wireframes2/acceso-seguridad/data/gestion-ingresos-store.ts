@@ -51,7 +51,7 @@ export function getEstadoBadgeProps(
     case "PENDIENTE_ASIGNACION_NORMATIVIDAD":
       return {
         tone: "warning" as const,
-        label: "Pendiente de Asignación · Normatividad",
+        label: "Pendiente de asignación",
       };
     case "PENDIENTE_GENERAR_RESOLUCION":
       return {
@@ -3747,16 +3747,19 @@ export function useSolicitudesIngresoStore() {
 
       const updated = prev.map((item) => {
         if (item.id === solicitudId) {
-          const resp = revisorNombre || item.revisorGestion || item.revisor || "Revisor de Gestión";
+          const isNormativa = item.estado === "PENDIENTE_GENERAR_RESOLUCION" || item.estado === "EN_GENERACION_RESOLUCION" || item.estado === "EN_REVISION_NORMATIVIDAD" || item.estado === "PENDIENTE_ASIGNACION_NORMATIVIDAD";
+          const resp = revisorNombre || (isNormativa ? item.revisorNormatividad : item.revisorGestion) || item.revisor || (isNormativa ? "Personal facultado de Normatividad" : "Revisor de Gestión");
           const nuevoHistorial = [...(item.historial || [])];
 
           nuevoHistorial.push({
             id: `hist-pause-${Date.now()}`,
             fechaHora: fechaStr,
-            accion: "Revisión pausada",
+            accion: isNormativa ? "Generación de resolución pausada" : "Revisión pausada",
             realizadoPor: resp,
-            rol: "Revisor de Gestión",
-            detalles: motivo || `El revisor ${resp} salió de la revisión sin emitir dictamen. El trámite retorna al estado pendiente de revisión.`
+            rol: isNormativa ? "Personal facultado de Normatividad" : "Revisor de Gestión",
+            detalles: motivo || (isNormativa 
+              ? `El funcionario ${resp} salió de la formulación sin emitir la resolución. El trámite retorna al estado pendiente de formulación.`
+              : `El revisor ${resp} salió de la revisión sin emitir dictamen. El trámite retorna al estado pendiente de revisión.`)
           });
 
           return {
