@@ -1377,9 +1377,6 @@ export default function SolicitudDetailPage({ params }: PageProps) {
                   onIniciarGeneracion={(solId) => {
                     store.iniciarRevision(solId, currentUser.name);
                   }}
-                  onGenerarExito={(solId, resolucion, obs) => {
-                    store.aprobarNormatividad(solId, currentUser.name, resolucion, obs);
-                  }}
                   onFalloGeneracion={(solId, causa) => {
                     store.fallarGeneracionResolucion(solId, causa, currentUser.name);
                   }}

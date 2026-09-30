@@ -14,6 +14,7 @@ import {
   X
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { StatusBadge } from "@/components/shared/status-badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardDecorativeIcon } from "@/components/ui/card";
 import { Search as SearchInput } from "@/components/ui/search";
@@ -87,32 +88,6 @@ export function FuentesTab({ activeRole }: { activeRole?: string }) {
   }, [fuentesRoleFiltradas, searchTerm, estadoFilter, institucionFilter]);
 
   const hasActiveFilters = searchTerm !== "" || estadoFilter !== "ALL" || institucionFilter !== "ALL";
-
-  const getEstadoBadge = (estado: FuenteEstado) => {
-    switch (estado) {
-      case "PUBLICADO":
-        return (
-          <Badge tone="success" appearance="soft" size="sm" className="gap-1 font-medium">
-            <Eye className="size-3" />
-            PUBLICADO
-          </Badge>
-        );
-      case "OCULTO":
-        return (
-          <Badge tone="neutral" appearance="outline" size="sm" className="gap-1 font-medium border-dashed text-muted-foreground">
-            <EyeOff className="size-3 text-muted-foreground" />
-            OCULTO
-          </Badge>
-        );
-      case "DESACTIVADO":
-        return (
-          <Badge tone="neutral" appearance="soft" size="sm" className="gap-1 font-medium bg-muted/40 text-muted-foreground/80">
-            <FolderArchive className="size-3 text-muted-foreground" />
-            DESACTIVADO
-          </Badge>
-        );
-    }
-  };
 
   return (
     <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
@@ -357,7 +332,7 @@ export function FuentesTab({ activeRole }: { activeRole?: string }) {
                         </span>
                       </div>
                     </TableCell>
-                    <TableCell>{getEstadoBadge(fuente.estado)}</TableCell>
+                    <TableCell><StatusBadge estado={fuente.estado} size="sm" /></TableCell>
                     <TableCell className="text-center font-mono font-medium text-muted-foreground">
                       {fuente.campos?.length || 0}
                     </TableCell>
@@ -395,3 +370,5 @@ export function FuentesTab({ activeRole }: { activeRole?: string }) {
     </div>
   );
 }
+
+

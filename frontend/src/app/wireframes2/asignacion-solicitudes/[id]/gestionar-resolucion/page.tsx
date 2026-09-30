@@ -1,14 +1,12 @@
 "use client";
 
 import React, { useState, use, useMemo } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   FileText,
   FileSignature,
   Eye,
   ShieldCheck,
-  Building2,
   ArrowLeft,
   ArrowRight,
   Clock,
@@ -19,15 +17,14 @@ import { Button } from "@/components/ui/button";
 import { Stepper, type Step as StepperStep } from "@/components/ui/stepper";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
 
-import { WireframeDashboardLayout } from "../../../../components/wireframe-dashboard-layout";
-import { useAuthStore } from "../../../../acceso-seguridad/data/auth-store";
+import { WireframeDashboardLayout } from "../../../components/wireframe-dashboard-layout";
+import { useAuthStore } from "../../../acceso-seguridad/data/auth-store";
 import {
   useSolicitudesIngresoStore,
   getEstadoBadgeProps
-} from "../../../../acceso-seguridad/data/gestion-ingresos-store";
-import { MOCK_USERS_BY_ROLE } from "../../../../catalogo-interoperabilidad/data/catalogo-data";
+} from "../../../acceso-seguridad/data/gestion-ingresos-store";
+import { MOCK_USERS_BY_ROLE } from "../../../catalogo-interoperabilidad/data/catalogo-data";
 
 interface PageProps {
   params: Promise<{ id: string }>;

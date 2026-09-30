@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState, useMemo } from "react";
 import Link from "next/link";
@@ -796,7 +796,7 @@ export default function GestionIngresosPage() {
           <Badge
             tone={tone}
             appearance="soft"
-            size="sm"
+            size="icon-sm"
             dot
             className="font-semibold text-[11px] normal-case tracking-normal px-2 py-0.5 inline-flex items-center shadow-2xs cursor-pointer hover:opacity-90 transition-opacity max-w-full"
           >
@@ -813,7 +813,7 @@ export default function GestionIngresosPage() {
 
   const renderTramiteBadge = (tipo: TipoTramiteIngreso, codigo: string) => {
     return (
-      <Badge tone="neutral" appearance="soft" size="sm" className="font-mono text-[10px] border border-border">
+      <Badge tone="neutral" appearance="soft" size="icon-sm" className="font-mono text-[10px] border border-border">
         {codigo}
       </Badge>
     );
@@ -1238,7 +1238,7 @@ export default function GestionIngresosPage() {
                 </div>
 
                 <div className="p-6 sm:p-8 space-y-6">
-<Badge tone="primary" appearance="solid" size="sm" className="font-bold uppercase tracking-wider shrink-0 self-start sm:self-auto !text-white shadow-xs rounded-full px-3 py-1">
+<Badge tone="primary" appearance="solid" size="icon-sm" className="font-bold uppercase tracking-wider shrink-0 self-start sm:self-auto !text-white shadow-xs rounded-full px-3 py-1">
                     {selectedSolicitud.anexoA?.entidadTipo === "Privada" ? "ENTIDAD PRIVADA" : "ENTIDAD PÚBLICA"}
                   </Badge>
                 </div>
@@ -1255,7 +1255,7 @@ export default function GestionIngresosPage() {
                       </p>
                     </div>
                   </div>
-                  <Badge tone="neutral" appearance="soft" size="sm" className="border border-border shrink-0 self-start sm:self-auto">
+                  <Badge tone="neutral" appearance="soft" size="icon-sm" className="border border-border shrink-0 self-start sm:self-auto">
                     ENTIDAD
                   </Badge>
                 </div>
@@ -1342,7 +1342,7 @@ export default function GestionIngresosPage() {
                         </p>
                       </div>
                     </div>
-                    <Badge tone="neutral" appearance="soft" size="sm" className="border border-border shrink-0 self-start sm:self-auto">
+                    <Badge tone="neutral" appearance="soft" size="icon-sm" className="border border-border shrink-0 self-start sm:self-auto">
                       FIRMANTE
                     </Badge>
                   </div>
@@ -1416,7 +1416,7 @@ export default function GestionIngresosPage() {
                           Documento habilitante de delegación de firma oficial cargado en el expediente.
                         </p>
                       </div>
-                      <Badge tone="primary" appearance="soft" size="sm" className="font-mono text-xs shrink-0 self-start sm:self-auto">
+                      <Badge tone="primary" appearance="soft" size="icon-sm" className="font-mono text-xs shrink-0 self-start sm:self-auto">
                         {selectedSolicitud.anexoA?.archivoSoporteDelegacion || "Resolucion_Delegacion_Firma.pdf"}
                       </Badge>
                     </div>
@@ -1426,7 +1426,7 @@ export default function GestionIngresosPage() {
                     <Button
                       type="button"
                       variant="primary"
-                      size="sm"
+                      size="icon-sm"
                       onClick={() => setDetailTab(1)}
                       className="text-xs font-semibold gap-1.5"
                     >
@@ -1455,7 +1455,7 @@ export default function GestionIngresosPage() {
                 </div>
 
                 <div className="p-6 sm:p-8 space-y-6">
-<Badge tone="primary" appearance="solid" size="sm" className="font-bold uppercase tracking-wider shrink-0 self-start sm:self-auto !text-white shadow-xs rounded-full px-3 py-1">
+<Badge tone="primary" appearance="solid" size="icon-sm" className="font-bold uppercase tracking-wider shrink-0 self-start sm:self-auto !text-white shadow-xs rounded-full px-3 py-1">
                     COORDINACIÓN
                   </Badge>
                 </div>
@@ -1472,7 +1472,7 @@ export default function GestionIngresosPage() {
                           Ingresa los datos del coordinador institucional titular designado por la entidad.
                         </p>
                       </div>
-                      <Badge tone="neutral" appearance="soft" size="sm" className="font-bold uppercase tracking-wider px-2.5 py-0.5">
+                      <Badge tone="neutral" appearance="soft" size="icon-sm" className="font-bold uppercase tracking-wider px-2.5 py-0.5">
                         TITULAR
                       </Badge>
                     </div>
@@ -1548,7 +1548,7 @@ export default function GestionIngresosPage() {
                           Ingresa los datos del coordinador institucional suplente designado por la entidad.
                         </p>
                       </div>
-                      <Badge tone="neutral" appearance="soft" size="sm" className="font-bold uppercase tracking-wider px-2.5 py-0.5">
+                      <Badge tone="neutral" appearance="soft" size="icon-sm" className="font-bold uppercase tracking-wider px-2.5 py-0.5">
                         SUPLENTE
                       </Badge>
                     </div>
@@ -1617,7 +1617,7 @@ export default function GestionIngresosPage() {
                   <Button
                     type="button"
                     variant="neutral"
-                    size="sm"
+                    size="icon-sm"
                     onClick={() => setDetailTab(0)}
                     className="text-xs font-semibold gap-1.5"
                   >
@@ -1626,7 +1626,7 @@ export default function GestionIngresosPage() {
                   <Button
                     type="button"
                     variant="primary"
-                    size="sm"
+                    size="icon-sm"
                     onClick={() => setDetailTab(2)}
                     className="text-xs font-semibold gap-1.5"
                   >
@@ -1654,7 +1654,7 @@ export default function GestionIngresosPage() {
                 </div>
 
                 <div className="p-6 sm:p-8 space-y-6">
-<Badge tone="primary" appearance="solid" size="sm" className="font-bold uppercase tracking-wider shrink-0 self-start sm:self-auto !text-white shadow-xs rounded-full px-3 py-1">
+<Badge tone="primary" appearance="solid" size="icon-sm" className="font-bold uppercase tracking-wider shrink-0 self-start sm:self-auto !text-white shadow-xs rounded-full px-3 py-1">
                     SERVICIOS DINARP
                   </Badge>
                 </div>
@@ -1732,7 +1732,7 @@ export default function GestionIngresosPage() {
                   <Button
                     type="button"
                     variant="neutral"
-                    size="sm"
+                    size="icon-sm"
                     onClick={() => setDetailTab(1)}
                     className="text-xs font-semibold gap-1.5"
                   >
@@ -1741,7 +1741,7 @@ export default function GestionIngresosPage() {
                   <Button
                     type="button"
                     variant="primary"
-                    size="sm"
+                    size="icon-sm"
                     onClick={() => setDetailTab(3)}
                     className="text-xs font-semibold gap-1.5"
                   >
@@ -1769,7 +1769,7 @@ export default function GestionIngresosPage() {
                 </div>
 
                 <div className="p-6 sm:p-8 space-y-6">
-<Badge tone="primary" appearance="solid" size="sm" className="font-bold uppercase tracking-wider shrink-0 self-start sm:self-auto !text-white shadow-xs rounded-full px-3 py-1">
+<Badge tone="primary" appearance="solid" size="icon-sm" className="font-bold uppercase tracking-wider shrink-0 self-start sm:self-auto !text-white shadow-xs rounded-full px-3 py-1">
                     FORMALIZACIÓN
                   </Badge>
                 </div>
@@ -1865,7 +1865,7 @@ export default function GestionIngresosPage() {
                             <h4 className="font-mono font-bold text-xs sm:text-sm text-foreground">
                               {selectedSolicitud.anexoA?.archivoDocumentoFirmado || `ARP-R01_Solicitud_Acceso_SINARP_${(selectedSolicitud.anexoA?.entidadSiglas || "ENTIDAD").toUpperCase()}.pdf`}
                             </h4>
-                            <Badge tone="success" appearance="soft" size="sm" className="font-bold text-[10px] px-2 py-0.5 shrink-0">
+                            <Badge tone="success" appearance="soft" size="icon-sm" className="font-bold text-[10px] px-2 py-0.5 shrink-0">
                               Firma verificada en FirmaEC
                             </Badge>
                           </div>
@@ -1883,7 +1883,7 @@ export default function GestionIngresosPage() {
                   <Button
                     type="button"
                     variant="neutral"
-                    size="sm"
+                    size="icon-sm"
                     onClick={() => setDetailTab(2)}
                     className="text-xs font-semibold gap-1.5"
                   >
@@ -1893,7 +1893,7 @@ export default function GestionIngresosPage() {
                   <Button
                     type="button"
                     variant="primary"
-                    size="sm"
+                    size="icon-sm"
                     onClick={() => {
                       alert(`Descargando documento firmado ARP-R01_Solicitud_Acceso_SINARP_${(selectedSolicitud.anexoA?.entidadSiglas || "ENTIDAD").toUpperCase()}.pdf con validación FirmaEC...`);
                     }}
@@ -2461,7 +2461,7 @@ export default function GestionIngresosPage() {
                       appearance="soft"
                       className="gap-1.5 px-3 py-1 font-semibold text-xs rounded-full border border-border"
                     >
-                      <span>Búsqueda: "{searchQuery}"</span>
+                      <span>Búsqueda: &quot;{searchQuery}&quot;</span>
                       <X
                         className="size-3.5 cursor-pointer hover:text-foreground/80 transition-colors"
                         onClick={() => setSearchQuery("")}
@@ -2517,7 +2517,7 @@ export default function GestionIngresosPage() {
                   <Button
                     type="button"
                     variant="ghost"
-                    size="sm"
+                    size="icon-sm"
                     onClick={clearAllFilters}
                     className="h-7 text-xs font-semibold text-muted-foreground hover:text-foreground px-2 rounded-full"
                   >
@@ -2827,21 +2827,27 @@ export default function GestionIngresosPage() {
                               <TableCell className="px-2 text-right" onClick={(e) => e.stopPropagation()}>
                                 <div className="flex items-center justify-end gap-1">
                                   {/* Si es Personal de Normatividad (EQ_NORMATIVA), acción principal directa: 'Gestionar resolución' */}
-                                  {currentUser.role === "EQ_NORMATIVA" ? (
-                                    <Button
-                                      type="button"
-                                      variant="primary"
-                                      size="sm"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleSelectSolicitud(row);
-                                      }}
-                                      className="h-7 px-2.5 text-xs font-semibold rounded-lg shadow-2xs gap-1.5 whitespace-nowrap"
-                                      aria-label={`Gestionar resolución para trámite ${row.id}`}
-                                    >
-                                      <FileSignature className="size-3.5" />
-                                      <span>Gestionar resolución</span>
-                                    </Button>
+                                  {currentUser.role === "EQ_NORMATIVA" ? ( 
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <Button
+                                          type="button"
+                                          variant="primary"
+                                          size="icon-sm"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleSelectSolicitud(row);
+                                          }}
+                                          className="size-7 rounded-lg shadow-2xs"
+                                          aria-label={`Gestionar resolución para trámite ${row.id}`}
+                                        >
+                                          <FileSignature className="size-3.5" />
+                                        </Button>
+                                      </TooltipTrigger>
+                                      <TooltipContent side="top">
+                                        Gestionar
+                                      </TooltipContent>
+                                    </Tooltip>
                                   ) : (
                                     <>
                                       {isAssignable ? (
@@ -3017,7 +3023,7 @@ export default function GestionIngresosPage() {
 
                               <div className="flex items-center gap-2 shrink-0 ml-auto" onClick={(e) => e.stopPropagation()}>
                                 {revisorAsignado ? (
-                                  <Badge tone="neutral" appearance="soft" size="sm" className="text-[10px] border border-border px-2 py-0.5">
+                                  <Badge tone="neutral" appearance="soft" size="icon-sm" className="text-[10px] border border-border px-2 py-0.5">
                                     <User className="size-2.5 mr-1 text-primary shrink-0" />
                                     <span className="whitespace-nowrap">{revisorAsignado}</span>
                                   </Badge>
@@ -3029,16 +3035,15 @@ export default function GestionIngresosPage() {
                                   <Button
                                     type="button"
                                     variant="primary"
-                                    size="sm"
+                                    size="icon-sm"
                                     onClick={(e) => {
                                       e.stopPropagation();
                                       handleSelectSolicitud(row);
                                     }}
-                                    className="h-7 px-2.5 text-xs font-semibold rounded-lg shadow-2xs gap-1.5"
+                                    className="size-7 rounded-lg shadow-2xs"
                                     aria-label={`Gestionar resolución para trámite ${row.id}`}
                                   >
                                     <FileSignature className="size-3" />
-                                    <span>Gestionar resolución</span>
                                   </Button>
                                 ) : (
                                   <>
@@ -3046,7 +3051,7 @@ export default function GestionIngresosPage() {
                                       <Button
                                         type="button"
                                         variant={esReasignacion ? "neutral" : "primary"}
-                                        size="sm"
+                                        size="icon-sm"
                                         onClick={(e) => {
                                           e.stopPropagation();
                                           handleOpenAssign(row);
@@ -3065,7 +3070,7 @@ export default function GestionIngresosPage() {
                                     <Button
                                       type="button"
                                       variant="outline"
-                                      size="sm"
+                                      size="icon-sm"
                                       onClick={(e) => {
                                         e.stopPropagation();
                                         handleSelectSolicitud(row);
@@ -3098,7 +3103,7 @@ export default function GestionIngresosPage() {
                         <Button
                           type="button"
                           variant="primary"
-                          size="sm"
+                          size="icon-sm"
                           onClick={() => {
                             setSolicitudesMasivas(solicitudes.filter((s) => selectedIds.includes(s.id)));
                             setIsAssignMasivoOpen(true);
@@ -3112,7 +3117,7 @@ export default function GestionIngresosPage() {
                         <Button
                           type="button"
                           variant="ghost"
-                          size="sm"
+                          size="icon-sm"
                           onClick={() => setSelectedIds([])}
                           className="h-8 text-xs font-semibold text-white/80 hover:text-white hover:bg-white/10 dark:text-muted-foreground dark:hover:text-foreground dark:hover:bg-muted/50 px-3 rounded-xl transition-colors"
                         >
@@ -3286,7 +3291,7 @@ export default function GestionIngresosPage() {
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-muted-foreground">Firma digital:</span>
-                      <Badge tone="neutral" appearance="soft" size="sm" className="gap-1 text-[10px] border border-border text-foreground">
+                      <Badge tone="neutral" appearance="soft" size="icon-sm" className="gap-1 text-[10px] border border-border text-foreground">
                         <Check className="size-2.5" />
                         Válida y Vigente
                       </Badge>
