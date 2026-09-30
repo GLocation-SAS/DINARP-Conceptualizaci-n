@@ -412,7 +412,7 @@ export default function GestionIngresosPage() {
   { value: "estado-prioridad", label: "Pendientes primero" }],
   []);
 
-  const activeSectionTitle = "Bandeja de En revisión - Normatividad";
+  const activeSectionTitle = "Solicitudes generación resolución";
 
   const hasActiveFilters = useMemo(() => {
     return (
@@ -3329,4 +3329,5 @@ export default function GestionIngresosPage() {
     </WireframeDashboardLayout>);
 
 }
+
 

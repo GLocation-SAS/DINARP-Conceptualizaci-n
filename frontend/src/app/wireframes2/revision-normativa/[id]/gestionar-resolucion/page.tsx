@@ -67,7 +67,7 @@ export default function GestionarResolucionPage({ params }: PageProps) {
     },
   ];
 
-  const activeSectionTitle = "Bandeja de En revisión - Normatividad";
+  const activeSectionTitle = "Solicitudes generación resolución";
 
   if (isLoaded && !solicitud) {
     return (
@@ -360,5 +360,6 @@ export default function GestionarResolucionPage({ params }: PageProps) {
     </WireframeDashboardLayout>
   );
 }
+
 
 

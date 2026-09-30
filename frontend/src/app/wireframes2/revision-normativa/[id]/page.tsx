@@ -115,7 +115,7 @@ export default function SolicitudDetailPage({ params }: PageProps) {
     archivo: string;
   } | null>(null);
 
-  const activeSectionTitle = "Bandeja de En revisión - Normatividad";
+  const activeSectionTitle = "Solicitudes generación resolución";
 
   const handleConfirmAsignacion = (
     solicitudId: string,
@@ -1458,5 +1458,6 @@ export default function SolicitudDetailPage({ params }: PageProps) {
     </WireframeDashboardLayout>
   );
 }
+
 
 
