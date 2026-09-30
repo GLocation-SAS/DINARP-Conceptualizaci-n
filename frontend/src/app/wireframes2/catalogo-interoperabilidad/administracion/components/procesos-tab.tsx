@@ -434,7 +434,7 @@ export function ProcesosTab({ activeRole, onStartTour }: ProcesosTabProps) {
                 <TableHead>Responsable actual</TableHead>
                 <TableHead>Estado del catálogo</TableHead>
                 <TableHead>Última actualización</TableHead>
-                <TableHead className="text-right">Acciones</TableHead>
+                <TableHead className="w-24 text-center">Acciones</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -500,19 +500,19 @@ export function ProcesosTab({ activeRole, onStartTour }: ProcesosTabProps) {
                       <TableCell className="text-xs text-muted-foreground">
                         {exp.ultimaActualizacion}
                       </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex items-center justify-end gap-1.5" data-tour="tour-expediente">
+                      <TableCell className="text-center">
+                        <div className="flex items-center justify-center gap-3.5" data-tour="tour-expediente">
                           <TooltipProvider delayDuration={0}>
                             <Tooltip>
                               <TooltipTrigger asChild>
                                 <Button
-                                  variant={isMyTask ? "primary" : "ghost"}
+                                  variant={isMyTask ?"primary" :"ghost"}
                                   size="icon-sm"
                                   asChild
-                                  className={isMyTask ? "size-8 rounded-lg shadow-sm font-semibold" : "size-8 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted"}
+                                  className={isMyTask ?"size-8 rounded-lg shadow-sm font-semibold" :"size-8 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted"}
                                 >
                                   <Link href={`/wireframes2/catalogo-interoperabilidad/administracion/incorporaciones/${exp.id}`}>
-                                    {isMyTask ? <ArrowRight className="size-4" /> : <Eye className="size-4" />}
+                                    {isMyTask ? <ArrowRight className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10 size-4" /> : <Eye className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10 size-4" />}
                                   </Link>
                                 </Button>
                               </TooltipTrigger>

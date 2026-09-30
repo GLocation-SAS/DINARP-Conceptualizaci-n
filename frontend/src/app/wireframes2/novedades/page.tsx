@@ -120,7 +120,7 @@ export default function NovedadesListPage() {
                   <TableHead className="font-semibold hidden lg:table-cell">Fuente Afectada</TableHead>
                   <TableHead className="font-semibold">Fecha</TableHead>
                   <TableHead className="font-semibold">Estado</TableHead>
-                  <TableHead className="text-right font-semibold">Acciones</TableHead>
+                  <TableHead className="w-24 text-center">Acciones</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>

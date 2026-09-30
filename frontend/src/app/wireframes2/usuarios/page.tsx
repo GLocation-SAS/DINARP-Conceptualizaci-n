@@ -1173,9 +1173,7 @@ export default function GestionUsuariosPage() {
                   <TableHead className="w-[140px] px-3 py-2.5 whitespace-nowrap text-white font-bold text-xs">
                     ÚLTIMA ACTUALIZACIÓN
                   </TableHead>
-                  <TableHead className="w-[160px] px-3 py-2.5 whitespace-nowrap text-right text-white font-bold text-xs">
-                    ACCIONES
-                  </TableHead>
+                  <TableHead className="w-24 text-center">Acciones</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -1277,8 +1275,8 @@ export default function GestionUsuariosPage() {
                       </TableCell>
 
                       {/* Acciones */}
-                      <TableCell className="px-3 py-2.5 text-right whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
-                        <div className="flex items-center justify-end gap-1 shrink-0">
+                      <TableCell className="px-3 py-2.5 text-center whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex items-center justify-center gap-3 shrink-0">
                           {/* Ver detalle y auditoría */}
                           <Tooltip>
                             <TooltipTrigger asChild>

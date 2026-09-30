@@ -299,7 +299,7 @@ export function FuentesTab({ activeRole }: { activeRole?: string }) {
                 <TableHead className="min-w-[140px]" data-tour="tour-estado">Estado</TableHead>
                 <TableHead className="text-center min-w-[80px]">Campos</TableHead>
                 <TableHead className="min-w-[140px]">Última actualización</TableHead>
-                <TableHead className="text-right min-w-[120px]">Acciones</TableHead>
+                <TableHead className="w-24 text-center">Acciones</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

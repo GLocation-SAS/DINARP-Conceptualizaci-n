@@ -148,7 +148,7 @@ export default function PaquetesConsumoPage() {
                   <TableHead>Estado</TableHead>
                   <TableHead>Responsable actual</TableHead>
                   <TableHead>Última actualización</TableHead>
-                  <TableHead className="text-right">Acciones</TableHead>
+                  <TableHead className="w-24 text-center">Acciones</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -166,19 +166,19 @@ export default function PaquetesConsumoPage() {
                     </TableCell>
                     <TableCell>{p.responsable}</TableCell>
                     <TableCell className="text-muted-foreground">{p.ultimaActualizacion}</TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-1">
+                    <TableCell className="text-center">
+                      <div className="flex items-center justify-center gap-3">
                         <TooltipProvider delayDuration={0}>
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <Button
-                                variant="outline"
+                                variant="ghost"
                                 size="icon-sm"
                                 asChild
-                                className="size-8 rounded-lg border-border/80 text-foreground hover:bg-muted hover:text-foreground shadow-2xs"
+                                className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10 size-8   text-foreground hover:bg-muted hover:text-foreground"
                               >
                                 <Link href={`/wireframes2/acceso-interoperabilidad/paquetes/${p.id}`}>
-                                  <Eye className="size-4" />
+                                  <Eye className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10 size-4" />
                                 </Link>
                               </Button>
                             </TooltipTrigger>

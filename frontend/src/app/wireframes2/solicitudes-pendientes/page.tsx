@@ -2135,9 +2135,7 @@ export default function GestionIngresosPage() {
                         <TableHead className="w-[170px] px-2 py-2.5 whitespace-nowrap">
                           ESTADO
                         </TableHead>
-                        <TableHead className="w-[90px] px-2 py-2.5 whitespace-nowrap text-right">
-                          ACCIONES
-                        </TableHead>
+                        <TableHead className="w-24 text-center">Acciones</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -2322,22 +2320,22 @@ export default function GestionIngresosPage() {
                               </TableCell>
 
                               {/* 7. Acciones */}
-                              <TableCell className="px-2 text-right" onClick={(e) => e.stopPropagation()}>
-                                <div className="flex items-center justify-end">
+                              <TableCell className="text-center" onClick={(e) => e.stopPropagation()}>
+                                <div className="flex items-center justify-center gap-3">
                                   <Tooltip>
                                     <TooltipTrigger asChild>
                                       <Button
                                         type="button"
-                                        variant="outline"
+                                        variant="ghost"
                                         size="icon-sm"
                                         onClick={(e) => {
                                           e.stopPropagation();
                                           handleSelectSolicitud(row);
                                         }}
-                                        className="size-7 rounded-lg border-border/80 text-foreground hover:bg-muted shadow-2xs"
+                                        className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10    text-foreground hover:bg-muted"
                                         aria-label={`Ver detalle y gestionar trámite ${row.id}`}
                                       >
-                                        <Eye className="size-3.5" />
+                                        <Eye className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10 size-3.5" />
                                       </Button>
                                     </TooltipTrigger>
                                     <TooltipContent side="top">Ver detalle y gestionar</TooltipContent>

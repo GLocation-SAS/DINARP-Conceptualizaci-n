@@ -2589,9 +2589,7 @@ export default function GestionIngresosPage() {
                         <TableHead className="w-[150px] px-2 py-2.5 whitespace-nowrap">
                           ASIGNADO
                         </TableHead>
-                        <TableHead className="w-[90px] px-2 py-2.5 whitespace-nowrap text-right">
-                          ACCIONES
-                        </TableHead>
+                        <TableHead className="w-24 text-center">Acciones</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -2824,24 +2822,24 @@ export default function GestionIngresosPage() {
                               </TableCell>
 
                               {/* Acciones */}
-                              <TableCell className="px-2 text-right" onClick={(e) => e.stopPropagation()}>
-                                <div className="flex items-center justify-end gap-1">
+                              <TableCell className="text-center" onClick={(e) => e.stopPropagation()}>
+                                <div className="flex items-center justify-center gap-3">
                                   {/* Si es Personal de Normatividad (EQ_NORMATIVA), acción principal directa: 'Gestionar resolución' */}
                                   {currentUser.role === "EQ_NORMATIVA" ? ( 
                                     <Tooltip>
                                       <TooltipTrigger asChild>
                                         <Button
                                           type="button"
-                                          variant="primary"
-                                          size="sm"
+                                          variant="ghost"
+                                          size="icon-sm"
                                           onClick={(e) => {
                                             e.stopPropagation();
                                             handleSelectSolicitud(row);
                                           }}
-                                          className="size-7 rounded-lg shadow-2xs"
+                                          className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10"
                                           aria-label={`Gestionar resolución para trámite ${row.id}`}
                                         >
-                                          <FileSignature className="size-3.5" />
+                                          <FileSignature className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10 size-3.5" />
                                         </Button>
                                       </TooltipTrigger>
                                       <TooltipContent side="top">
@@ -2855,19 +2853,18 @@ export default function GestionIngresosPage() {
                                           <TooltipTrigger asChild>
                                             <Button
                                               type="button"
-                                              variant={esReasignacion ? "neutral" : "primary"}
-                                              size="sm"
+                                              variant={esReasignacion ?"neutral" :"primary"}
+                                              size="icon-sm"
                                               onClick={(e) => {
                                                 e.stopPropagation();
                                                 handleOpenAssign(row);
                                               }}
-                                              className={cn(
-                                                "size-7 rounded-lg shadow-2xs",
-                                                esReasignacion && "border border-border text-foreground hover:bg-muted"
+                                              className={cn("size-7 rounded-lg shadow-2xs",
+                                                esReasignacion &&"border border-border text-foreground hover:bg-muted"
                                               )}
                                               aria-label={esReasignacion ? `Reasignar revisor a trámite ${row.id}` : `Asignar revisor a trámite ${row.id}`}
                                             >
-                                              {esReasignacion ? <RotateCcw className="size-3.5 text-primary" /> : <UserPlus className="size-3.5" />}
+                                              {esReasignacion ? <RotateCcw className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10 size-3.5 text-primary" /> : <UserPlus className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10 size-3.5" />}
                                             </Button>
                                           </TooltipTrigger>
                                           <TooltipContent side="top">
@@ -2891,16 +2888,16 @@ export default function GestionIngresosPage() {
                                         <TooltipTrigger asChild>
                                           <Button
                                             type="button"
-                                            variant="outline"
-                                            size="sm"
+                                            variant="ghost"
+                                            size="icon-sm"
                                             onClick={(e) => {
                                               e.stopPropagation();
                                               handleSelectSolicitud(row);
                                             }}
-                                            className="size-7 rounded-lg border-border/80 text-foreground hover:bg-muted shadow-2xs"
+                                            className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10    text-foreground hover:bg-muted"
                                             aria-label={`Ver detalle de trámite ${row.id}`}
                                           >
-                                            <Eye className="size-3.5" />
+                                            <Eye className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10 size-3.5" />
                                           </Button>
                                         </TooltipTrigger>
                                         <TooltipContent side="top">Ver detalle</TooltipContent>

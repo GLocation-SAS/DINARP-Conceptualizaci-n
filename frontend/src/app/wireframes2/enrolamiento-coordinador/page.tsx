@@ -65,8 +65,7 @@ import {
   type DatosAnexoB
 } from "../acceso-seguridad/data/gestion-ingresos-store";
 import { MOCK_USERS_BY_ROLE, type UserRole, ROLES_CONFIG } from "../catalogo-interoperabilidad/data/catalogo-data";
-import { WireframeRoleSelector } from "../components/wireframe-role-selector";
-import { WireframeUserMenu } from "../components/wireframe-user-menu";
+
 
 function EnrolamientoContent() {
   const router = useRouter();
@@ -407,10 +406,7 @@ function EnrolamientoContent() {
           </div>
 
           <div className="flex items-center gap-3">
-            {/* Selector de Rol Simulado */}
-            <WireframeRoleSelector activeRole={simulatedRole} onRoleChange={(role) => setSimulatedRole(role)} />
             <ThemeToggle />
-            <WireframeUserMenu user={currentUser} onRoleChange={(role) => setSimulatedRole(role)} />
           </div>
         </div>
       </header>
@@ -1802,7 +1798,7 @@ function EnrolamientoContent() {
                       <TableHead className="text-xs font-bold text-foreground">Tipo de Trámite</TableHead>
                       <TableHead className="text-xs font-bold text-foreground">Fecha</TableHead>
                       <TableHead className="text-xs font-bold text-foreground">Estado</TableHead>
-                      <TableHead className="text-xs font-bold text-foreground text-right">Acciones</TableHead>
+                      <TableHead className="w-24 text-center">Acciones</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>

@@ -1032,7 +1032,7 @@ export default function CambioCoordinadorPage() {
                     <TableHead className="text-xs font-bold">Fecha</TableHead>
                     <TableHead className="text-xs font-bold">Estado</TableHead>
                     <TableHead className="text-xs font-bold">Responsable / Revisor</TableHead>
-                    <TableHead className="text-xs font-bold text-right">Acciones</TableHead>
+                    <TableHead className="w-24 text-center">Acciones</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -1138,7 +1138,7 @@ export default function CambioCoordinadorPage() {
                     <TableHead className="text-xs font-bold">Solicitante</TableHead>
                     <TableHead className="text-xs font-bold">Fecha Asignación</TableHead>
                     <TableHead className="text-xs font-bold">Estado</TableHead>
-                    <TableHead className="text-xs font-bold text-right">Acciones</TableHead>
+                    <TableHead className="w-24 text-center">Acciones</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>

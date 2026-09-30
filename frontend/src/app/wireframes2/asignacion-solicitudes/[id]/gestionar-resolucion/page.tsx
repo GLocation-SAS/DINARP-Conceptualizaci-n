@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState, use, useMemo } from "react";
 import { useRouter } from "next/navigation";
@@ -154,10 +154,7 @@ export default function GestionarResolucionPage({ params }: PageProps) {
           <div>
             <Button
               type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => router.push(`/wireframes2/asignacion-solicitudes/${solicitud.id}`)}
-              className="h-8 px-2.5 text-xs font-semibold gap-1.5 rounded-xl border-border text-foreground hover:bg-muted mb-3"
+              variant="neutral" size="sm" onClick={() => router.push(`/wireframes2/asignacion-solicitudes/${solicitud.id}`)} className="h-8 px-3 text-xs font-semibold gap-1.5 rounded-full mb-3"
             >
               <ArrowLeft className="size-3.5" />
               <span>Volver al trámite</span>
@@ -261,10 +258,7 @@ export default function GestionarResolucionPage({ params }: PageProps) {
         <div className="flex flex-col-reverse sm:flex-row justify-between items-center gap-3 pt-4 border-t border-border mt-8">
           <Button
             type="button"
-            variant="outline"
-            size="default"
-            onClick={step === 1 ? () => router.push(`/wireframes2/asignacion-solicitudes/${solicitud.id}`) : handlePrev}
-            className="w-full sm:w-auto text-xs font-semibold"
+            variant="secondary" size="default" onClick={step === 1 ? () => router.push(`/wireframes2/asignacion-solicitudes/${solicitud.id}`) : handlePrev} className="w-full sm:w-auto text-xs font-semibold rounded-full"
           >
             {step === 1 ? "Cancelar" : "Atrás"}
           </Button>
@@ -275,7 +269,7 @@ export default function GestionarResolucionPage({ params }: PageProps) {
               variant="primary"
               size="default"
               onClick={handleNext}
-              className="w-full sm:w-auto text-xs font-semibold gap-1.5 shadow-2xs"
+              className="w-full sm:w-auto text-xs font-semibold gap-1.5 shadow-2xs rounded-full"
             >
               <span>Siguiente</span>
               <ArrowRight className="size-4" />
@@ -286,7 +280,7 @@ export default function GestionarResolucionPage({ params }: PageProps) {
               variant="primary"
               size="default"
               onClick={handleGenerate}
-              className="w-full sm:w-auto text-xs font-semibold gap-1.5 shadow-2xs"
+              className="w-full sm:w-auto text-xs font-semibold gap-1.5 shadow-2xs rounded-full"
             >
               <CheckCircle2 className="size-4" />
               <span>Confirmar y Generar Resolución</span>
@@ -298,3 +292,4 @@ export default function GestionarResolucionPage({ params }: PageProps) {
     </WireframeDashboardLayout>
   );
 }
+

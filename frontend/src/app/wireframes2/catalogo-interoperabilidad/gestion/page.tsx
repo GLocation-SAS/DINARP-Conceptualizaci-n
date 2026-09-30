@@ -579,7 +579,7 @@ export default function GestionCatalogoPage() {
                     </TableHead>
                     <TableHead className="text-center min-w-[80px]">Campos</TableHead>
                     <TableHead className="min-w-[140px]">Última actualización</TableHead>
-                    <TableHead className="text-right min-w-[120px]">Acciones</TableHead>
+                    <TableHead className="w-24 text-center">Acciones</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -632,8 +632,8 @@ export default function GestionCatalogoPage() {
                         </TableCell>
 
                         {/* Acciones */}
-                        <TableCell className="text-right">
-                          <div className="flex items-center justify-end gap-1">
+                        <TableCell className="text-center">
+                          <div className="flex items-center justify-center gap-3">
                             <TooltipProvider delayDuration={0}>
                               <Tooltip>
                                 <TooltipTrigger asChild>
@@ -641,10 +641,10 @@ export default function GestionCatalogoPage() {
                                     variant="ghost"
                                     size="icon-sm"
                                     asChild
-                                    className="size-8 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted"
+                                    className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10 size-8  text-muted-foreground hover:text-foreground hover:bg-muted"
                                   >
                                     <Link href={`/wireframes2/catalogo-interoperabilidad/gestion/fuente/${fuente.id}`}>
-                                      <Eye className="size-4" />
+                                      <Eye className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10 size-4" />
                                     </Link>
                                   </Button>
                                 </TooltipTrigger>
@@ -659,9 +659,9 @@ export default function GestionCatalogoPage() {
                                     <Button
                                       variant="ghost"
                                       size="icon-sm"
-                                      className="size-8 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted"
+                                      className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10 size-8  text-muted-foreground hover:text-foreground hover:bg-muted"
                                     >
-                                      <Edit className="size-4" />
+                                      <Edit className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10 size-4" />
                                     </Button>
                                   </TooltipTrigger>
                                   <TooltipContent side="top">
@@ -676,9 +676,9 @@ export default function GestionCatalogoPage() {
                                     <Button
                                       variant="ghost"
                                       size="icon-sm"
-                                      className="size-8 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted"
+                                      className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10 size-8  text-muted-foreground hover:text-foreground hover:bg-muted"
                                     >
-                                      <ShieldAlert className="size-4" />
+                                      <ShieldAlert className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10 size-4" />
                                     </Button>
                                   </TooltipTrigger>
                                   <TooltipContent side="top">

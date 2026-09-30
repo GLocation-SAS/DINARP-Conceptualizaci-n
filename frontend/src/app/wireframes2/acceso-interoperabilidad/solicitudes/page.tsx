@@ -675,7 +675,7 @@ export default function AccesoInteroperabilidadPage() {
                     <TableHead>Fecha de envío</TableHead>
                     <TableHead>Campos</TableHead>
                     <TableHead>Estado</TableHead>
-                    <TableHead className="text-right">Acciones</TableHead>
+                    <TableHead className="w-24 text-center">Acciones</TableHead>
                   </TableRow>
                 )}
 
@@ -687,7 +687,7 @@ export default function AccesoInteroperabilidadPage() {
                     <TableHead>Fuente</TableHead>
                     <TableHead>Fecha de envío</TableHead>
                     <TableHead>Estado</TableHead>
-                    <TableHead className="text-right">Acciones</TableHead>
+                    <TableHead className="w-24 text-center">Acciones</TableHead>
                   </TableRow>
                 )}
 
@@ -699,7 +699,7 @@ export default function AccesoInteroperabilidadPage() {
                     <TableHead>Fecha de aprobación</TableHead>
                     <TableHead>Valor</TableHead>
                     <TableHead>Estado</TableHead>
-                    <TableHead className="text-right">Acciones</TableHead>
+                    <TableHead className="w-24 text-center">Acciones</TableHead>
                   </TableRow>
                 )}
               </TableHeader>
@@ -734,19 +734,19 @@ export default function AccesoInteroperabilidadPage() {
                           <span className="font-medium text-foreground">{s.camposCount ?? s.fuentes?.reduce((acc, f) => acc + (f.campos?.length || 0), 0) ?? 2}</span>
                         </TableCell>
                         <TableCell>{getEstadoBadge(s.estado)}</TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex items-center justify-end gap-1">
+                        <TableCell className="text-center">
+                          <div className="flex items-center justify-center gap-3">
                             <TooltipProvider delayDuration={0}>
                               <Tooltip>
                                 <TooltipTrigger asChild>
                                   <Button
-                                    variant="outline"
+                                    variant="ghost"
                                     size="icon-sm"
                                     asChild
-                                    className="size-8 rounded-lg border-border/80 text-foreground hover:bg-muted hover:text-foreground shadow-2xs"
+                                    className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10 size-8   text-foreground hover:bg-muted hover:text-foreground"
                                   >
                                     <Link href={`/wireframes2/acceso-interoperabilidad/solicitudes/${s.id}`}>
-                                      <Eye className="size-4" />
+                                      <Eye className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10 size-4" />
                                     </Link>
                                   </Button>
                                 </TooltipTrigger>
@@ -761,12 +761,12 @@ export default function AccesoInteroperabilidadPage() {
                                 <Tooltip>
                                   <TooltipTrigger asChild>
                                     <Button
-                                      variant="outline"
-                                      size="sm"
+                                      variant="ghost"
+                                      size="icon-sm"
                                       onClick={() => setModalCredenciales(s)}
-                                      className="h-8 px-2.5 rounded-lg border-emerald-500/40 text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20 shadow-2xs text-xs font-semibold gap-1.5"
+                                      className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10 h-8 px-2.5  border-emerald-500/40 text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20  text-xs font-semibold gap-1.5"
                                     >
-                                      <KeyRound className="size-3.5 text-emerald-600 dark:text-emerald-400" />
+                                      <KeyRound className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10 size-3.5 text-emerald-600 dark:text-emerald-400" />
                                       <span>Ver credenciales</span>
                                     </Button>
                                   </TooltipTrigger>
@@ -780,22 +780,22 @@ export default function AccesoInteroperabilidadPage() {
                                 <Tooltip>
                                   <TooltipTrigger asChild>
                                     <Button
-                                      variant="outline"
+                                      variant="ghost"
                                       size="icon-sm"
                                       asChild
-                                      className="size-8 rounded-lg border-border/80 text-foreground hover:bg-muted shadow-2xs"
+                                      className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10 size-8   text-foreground hover:bg-muted"
                                     >
                                       <Link
                                         href={`/wireframes2/acceso-interoperabilidad/solicitudes/${s.id}?edit=true&step=${
-                                          (`${s.motivoRechazo || ""} ${s.observaciones || ""}`.toLowerCase().includes("eliminar campo") ||
-                                          `${s.motivoRechazo || ""} ${s.observaciones || ""}`.toLowerCase().includes("quitar campo") ||
-                                          `${s.motivoRechazo || ""} ${s.observaciones || ""}`.toLowerCase().includes("cambiar fuente") ||
-                                          `${s.motivoRechazo || ""} ${s.observaciones || ""}`.toLowerCase().includes("campo no autorizado"))
+                                          (`${s.motivoRechazo ||""} ${s.observaciones ||""}`.toLowerCase().includes("eliminar campo") ||
+                                          `${s.motivoRechazo ||""} ${s.observaciones ||""}`.toLowerCase().includes("quitar campo") ||
+                                          `${s.motivoRechazo ||""} ${s.observaciones ||""}`.toLowerCase().includes("cambiar fuente") ||
+                                          `${s.motivoRechazo ||""} ${s.observaciones ||""}`.toLowerCase().includes("campo no autorizado"))
                                             ? 1
                                             : 2
                                         }`}
                                       >
-                                        <Edit className="size-4" />
+                                        <Edit className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10 size-4" />
                                       </Link>
                                     </Button>
                                   </TooltipTrigger>
@@ -826,19 +826,19 @@ export default function AccesoInteroperabilidadPage() {
                         <TableCell className="text-foreground">{servicioNombre}</TableCell>
                         <TableCell className="text-muted-foreground font-mono text-xs">{s.fecha.substring(0, 10)}</TableCell>
                         <TableCell>{getEstadoBadge(s.estado)}</TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex items-center justify-end gap-1">
+                        <TableCell className="text-center">
+                          <div className="flex items-center justify-center gap-3">
                             <TooltipProvider delayDuration={0}>
                               <Tooltip>
                                 <TooltipTrigger asChild>
                                   <Button
-                                    variant="outline"
+                                    variant="ghost"
                                     size="icon-sm"
                                     asChild
-                                    className="size-8 rounded-lg border-border/80 text-foreground hover:bg-muted hover:text-foreground shadow-2xs"
+                                    className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10 size-8   text-foreground hover:bg-muted hover:text-foreground"
                                   >
                                     <Link href={`/wireframes2/acceso-interoperabilidad/solicitudes/${s.id}`}>
-                                      <Eye className="size-4" />
+                                      <Eye className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10 size-4" />
                                     </Link>
                                   </Button>
                                 </TooltipTrigger>
@@ -851,12 +851,12 @@ export default function AccesoInteroperabilidadPage() {
                                 <Tooltip>
                                   <TooltipTrigger asChild>
                                     <Button
-                                      variant="outline"
-                                      size="sm"
+                                      variant="ghost"
+                                      size="icon-sm"
                                       onClick={() => setModalCredenciales(s)}
-                                      className="h-8 px-2.5 rounded-lg border-emerald-500/40 text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20 shadow-2xs text-xs font-semibold gap-1.5"
+                                      className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10 h-8 px-2.5  border-emerald-500/40 text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20  text-xs font-semibold gap-1.5"
                                     >
-                                      <KeyRound className="size-3.5 text-emerald-600 dark:text-emerald-400" />
+                                      <KeyRound className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10 size-3.5 text-emerald-600 dark:text-emerald-400" />
                                       <span>Ver credenciales</span>
                                     </Button>
                                   </TooltipTrigger>
@@ -886,19 +886,19 @@ export default function AccesoInteroperabilidadPage() {
                         <TableCell className="text-muted-foreground font-mono text-xs">{fechaAprobacion}</TableCell>
                         <TableCell className="font-bold text-foreground">{valorFactura}</TableCell>
                         <TableCell>{getEstadoBadge(s.estado)}</TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex items-center justify-end gap-1.5">
+                        <TableCell className="text-center">
+                          <div className="flex items-center justify-center gap-3.5">
                             <TooltipProvider delayDuration={0}>
                               <Tooltip>
                                 <TooltipTrigger asChild>
                                   <Button
-                                    variant="outline"
+                                    variant="ghost"
                                     size="icon-sm"
                                     asChild
-                                    className="size-8 rounded-lg border-border/80 text-foreground hover:bg-muted hover:text-foreground shadow-2xs"
+                                    className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10 size-8   text-foreground hover:bg-muted hover:text-foreground"
                                   >
                                     <Link href={`/wireframes2/acceso-interoperabilidad/solicitudes/${s.id}`}>
-                                      <Eye className="size-4" />
+                                      <Eye className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10 size-4" />
                                     </Link>
                                   </Button>
                                 </TooltipTrigger>
@@ -911,12 +911,12 @@ export default function AccesoInteroperabilidadPage() {
                                 <Tooltip>
                                   <TooltipTrigger asChild>
                                     <Button
-                                      variant="outline"
-                                      size="sm"
+                                      variant="ghost"
+                                      size="icon-sm"
                                       onClick={() => setModalCredenciales(s)}
-                                      className="h-8 px-2.5 rounded-lg border-emerald-500/40 text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20 shadow-2xs text-xs font-semibold gap-1.5"
+                                      className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10 h-8 px-2.5  border-emerald-500/40 text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20  text-xs font-semibold gap-1.5"
                                     >
-                                      <KeyRound className="size-3.5 text-emerald-600 dark:text-emerald-400" />
+                                      <KeyRound className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10 size-3.5 text-emerald-600 dark:text-emerald-400" />
                                       <span>Ver credenciales</span>
                                     </Button>
                                   </TooltipTrigger>
@@ -932,12 +932,12 @@ export default function AccesoInteroperabilidadPage() {
                                 <Tooltip>
                                   <TooltipTrigger asChild>
                                     <Button
-                                      variant="outline"
+                                      variant="ghost"
                                       size="icon-sm"
                                       onClick={() => handleOpenValidar(s)}
-                                      className="size-8 rounded-lg border-border/80 text-foreground hover:bg-muted shadow-2xs"
+                                      className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10 size-8   text-foreground hover:bg-muted"
                                     >
-                                      <CheckCircle2 className="size-4 text-foreground" />
+                                      <CheckCircle2 className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10 size-4 text-foreground" />
                                     </Button>
                                   </TooltipTrigger>
                                   <TooltipContent side="top">
@@ -950,12 +950,12 @@ export default function AccesoInteroperabilidadPage() {
                                 <Tooltip>
                                   <TooltipTrigger asChild>
                                     <Button
-                                      variant="outline"
+                                      variant="ghost"
                                       size="icon-sm"
                                       onClick={() => setModalCur(s)}
-                                      className="size-8 rounded-lg border-border/80 text-foreground hover:bg-muted shadow-2xs"
+                                      className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10 size-8   text-foreground hover:bg-muted"
                                     >
-                                      <FileCheck2 className="size-4 text-foreground" />
+                                      <FileCheck2 className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10 size-4 text-foreground" />
                                     </Button>
                                   </TooltipTrigger>
                                   <TooltipContent side="top">

@@ -149,7 +149,7 @@ function CrearProyectoWizard() {
     const initialCampos = serv.camposDisponibles.slice(0, 3).map((c) => c.nombre);
 
     const nuevaFuente: FuenteSolicitada = {
-      id: `fuente-${Date.now()}`,
+      id: `fuente-${new Date().getTime()}`,
       institucionId: inst.id,
       institucionNombre: `${inst.nombre} (${inst.siglas})`,
       servicioId: serv.id,
