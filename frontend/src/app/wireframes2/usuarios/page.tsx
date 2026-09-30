@@ -1682,9 +1682,8 @@ export default function GestionUsuariosPage() {
       <Dialog open={modalCrearOpen} onOpenChange={handleCloseModalCrear}>
         <DialogContent variant="standard" size="lg" className="p-6 rounded-2xl border-border bg-surface">
           <DialogHeader className="border-b border-border/60 pb-3">
-            <DialogTitle className="font-heading font-extrabold text-xl text-primary flex items-center gap-2">
-              <UserPlus className="size-5 text-primary" />
-              <span>Crear cuenta interna</span>
+            <DialogTitle className="font-heading font-extrabold text-xl text-primary">
+              Crear cuenta interna
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground">
               Define los datos de identidad, rol institucional y ámbito de la persona. Se validarán duplicados y coherencia antes de registrarla en estado PENDIENTE DE ACTIVACIÓN.
@@ -1909,9 +1908,8 @@ export default function GestionUsuariosPage() {
       <Dialog open={modalEditarOpen} onOpenChange={setModalEditarOpen}>
         <DialogContent variant="standard" size="lg" className="p-6 rounded-2xl border-border bg-surface">
           <DialogHeader className="border-b border-border/60 pb-3">
-            <DialogTitle className="font-heading font-extrabold text-xl text-primary flex items-center gap-2">
-              <Edit2 className="size-5 text-primary" />
-              <span>Editar cuenta interna</span>
+            <DialogTitle className="font-heading font-extrabold text-xl text-primary">
+              Editar cuenta interna
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground">
               Modifica los datos de contacto, rol o ámbito. La cédula es inmutable. Si modificas el rol o ámbito, debes ingresar el motivo justificativo.

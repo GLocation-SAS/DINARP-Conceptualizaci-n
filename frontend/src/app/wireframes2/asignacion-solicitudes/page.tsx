@@ -2100,7 +2100,7 @@ export default function GestionIngresosPage() {
               } else if (isDirNormativa) {
                 badgeText = "Dirección de Normatividad · DINARP";
                 titleText = "Gestión de resoluciones";
-                subtitleText = "Gestiona y asigna los responsables para la formulación de resoluciones institucionales.";
+                subtitleText = "Asignación de solicitudes para generar resoluciones a instituciones aprobadas.";
               } else if (isEqNormativa) {
                 badgeText = "Equipo de Normatividad · DINARP";
                 titleText = "Bandeja de En revisión - Normatividad";
