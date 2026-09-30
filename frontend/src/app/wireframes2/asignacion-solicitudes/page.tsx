@@ -2601,7 +2601,7 @@ export default function GestionIngresosPage() {
                     <TableBody>
                       {paginatedData.length === 0 ? (
                         <TableRow>
-                          <TableCell colSpan={9} className="text-center py-12">
+                          <TableCell colSpan={(currentUser.role === "DIR_NORMATIVA" || currentUser.role === "EQ_NORMATIVA") ? 7 : 9} className="text-center py-12">
                             <div className="flex flex-col items-center justify-center max-w-sm mx-auto text-center space-y-2">
                               <div className="size-12 rounded-full bg-muted/60 flex items-center justify-center text-muted-foreground mb-1">
                                 <SearchIcon className="size-6" />
@@ -2665,7 +2665,8 @@ export default function GestionIngresosPage() {
                               </TableCell>
 
                               {/* Proceso */}
-                              <TableCell className="px-2 overflow-hidden">
+                              {!(currentUser.role === "DIR_NORMATIVA" || currentUser.role === "EQ_NORMATIVA") && (
+                                <TableCell className="px-2 overflow-hidden">
                                 {(() => {
                                   const procesoLabel =
                                     row.tipoTramite === "PROCESO_A_REGISTRO_INSTITUCION"
@@ -2722,6 +2723,7 @@ export default function GestionIngresosPage() {
                                   );
                                 })()}
                               </TableCell>
+                              )}
 
                               {/* Solicitante */}
                               {!(currentUser.role === "DIR_NORMATIVA" || currentUser.role === "EQ_NORMATIVA") && (

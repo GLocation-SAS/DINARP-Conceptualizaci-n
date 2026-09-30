@@ -390,7 +390,7 @@ function EnrolamientoContent() {
     <div className="min-h-screen bg-background text-foreground flex flex-col">
       {/* Header Superior Principal */}
       <header className="border-b border-border bg-surface/50 backdrop-blur-md sticky top-0 z-20">
-        <div className="w-full max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
+        <div className="w-full max-w-[1920px] mx-auto px-3 sm:px-5 lg:px-6 h-20 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <Link href="/wireframes2/login" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
               <img
@@ -416,8 +416,7 @@ function EnrolamientoContent() {
       </header>
 
       {/* Contenido Principal */}
-      <main className="flex-1 w-full pb-8">
-        <div className="w-full max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="flex-1 w-full max-w-[1920px] mx-auto px-2 sm:px-4 lg:px-5 py-4 sm:py-6">
         {/* ========================================================= */}
         {/* EXPERIENCIA 1: COORDINADOR SINARP                          */}
         {/* ========================================================= */}
@@ -1876,7 +1875,6 @@ function EnrolamientoContent() {
             </Sheet>
           </div>
         )}
-      </div>
       </main>
 
       {/* ── MODAL APROBAR SOLICITUD (Categoría 4: Dialog) ── */}

@@ -2537,14 +2537,14 @@ export default function GestionUsuariosPage() {
                   </div>
                 </TabsContent>
 
-                {/* Tab 3: Auditoría y Trazabilidad (ID-05) */}
+                {/* Tab 3: Auditoría y Trazabilidad */}
                 <TabsContent value="auditoria" className="space-y-4">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 rounded-md bg-surface-raised/40 border border-border/60">
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
                         <History className="size-4 text-primary" />
                         <span className="text-xs font-bold text-foreground block">
-                          Trazabilidad de Seguridad (HU ID-05)
+                          Trazabilidad de Seguridad y Auditoría
                         </span>
                       </div>
                       <p className="text-[11px] text-muted-foreground">
@@ -2552,14 +2552,14 @@ export default function GestionUsuariosPage() {
                       </p>
                     </div>
 
-                    {/* Nota de Secreto ID-05 Criterio 1 */}
+                    {/* Nota de confidencialidad */}
                     <div className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-success/10 border border-success/20 text-success text-[10px] font-medium shrink-0">
                       <ShieldCheck className="size-3.5 shrink-0" />
-                      <span>Sin exposición de contraseña, OTP ni tokens</span>
+                      <span>Sin exposición de contraseña ni tokens</span>
                     </div>
                   </div>
 
-                  {/* Filtros avanzados del expediente (ID-05 Criterio 1 y 3) */}
+                  {/* Filtros avanzados del expediente */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 rounded-md bg-surface-raised/20 border border-border/40">
                     <div className="space-y-1.5">
                       <Label className="text-[11px] font-medium text-foreground">
@@ -2577,16 +2577,16 @@ export default function GestionUsuariosPage() {
                             <ComboboxItem value="TODOS">Todos los eventos</ComboboxItem>
                             <ComboboxItem value="CUENTA_CREADA">Alta / Cuenta creada</ComboboxItem>
                             <ComboboxItem value="ACTIVACION">Activación con factores</ComboboxItem>
-                            <ComboboxItem value="CAMBIO_ROL">Cambio de rol (ID-02)</ComboboxItem>
+                            <ComboboxItem value="CAMBIO_ROL">Cambio de rol institucional</ComboboxItem>
                             <ComboboxItem value="CAMBIO_AMBITO">Cambio de ámbito</ComboboxItem>
                             <ComboboxItem value="INGRESO">Ingresos y accesos</ComboboxItem>
                             <ComboboxItem value="BLOQUEO">Bloqueos de sesión</ComboboxItem>
                             <ComboboxItem value="RECUPERACION">Recuperación de acceso</ComboboxItem>
-                            <ComboboxItem value="SUSPENSION">Suspensión de cuenta (ID-03)</ComboboxItem>
-                            <ComboboxItem value="REACTIVACION">Reactivación de cuenta (ID-03)</ComboboxItem>
-                            <ComboboxItem value="CAMBIO_COORDINADOR">Cambio de Coordinador (CAM-03)</ComboboxItem>
-                            <ComboboxItem value="CREDENCIALES_API_REVOCADAS">Credenciales API institucionales (INS-08)</ComboboxItem>
-                            <ComboboxItem value="BAJA_LOGICA">Baja lógica definitiva (ID-04)</ComboboxItem>
+                            <ComboboxItem value="SUSPENSION">Suspensión de cuenta</ComboboxItem>
+                            <ComboboxItem value="REACTIVACION">Reactivación de cuenta</ComboboxItem>
+                            <ComboboxItem value="CAMBIO_COORDINADOR">Cambio de Coordinador</ComboboxItem>
+                            <ComboboxItem value="CREDENCIALES_API_REVOCADAS">Credenciales API institucionales</ComboboxItem>
+                            <ComboboxItem value="BAJA_LOGICA">Baja lógica definitiva</ComboboxItem>
                           </ComboboxList>
                         </ComboboxContent>
                       </Combobox>
@@ -2594,7 +2594,7 @@ export default function GestionUsuariosPage() {
 
                     <div className="space-y-1.5">
                       <Label className="text-[11px] font-medium text-foreground">
-                        Período (según 2.1)
+                        Período
                       </Label>
                       <Combobox
                         value={filtroAuditPeriodo}
