@@ -2555,7 +2555,7 @@ export default function GestionIngresosPage() {
                   {/* Vista de Tabla para Escritorio */}
                   <div className="hidden md:block">
                     <Table
-                      className={cn("w-full table-fixed", (currentUser.role === "DIR_NORMATIVA" || currentUser.role === "EQ_NORMATIVA") ? "min-w-[800px]" : "min-w-[1080px]")}
+                      className="w-full table-fixed min-w-[1080px]"
                       containerClassName="overflow-x-auto rounded-xl"
                     >
                     <TableHeader>
@@ -2571,16 +2571,12 @@ export default function GestionIngresosPage() {
                         <TableHead className="w-[130px] px-2 py-2.5 whitespace-nowrap">
                           TRÁMITE
                         </TableHead>
-                        {!(currentUser.role === "DIR_NORMATIVA" || currentUser.role === "EQ_NORMATIVA") && (
-                          <TableHead className="w-[160px] px-2 py-2.5 whitespace-nowrap">
+                        <TableHead className="w-[160px] px-2 py-2.5 whitespace-nowrap">
                             PROCESO
                           </TableHead>
-                        )}
-                        {!(currentUser.role === "DIR_NORMATIVA" || currentUser.role === "EQ_NORMATIVA") && (
-                          <TableHead className="w-[190px] px-2 py-2.5 whitespace-nowrap">
+                        <TableHead className="w-[190px] px-2 py-2.5 whitespace-nowrap">
                             SOLICITANTE
                           </TableHead>
-                        )}
                         <TableHead className="w-[210px] px-2 py-2.5 whitespace-nowrap">
                           INSTITUCIÓN
                         </TableHead>
@@ -2601,7 +2597,7 @@ export default function GestionIngresosPage() {
                     <TableBody>
                       {paginatedData.length === 0 ? (
                         <TableRow>
-                          <TableCell colSpan={(currentUser.role === "DIR_NORMATIVA" || currentUser.role === "EQ_NORMATIVA") ? 7 : 9} className="text-center py-12">
+                          <TableCell colSpan={9} className="text-center py-12">
                             <div className="flex flex-col items-center justify-center max-w-sm mx-auto text-center space-y-2">
                               <div className="size-12 rounded-full bg-muted/60 flex items-center justify-center text-muted-foreground mb-1">
                                 <SearchIcon className="size-6" />
@@ -2665,8 +2661,7 @@ export default function GestionIngresosPage() {
                               </TableCell>
 
                               {/* Proceso */}
-                              {!(currentUser.role === "DIR_NORMATIVA" || currentUser.role === "EQ_NORMATIVA") && (
-                                <TableCell className="px-2 overflow-hidden">
+                              <TableCell className="px-2 overflow-hidden">
                                 {(() => {
                                   const procesoLabel =
                                     row.tipoTramite === "PROCESO_A_REGISTRO_INSTITUCION"
@@ -2723,11 +2718,9 @@ export default function GestionIngresosPage() {
                                   );
                                 })()}
                               </TableCell>
-                              )}
 
                               {/* Solicitante */}
-                              {!(currentUser.role === "DIR_NORMATIVA" || currentUser.role === "EQ_NORMATIVA") && (
-                                <TableCell className="px-2 overflow-hidden">
+                              <TableCell className="px-2 overflow-hidden">
                                   <Tooltip>
                                     <TooltipTrigger asChild>
                                       <div className="flex flex-col min-w-0 group/sol cursor-pointer">
@@ -2750,7 +2743,6 @@ export default function GestionIngresosPage() {
                                     </TooltipContent>
                                   </Tooltip>
                                 </TableCell>
-                              )}
 
                               {/* Institución */}
                               <TableCell className="px-2 overflow-hidden">

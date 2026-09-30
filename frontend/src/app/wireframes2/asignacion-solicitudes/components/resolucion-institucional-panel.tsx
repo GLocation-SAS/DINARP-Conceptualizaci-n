@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   FileSignature,
   CheckCircle2,
@@ -37,7 +38,6 @@ interface ResolucionInstitucionalPanelProps {
   solicitud: SolicitudIngreso;
   currentUserName: string;
   onIniciarGeneracion: (solicitudId: string) => void;
-  onGenerarExito: (solicitudId: string, resolucion: string, observaciones?: string) => void;
   onFalloGeneracion: (solicitudId: string, causa: string) => void;
   onReintentarGeneracion: (solicitudId: string) => void;
   onCompletarFirmaResolucion?: (solicitudId: string, exitosa: boolean, firmante?: string, motivoFallo?: string) => void;
@@ -48,38 +48,28 @@ export function ResolucionInstitucionalPanel({
   solicitud,
   currentUserName,
   onIniciarGeneracion,
-  onGenerarExito,
   onFalloGeneracion,
   onReintentarGeneracion,
   onCompletarFirmaResolucion,
   onPreviewDocumento
 }: ResolucionInstitucionalPanelProps) {
-  const [isGenerarModalOpen, setIsGenerarModalOpen] = useState(false);
+  const router = useRouter();
+  
   const [isFalloModalOpen, setIsFalloModalOpen] = useState(false);
   const [isFirmaExitoModalOpen, setIsFirmaExitoModalOpen] = useState(false);
   const [isFirmaFalloModalOpen, setIsFirmaFalloModalOpen] = useState(false);
   const [causaFalloInput, setCausaFalloInput] = useState("");
   const [causaFirmaFalloInput, setCausaFirmaFalloInput] = useState("");
-  const [observacionesResolucion, setObservacionesResolucion] = useState("");
 
-  const numResolucionSugerido =
-    solicitud.resolucion ||
-    `RES-DINARP-2026-${String(Math.floor(100 + Math.random() * 900))}`;
+
+  const numResolucionSugerido = React.useMemo(() => {
+    return solicitud.resolucion || `RES-DINARP-2026-${String(Math.floor(100 + Math.random() * 900))}`;
+  }, [solicitud.resolucion]);
 
   const { estado } = solicitud;
   const { tone, label } = getEstadoBadgeProps(estado, solicitud.revisionIniciada);
 
-  const handleConfirmGenerar = () => {
-    onGenerarExito(
-      solicitud.id,
-      numResolucionSugerido,
-      observacionesResolucion || "Resolución institucional emitida y suscrita mediante FirmaEC."
-    );
-    setIsGenerarModalOpen(false);
-    toast.success("Resolución institucional generada correctamente", {
-      description: `Se vinculó la resolución ${numResolucionSugerido} a la solicitud ${solicitud.id}.`
-    });
-  };
+
 
   const handleConfirmFallo = () => {
     if (!causaFalloInput.trim()) {
@@ -177,9 +167,7 @@ export function ResolucionInstitucionalPanel({
             size="default"
             onClick={() => {
               onIniciarGeneracion(solicitud.id);
-              toast.info("Generación de resolución iniciada", {
-                description: "El trámite pasó al estado 'En generación de resolución'."
-              });
+              router.push(`/wireframes2/asignacion-solicitudes/${solicitud.id}/gestionar-resolucion`);
             }}
             className="w-full text-xs font-semibold gap-2 shadow-xs"
           >
@@ -207,7 +195,7 @@ export function ResolucionInstitucionalPanel({
               type="button"
               variant="primary"
               size="default"
-              onClick={() => setIsGenerarModalOpen(true)}
+              onClick={() => router.push(`/wireframes2/asignacion-solicitudes/${solicitud.id}/gestionar-resolucion`)}
               className="w-full text-xs font-semibold gap-2 shadow-xs"
             >
               <CheckCircle2 className="size-4" />
@@ -509,9 +497,7 @@ export function ResolucionInstitucionalPanel({
             size="default"
             onClick={() => {
               onReintentarGeneracion(solicitud.id);
-              toast.info("Reintento de generación iniciado", {
-                description: "El trámite volvió al estado 'En generación de resolución'."
-              });
+              router.push(`/wireframes2/asignacion-solicitudes/${solicitud.id}/gestionar-resolucion`);
             }}
             className="w-full text-xs font-semibold gap-2 shadow-xs"
           >
@@ -521,71 +507,7 @@ export function ResolucionInstitucionalPanel({
         </div>
       )}
 
-      {/* DIALOG DE CONFIRMACIÓN DE GENERACIÓN EXITOSA */}
-      <Dialog open={isGenerarModalOpen} onOpenChange={setIsGenerarModalOpen}>
-        <DialogContent className="max-w-lg p-6">
-          <DialogHeader>
-            <DialogTitle className="text-base font-bold font-heading text-foreground flex items-center gap-2">
-              <FileSignature className="size-5 text-primary shrink-0" />
-              <span>Vincular y emitir resolución institucional</span>
-            </DialogTitle>
-            <DialogDescription className="text-xs text-muted-foreground">
-              Se asociará permanentemente la resolución institucional con la solicitud de registro y el Anexo A aprobado por Gestión.
-            </DialogDescription>
-          </DialogHeader>
 
-          <div className="space-y-3 my-2 text-xs">
-            <div className="p-3 bg-muted/40 rounded-xl border border-border space-y-1.5">
-              <div className="flex justify-between items-center text-[11px]">
-                <span className="text-muted-foreground">Entidad:</span>
-                <strong className="text-foreground truncate max-w-[240px]">{solicitud.institucion}</strong>
-              </div>
-              <div className="flex justify-between items-center text-[11px]">
-                <span className="text-muted-foreground">Trámite:</span>
-                <span className="font-mono font-bold text-foreground">{solicitud.id}</span>
-              </div>
-              <div className="flex justify-between items-center text-[11px]">
-                <span className="text-muted-foreground">Número de resolución asignado:</span>
-                <span className="font-mono font-bold text-primary">{numResolucionSugerido}</span>
-              </div>
-            </div>
-
-            <div>
-              <label className="font-semibold text-foreground text-xs block mb-1">
-                Observaciones o dictamen legal complementario (opcional)
-              </label>
-              <Textarea
-                placeholder="Indica notas adicionales o considerandos relevantes de la resolución..."
-                value={observacionesResolucion}
-                onChange={(e) => setObservacionesResolucion(e.target.value)}
-                className="text-xs min-h-[70px]"
-              />
-            </div>
-          </div>
-
-          <DialogFooter className="gap-2 sm:gap-0">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => setIsGenerarModalOpen(false)}
-              className="text-xs font-semibold"
-            >
-              Cancelar
-            </Button>
-            <Button
-              type="button"
-              variant="primary"
-              size="sm"
-              onClick={handleConfirmGenerar}
-              className="text-xs font-semibold gap-1.5 shadow-2xs"
-            >
-              <CheckCircle2 className="size-3.5" />
-              <span>Emitir y vincular resolución</span>
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
       {/* DIALOG DE REPORTE DE FALLO EN GENERACIÓN */}
       <Dialog open={isFalloModalOpen} onOpenChange={setIsFalloModalOpen}>
