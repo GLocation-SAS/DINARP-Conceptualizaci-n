@@ -795,7 +795,7 @@ export default function GestionIngresosPage() {
         <TooltipTrigger asChild>
           <Badge
             tone={tone}
-            appearance="solid"
+            appearance="soft"
             size="sm"
             dot
             className="font-semibold text-[11px] normal-case tracking-normal px-2 py-0.5 inline-flex items-center shadow-2xs cursor-pointer hover:opacity-90 transition-opacity max-w-full"
