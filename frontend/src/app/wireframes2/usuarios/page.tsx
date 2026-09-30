@@ -2080,9 +2080,8 @@ export default function GestionUsuariosPage() {
       <Dialog open={modalSuspenderOpen} onOpenChange={setModalSuspenderOpen}>
         <DialogContent variant="danger" size="default" className="text-left">
           <DialogHeader className="text-center sm:text-left">
-            <DialogTitle className="font-heading font-extrabold text-xl text-foreground flex items-center gap-2">
-              <Ban className="size-5 text-danger shrink-0" />
-              <span>Suspender cuenta interna</span>
+            <DialogTitle className="font-heading font-extrabold text-xl text-foreground">
+              Suspender cuenta interna
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground mt-1">
               Se invalidará la sesión activa y se impedirá el ingreso y la asignación de nuevos trámites a la persona.
@@ -2160,9 +2159,8 @@ export default function GestionUsuariosPage() {
       <Dialog open={modalReactivarOpen} onOpenChange={setModalReactivarOpen}>
         <DialogContent variant="standard" size="default" className="p-6 rounded-2xl border-border bg-surface">
           <DialogHeader className="border-b border-border/60 pb-3">
-            <DialogTitle className="font-heading font-extrabold text-xl text-success flex items-center gap-2">
-              <RotateCcw className="size-5 text-success" />
-              <span>Reactivar cuenta interna</span>
+            <DialogTitle className="font-heading font-extrabold text-xl text-success">
+              Reactivar cuenta interna
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground">
               Restaura el estado ACTIVO de la cuenta interna. Conforme a ID-03: exige factor TOTP configurado, deja constancia de causa y no devuelve roles retirados por ID-02.
@@ -2260,9 +2258,8 @@ export default function GestionUsuariosPage() {
       <Dialog open={modalBajaOpen} onOpenChange={setModalBajaOpen}>
         <DialogContent variant="standard" size="lg" className="p-6 rounded-2xl border-border bg-surface">
           <DialogHeader className="border-b border-border/60 pb-3">
-            <DialogTitle className="font-heading font-extrabold text-xl text-danger flex items-center gap-2">
-              <UserX className="size-5 text-danger" />
-              <span>Dar de baja a cuenta interna</span>
+            <DialogTitle className="font-heading font-extrabold text-xl text-danger">
+              Dar de baja a cuenta interna
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground">
               Conforme a ID-04: Retira la cuenta interna conservando trazabilidad inalterable. No se ejecuta borrado físico ni se reutiliza la identidad.
@@ -2371,9 +2368,8 @@ export default function GestionUsuariosPage() {
         <DialogContent variant="standard" size="2xl" className="p-6 rounded-2xl border-border bg-surface max-h-[85vh] flex flex-col">
           <DialogHeader className="border-b border-border/60 pb-3 shrink-0">
             <div className="flex items-center justify-between">
-              <DialogTitle className="font-heading font-extrabold text-xl text-primary flex items-center gap-2">
-                <Fingerprint className="size-5 text-primary" />
-                <span>Expediente de Cuenta Interna y Seguridad</span>
+              <DialogTitle className="font-heading font-extrabold text-xl text-primary">
+                Expediente de Cuenta Interna y Seguridad
               </DialogTitle>
               {selectedUser && getEstadoBadge(selectedUser.estado)}
             </div>

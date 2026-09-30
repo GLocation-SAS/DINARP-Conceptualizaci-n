@@ -51,7 +51,7 @@ export function getEstadoBadgeProps(
     case "PENDIENTE_ASIGNACION_NORMATIVIDAD":
       return {
         tone: "warning" as const,
-        label: "Pendiente de asignación",
+        label: "Pendiente asignación a Normativa",
       };
     case "PENDIENTE_GENERAR_RESOLUCION":
       return {
