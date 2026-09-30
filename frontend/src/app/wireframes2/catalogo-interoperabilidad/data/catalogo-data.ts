@@ -208,7 +208,7 @@ export const MOCK_USERS_BY_ROLE: Record<UserRole, MockUser> = {
     cedula: "3333333333"
   },
   COORDINADOR_SINARP: {
-    id: "USR-001",
+    id: "1712345678",
     name: "Andrea López",
     role: "COORDINADOR_SINARP",
     roleTitle: "Coordinador SINARP",

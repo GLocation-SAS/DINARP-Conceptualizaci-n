@@ -2836,10 +2836,10 @@ export default function GestionIngresosPage() {
                                             e.stopPropagation();
                                             handleSelectSolicitud(row);
                                           }}
-                                          className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10"
+                                          
                                           aria-label={`Gestionar resolución para trámite ${row.id}`}
                                         >
-                                          <FileSignature className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10 size-3.5" />
+                                          <FileSignature  />
                                         </Button>
                                       </TooltipTrigger>
                                       <TooltipContent side="top">
@@ -2864,7 +2864,7 @@ export default function GestionIngresosPage() {
                                               )}
                                               aria-label={esReasignacion ? `Reasignar revisor a trámite ${row.id}` : `Asignar revisor a trámite ${row.id}`}
                                             >
-                                              {esReasignacion ? <RotateCcw className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10 size-3.5 text-primary" /> : <UserPlus className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10 size-3.5" />}
+                                              {esReasignacion ? <RotateCcw  /> : <UserPlus  />}
                                             </Button>
                                           </TooltipTrigger>
                                           <TooltipContent side="top">
@@ -2894,10 +2894,10 @@ export default function GestionIngresosPage() {
                                               e.stopPropagation();
                                               handleSelectSolicitud(row);
                                             }}
-                                            className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10    text-foreground hover:bg-muted"
+                                            
                                             aria-label={`Ver detalle de trámite ${row.id}`}
                                           >
-                                            <Eye className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10 size-3.5" />
+                                            <Eye  />
                                           </Button>
                                         </TooltipTrigger>
                                         <TooltipContent side="top">Ver detalle</TooltipContent>

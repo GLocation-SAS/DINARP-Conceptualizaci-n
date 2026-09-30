@@ -227,6 +227,13 @@ export function DinarpWireframe2LoginFlow({
       ) {
         router.push("/wireframes2/usuarios");
       }
+      // Coordinador SINARP
+      else if (
+        cleanInput === "1712345678" ||
+        loggedUser?.role === "COORDINADOR_SINARP"
+      ) {
+        router.push("/wireframes2/acceso-interoperabilidad/solicitudes");
+      }
       // Redirigir al equipo / revisor de gestión o normatividad a su bandeja de solicitudes
       else if (
         cleanInput === "1111111111" ||

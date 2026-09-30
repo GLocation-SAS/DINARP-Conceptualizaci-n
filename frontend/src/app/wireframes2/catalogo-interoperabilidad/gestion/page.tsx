@@ -641,10 +641,10 @@ export default function GestionCatalogoPage() {
                                     variant="ghost"
                                     size="icon-sm"
                                     asChild
-                                    className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10 size-8  text-muted-foreground hover:text-foreground hover:bg-muted"
+                                    
                                   >
                                     <Link href={`/wireframes2/catalogo-interoperabilidad/gestion/fuente/${fuente.id}`}>
-                                      <Eye className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10 size-4" />
+                                      <Eye  />
                                     </Link>
                                   </Button>
                                 </TooltipTrigger>
@@ -659,9 +659,9 @@ export default function GestionCatalogoPage() {
                                     <Button
                                       variant="ghost"
                                       size="icon-sm"
-                                      className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10 size-8  text-muted-foreground hover:text-foreground hover:bg-muted"
+                                      
                                     >
-                                      <Edit className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10 size-4" />
+                                      <Edit  />
                                     </Button>
                                   </TooltipTrigger>
                                   <TooltipContent side="top">
@@ -676,9 +676,9 @@ export default function GestionCatalogoPage() {
                                     <Button
                                       variant="ghost"
                                       size="icon-sm"
-                                      className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10 size-8  text-muted-foreground hover:text-foreground hover:bg-muted"
+                                      
                                     >
-                                      <ShieldAlert className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10 size-4" />
+                                      <ShieldAlert  />
                                     </Button>
                                   </TooltipTrigger>
                                   <TooltipContent side="top">

@@ -2332,10 +2332,10 @@ export default function GestionIngresosPage() {
                                           e.stopPropagation();
                                           handleSelectSolicitud(row);
                                         }}
-                                        className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10    text-foreground hover:bg-muted"
+                                        
                                         aria-label={`Ver detalle y gestionar trámite ${row.id}`}
                                       >
-                                        <Eye className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10 size-3.5" />
+                                        <Eye  />
                                       </Button>
                                     </TooltipTrigger>
                                     <TooltipContent side="top">Ver detalle y gestionar</TooltipContent>

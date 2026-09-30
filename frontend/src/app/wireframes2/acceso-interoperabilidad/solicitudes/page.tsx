@@ -59,7 +59,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { WireframeDashboardLayout } from "../../components/wireframe-dashboard-layout";
-import { useSimulatedRole } from "../../catalogo-interoperabilidad/hooks/use-simulated-role";
+
 import { MOCK_USERS_BY_ROLE, type UserRole } from "../../catalogo-interoperabilidad/data/catalogo-data";
 import { useSolicitudesStore, SolicitudAcceso } from "../data/solicitudes-store";
 import { WireframeTour, TourStep } from "../../components/wireframe-tour";
@@ -78,7 +78,7 @@ const roleOptions = [
 ];
 
 export default function AccesoInteroperabilidadPage() {
-  const [role, setRole] = useSimulatedRole("COORDINADOR_SINARP");
+  const role = "COORDINADOR_SINARP" as UserRole;
   const { solicitudes, validarPagoConCur, simularPagoRealizado } = useSolicitudesStore();
 
   const [searchTerm, setSearchTerm] = useState("");
@@ -430,7 +430,7 @@ export default function AccesoInteroperabilidadPage() {
       activeMenu="acceso-interoperabilidad"
       currentUser={MOCK_USERS_BY_ROLE[role]}
       currentRole={role}
-      onRoleChange={(r) => setRole(r)}
+      
       breadcrumbs={[
         { label: "Acceso a Interoperabilidad", href: "/wireframes2/acceso-interoperabilidad/solicitudes" },
         { label: headerInfo.breadcrumb }
@@ -441,7 +441,7 @@ export default function AccesoInteroperabilidadPage() {
             items={roleOptions}
             value={roleOptions.find(opt => opt.value === role) || roleOptions[0]}
             onValueChange={(val) => {
-              if (val) setRole(val.value as UserRole);
+              
             }}
           >
             <ComboboxSelectTrigger className="h-8 text-xs min-w-[185px]" />
@@ -743,10 +743,10 @@ export default function AccesoInteroperabilidadPage() {
                                     variant="ghost"
                                     size="icon-sm"
                                     asChild
-                                    className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10 size-8   text-foreground hover:bg-muted hover:text-foreground"
+                                    
                                   >
                                     <Link href={`/wireframes2/acceso-interoperabilidad/solicitudes/${s.id}`}>
-                                      <Eye className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10 size-4" />
+                                      <Eye  />
                                     </Link>
                                   </Button>
                                 </TooltipTrigger>
@@ -764,9 +764,9 @@ export default function AccesoInteroperabilidadPage() {
                                       variant="ghost"
                                       size="icon-sm"
                                       onClick={() => setModalCredenciales(s)}
-                                      className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10 h-8 px-2.5  border-emerald-500/40 text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20  text-xs font-semibold gap-1.5"
+                                      
                                     >
-                                      <KeyRound className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10 size-3.5 text-emerald-600 dark:text-emerald-400" />
+                                      <KeyRound  />
                                       <span>Ver credenciales</span>
                                     </Button>
                                   </TooltipTrigger>
@@ -783,7 +783,7 @@ export default function AccesoInteroperabilidadPage() {
                                       variant="ghost"
                                       size="icon-sm"
                                       asChild
-                                      className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10 size-8   text-foreground hover:bg-muted"
+                                      
                                     >
                                       <Link
                                         href={`/wireframes2/acceso-interoperabilidad/solicitudes/${s.id}?edit=true&step=${
@@ -795,7 +795,7 @@ export default function AccesoInteroperabilidadPage() {
                                             : 2
                                         }`}
                                       >
-                                        <Edit className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10 size-4" />
+                                        <Edit  />
                                       </Link>
                                     </Button>
                                   </TooltipTrigger>
@@ -835,10 +835,10 @@ export default function AccesoInteroperabilidadPage() {
                                     variant="ghost"
                                     size="icon-sm"
                                     asChild
-                                    className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10 size-8   text-foreground hover:bg-muted hover:text-foreground"
+                                    
                                   >
                                     <Link href={`/wireframes2/acceso-interoperabilidad/solicitudes/${s.id}`}>
-                                      <Eye className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10 size-4" />
+                                      <Eye  />
                                     </Link>
                                   </Button>
                                 </TooltipTrigger>
@@ -854,9 +854,9 @@ export default function AccesoInteroperabilidadPage() {
                                       variant="ghost"
                                       size="icon-sm"
                                       onClick={() => setModalCredenciales(s)}
-                                      className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10 h-8 px-2.5  border-emerald-500/40 text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20  text-xs font-semibold gap-1.5"
+                                      
                                     >
-                                      <KeyRound className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10 size-3.5 text-emerald-600 dark:text-emerald-400" />
+                                      <KeyRound  />
                                       <span>Ver credenciales</span>
                                     </Button>
                                   </TooltipTrigger>
@@ -895,10 +895,10 @@ export default function AccesoInteroperabilidadPage() {
                                     variant="ghost"
                                     size="icon-sm"
                                     asChild
-                                    className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10 size-8   text-foreground hover:bg-muted hover:text-foreground"
+                                    
                                   >
                                     <Link href={`/wireframes2/acceso-interoperabilidad/solicitudes/${s.id}`}>
-                                      <Eye className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10 size-4" />
+                                      <Eye  />
                                     </Link>
                                   </Button>
                                 </TooltipTrigger>
@@ -914,9 +914,9 @@ export default function AccesoInteroperabilidadPage() {
                                       variant="ghost"
                                       size="icon-sm"
                                       onClick={() => setModalCredenciales(s)}
-                                      className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10 h-8 px-2.5  border-emerald-500/40 text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20  text-xs font-semibold gap-1.5"
+                                      
                                     >
-                                      <KeyRound className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10 size-3.5 text-emerald-600 dark:text-emerald-400" />
+                                      <KeyRound  />
                                       <span>Ver credenciales</span>
                                     </Button>
                                   </TooltipTrigger>
@@ -935,9 +935,9 @@ export default function AccesoInteroperabilidadPage() {
                                       variant="ghost"
                                       size="icon-sm"
                                       onClick={() => handleOpenValidar(s)}
-                                      className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10 size-8   text-foreground hover:bg-muted"
+                                      
                                     >
-                                      <CheckCircle2 className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10 size-4 text-foreground" />
+                                      <CheckCircle2  />
                                     </Button>
                                   </TooltipTrigger>
                                   <TooltipContent side="top">
@@ -953,9 +953,9 @@ export default function AccesoInteroperabilidadPage() {
                                       variant="ghost"
                                       size="icon-sm"
                                       onClick={() => setModalCur(s)}
-                                      className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10 size-8   text-foreground hover:bg-muted"
+                                      
                                     >
-                                      <FileCheck2 className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10 size-4 text-foreground" />
+                                      <FileCheck2  />
                                     </Button>
                                   </TooltipTrigger>
                                   <TooltipContent side="top">
@@ -1496,7 +1496,7 @@ export default function AccesoInteroperabilidadPage() {
                             size="icon-xs"
                             type="button"
                             onClick={() => setShowPassword(!showPassword)}
-                            className="text-muted-foreground hover:text-foreground"
+                            
                             title={showPassword ? "Ocultar contraseña" : "Ver contraseña"}
                           >
                             {showPassword ? <EyeOff className="size-3.5" /> : <Eye className="size-3.5" />}
@@ -1506,7 +1506,7 @@ export default function AccesoInteroperabilidadPage() {
                             size="icon-xs"
                             type="button"
                             onClick={() => handleCopy(creds.contrasena, "Contraseña")}
-                            className="text-muted-foreground hover:text-foreground"
+                            
                             title="Copiar contraseña"
                           >
                             {copiedField === "Contraseña" ? <Check className="size-3.5 text-emerald-600" /> : <Copy className="size-3.5" />}

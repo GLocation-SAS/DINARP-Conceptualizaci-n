@@ -1014,15 +1014,17 @@ function EnrolamientoContent() {
                       <div className="space-y-6 animate-in fade-in duration-200">
                         {/* Bloque 1: Comparecientes */}
                         <div className="bg-surface border border-border rounded-2xl p-6 sm:p-8 space-y-6 shadow-xs">
-                          <div className="bg-secondary/10 border-b border-secondary/20 p-4 sm:px-6 flex items-center justify-between -mx-6 -mt-6 sm:-mx-8 sm:-mt-8 rounded-t-2xl mb-6">
-                            <div>
-                              <h3 className="text-base font-bold font-heading text-secondary-800 flex items-center gap-2">
-                                <Building2 className="size-5 text-secondary-700" />
-                                2.1 Datos de los Intervinientes
-                              </h3>
-                              <p className="text-xs text-muted-foreground mt-0.5">
-                                Suscripción del Acuerdo ARP-R02 entre la DINARP y la institución solicitante.
-                              </p>
+                          <div className="bg-muted/50 p-3.5 mb-5 flex items-start sm:items-center justify-between gap-3 rounded-xl">
+                            <div className="flex items-start gap-2.5 min-w-0">
+                              <Building2 className="size-4 text-secondary-400 shrink-0 mt-0.5" />
+                              <div className="min-w-0">
+                                <h2 className="text-sm font-bold font-heading text-secondary-400 leading-snug">
+                                  2.1 Datos de los Intervinientes
+                                </h2>
+                                <p className="text-xs text-muted-foreground mt-0.5">
+                                  Suscripción del Acuerdo ARP-R02 entre la DINARP y la institución solicitante.
+                                </p>
+                              </div>
                             </div>
                           </div>
 
@@ -1110,15 +1112,17 @@ function EnrolamientoContent() {
 
                         {/* Bloque 2: Misión y Visión */}
                         <div className="bg-surface border border-border rounded-2xl p-6 sm:p-8 space-y-6 shadow-xs">
-                          <div className="bg-secondary/10 border-b border-secondary/20 p-4 sm:px-6 flex items-center justify-between -mx-6 -mt-6 sm:-mx-8 sm:-mt-8 rounded-t-2xl mb-6">
-                            <div>
-                              <h3 className="text-base font-bold font-heading text-secondary-800 flex items-center gap-2">
-                                <FileText className="size-5 text-secondary-700" />
-                                2.2 Antecedentes Institucionales
-                              </h3>
-                              <p className="text-xs text-muted-foreground mt-0.5">
-                                Justificación formal de la necesidad de uso de los datos del SINARP.
-                              </p>
+                          <div className="bg-muted/50 p-3.5 mb-5 flex items-start sm:items-center justify-between gap-3 rounded-xl">
+                            <div className="flex items-start gap-2.5 min-w-0">
+                              <FileText className="size-4 text-secondary-400 shrink-0 mt-0.5" />
+                              <div className="min-w-0">
+                                <h2 className="text-sm font-bold font-heading text-secondary-400 leading-snug">
+                                  2.2 Antecedentes Institucionales
+                                </h2>
+                                <p className="text-xs text-muted-foreground mt-0.5">
+                                  Justificación formal de la necesidad de uso de los datos del SINARP.
+                                </p>
+                              </div>
                             </div>
                           </div>
 
@@ -1135,17 +1139,19 @@ function EnrolamientoContent() {
 
                         {/* Bloque 3: Base Legal y Cláusulas Operativas */}
                         <div className="bg-surface border border-border rounded-2xl p-6 sm:p-8 space-y-6 shadow-xs">
-                          <div className="bg-secondary/10 border-b border-secondary/20 p-4 sm:px-6 flex items-center justify-between -mx-6 -mt-6 sm:-mx-8 sm:-mt-8 rounded-t-2xl mb-6">
-                            <div>
-                              <h3 className="text-base font-bold font-heading text-secondary-800 flex items-center gap-2">
-                                <ShieldCheck className="size-5 text-secondary-700" />
-                                2.3 Cláusulas Legales del Instrumento Oficial (ARP-R02)
-                              </h3>
-                              <p className="text-xs text-muted-foreground mt-0.5 font-medium">
-                                Términos y condiciones jurídicas del acuerdo de uso.
-                              </p>
+                          <div className="bg-muted/50 p-3.5 mb-5 flex items-start sm:items-center justify-between gap-3 rounded-xl">
+                            <div className="flex items-start gap-2.5 min-w-0">
+                              <ShieldCheck className="size-4 text-secondary-400 shrink-0 mt-0.5" />
+                              <div className="min-w-0">
+                                <h2 className="text-sm font-bold font-heading text-secondary-400 leading-snug">
+                                  2.3 Cláusulas Legales del Instrumento Oficial (ARP-R02)
+                                </h2>
+                                <p className="text-xs text-muted-foreground mt-0.5 font-medium">
+                                  Términos y condiciones jurídicas del acuerdo de uso.
+                                </p>
+                              </div>
                             </div>
-                            <div className="hidden sm:block text-right">
+                            <div className="hidden sm:block text-right shrink-0">
                               <span className="text-[10px] font-bold font-mono text-secondary-800 tracking-wider">VERSIÓN: 1.0 - VIGENCIA: 20-06-2025</span>
                             </div>
                           </div>
@@ -1239,15 +1245,17 @@ function EnrolamientoContent() {
 
                         {/* Credenciales de Acceso */}
                         <div className="bg-surface border border-border rounded-2xl p-6 sm:p-8 space-y-6 shadow-xs">
-                          <div className="bg-secondary/10 border-b border-secondary/20 p-4 sm:px-6 flex items-center justify-between -mx-6 -mt-6 sm:-mx-8 sm:-mt-8 rounded-t-2xl mb-6">
-                            <div>
-                              <h3 className="text-base font-bold font-heading text-secondary-800 flex items-center gap-2">
-                                <KeyRound className="size-5 text-secondary-700" />
-                                2.4 Configuración de Credenciales de Acceso
-                              </h3>
-                              <p className="text-xs text-muted-foreground mt-0.5 font-medium">
-                                Define la contraseña que utilizarás para autenticarte una vez aprobada tu solicitud en Gestión.
-                              </p>
+                          <div className="bg-muted/50 p-3.5 mb-5 flex items-start sm:items-center justify-between gap-3 rounded-xl">
+                            <div className="flex items-start gap-2.5 min-w-0">
+                              <KeyRound className="size-4 text-secondary-400 shrink-0 mt-0.5" />
+                              <div className="min-w-0">
+                                <h2 className="text-sm font-bold font-heading text-secondary-400 leading-snug">
+                                  2.4 Configuración de Credenciales de Acceso
+                                </h2>
+                                <p className="text-xs text-muted-foreground mt-0.5 font-medium">
+                                  Define la contraseña que utilizarás para autenticarte una vez aprobada tu solicitud en Gestión.
+                                </p>
+                              </div>
                             </div>
                           </div>
 
@@ -1474,7 +1482,7 @@ function EnrolamientoContent() {
                                     <FileSignature className="size-6 mb-2 opacity-50" />
                                     <span>[Firma Electrónica Representante Legal]</span>
                                   </div>
-                                  <div className="border-t border-secondary/30 pt-3">
+                                  <div className="border-t border-secondary/30 pt-3 flex flex-col items-center text-center">
                                     <span className="font-bold font-heading text-secondary-900 block text-sm">
                                       {formData.representanteLegalNombre}
                                     </span>
@@ -1494,7 +1502,7 @@ function EnrolamientoContent() {
                                     <ShieldCheck className="size-6 mb-2" />
                                     <span>Pendiente FirmaEC (Paso 4)</span>
                                   </div>
-                                  <div className="border-t border-primary/30 pt-3">
+                                  <div className="border-t border-primary/30 pt-3 flex flex-col items-center text-center">
                                     <span className="font-bold font-heading text-primary block text-sm">
                                       {formData.funcionarioNombre}
                                     </span>

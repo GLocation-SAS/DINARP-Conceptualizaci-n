@@ -2820,7 +2820,7 @@ export default function GestionIngresosPage() {
                                   {currentUser.role === "EQ_NORMATIVA" ?
                                 <Tooltip>
                                       <TooltipTrigger asChild>
-                                        <Button variant="ghost" size="icon-sm" type="button" onClick={(e) => {e.stopPropagation();handleSelectSolicitud(row);}} className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10" aria-label={`Gestionar resoluci�n para tr�mite ${row.id}`}>
+                                        <Button variant="ghost" size="icon-sm" type="button" onClick={(e) => {e.stopPropagation();handleSelectSolicitud(row);}}  aria-label={`Gestionar resoluci�n para tr�mite ${row.id}`}>
                                           <FileSignature className="size-4 size-4" />
                                         </Button>
                                       </TooltipTrigger>
@@ -2833,7 +2833,7 @@ export default function GestionIngresosPage() {
                                       {isAssignable ?
                                   <Tooltip>
                                           <TooltipTrigger asChild>
-                                            <Button type="button" variant={esReasignacion ? "neutral" : "primary"} size="sm" onClick={(e) => {e.stopPropagation();handleOpenAssign(row);}} className={cn("size-7 rounded-lg shadow-2xs", esReasignacion && "border border-border text-foreground hover:bg-muted")} aria-label={esReasignacion ? `Reasignar revisor a tr�mite ${row.id}` : `Asignar revisor a tr�mite ${row.id}`} className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10">
+                                            <Button type="button" variant={esReasignacion ? "neutral" : "primary"} size="sm" onClick={(e) => {e.stopPropagation();handleOpenAssign(row);}} className={cn("size-7 rounded-lg shadow-2xs", esReasignacion && "border border-border text-foreground hover:bg-muted")} aria-label={esReasignacion ? `Reasignar revisor a tr�mite ${row.id}` : `Asignar revisor a tr�mite ${row.id}`} >
                                               {esReasignacion ? <RotateCcw className="size-4 size-4" /> : <UserPlus className="size-4 size-4" />}
                                             </Button>
                                           </TooltipTrigger>
@@ -2856,7 +2856,7 @@ export default function GestionIngresosPage() {
 
                                       <Tooltip>
                                         <TooltipTrigger asChild>
-                                          <Button variant="ghost" size="icon-sm" type="button" onClick={(e) => {e.stopPropagation();handleSelectSolicitud(row);}} className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10" aria-label={`Ver detalle de tr�mite ${row.id}`}>
+                                          <Button variant="ghost" size="icon-sm" type="button" onClick={(e) => {e.stopPropagation();handleSelectSolicitud(row);}}  aria-label={`Ver detalle de tr�mite ${row.id}`}>
                                             <Eye className="size-4 size-4" />
                                           </Button>
                                         </TooltipTrigger>

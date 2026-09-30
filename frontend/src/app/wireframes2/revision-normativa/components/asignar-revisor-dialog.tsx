@@ -771,7 +771,7 @@ export function AsignarRevisorPanel({
                             <TooltipProvider>
                               <Tooltip>
                                 <TooltipTrigger asChild>
-                                  <Button  variant="ghost" size="icon-sm" type="button" variant={isSelected ? "primary" : "ghost"} disabled={yaEmpezoRevision} onClick={() => setSelectedRevisor(rev)} className={cn( "size-8 rounded-lg transition-colors", isSelected ? "bg-primary text-primary-foreground shadow-2xs" : "text-muted-foreground hover:text-primary hover:bg-primary/10 border border-border/70 hover:border-primary/40" )} aria-label={`Seleccionar a ${rev.nombre}`} className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10">
+                                  <Button  size="icon-sm" type="button" variant={isSelected ? "primary" : "ghost"} disabled={yaEmpezoRevision} onClick={() => setSelectedRevisor(rev)} className={cn("size-8 rounded-lg transition-colors", isSelected ? "bg-primary text-primary-foreground shadow-2xs" : "text-muted-foreground hover:text-primary hover:bg-primary/10 border border-border/70 hover:border-primary/40", !isSelected && "hover:text-primary-300 hover:bg-primary-300/10")} aria-label={`Seleccionar a ${rev.nombre}`}>
                                     {isSelected ? (
                                       <Check className="size-4 size-4" />
                                     ) : (

@@ -175,10 +175,10 @@ export default function PaquetesConsumoPage() {
                                 variant="ghost"
                                 size="icon-sm"
                                 asChild
-                                className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10 size-8   text-foreground hover:bg-muted hover:text-foreground"
+                                
                               >
                                 <Link href={`/wireframes2/acceso-interoperabilidad/paquetes/${p.id}`}>
-                                  <Eye className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10 size-4" />
+                                  <Eye  />
                                 </Link>
                               </Button>
                             </TooltipTrigger>

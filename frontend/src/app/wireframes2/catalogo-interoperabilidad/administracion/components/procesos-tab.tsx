@@ -512,7 +512,7 @@ export function ProcesosTab({ activeRole, onStartTour }: ProcesosTabProps) {
                                   className={isMyTask ?"size-8 rounded-lg shadow-sm font-semibold" :"size-8 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted"}
                                 >
                                   <Link href={`/wireframes2/catalogo-interoperabilidad/administracion/incorporaciones/${exp.id}`}>
-                                    {isMyTask ? <ArrowRight className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10 size-4" /> : <Eye className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10 size-4" />}
+                                    {isMyTask ? <ArrowRight  /> : <Eye  />}
                                   </Link>
                                 </Button>
                               </TooltipTrigger>
