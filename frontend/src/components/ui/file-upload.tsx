@@ -235,6 +235,9 @@ function DropZoneHeader({
   disabled,
   multiple,
   isDragging,
+  accept,
+  maxSizeMB,
+  allowedFormats,
   onDragOver,
   onDragLeave,
   onDrop,
@@ -243,6 +246,9 @@ function DropZoneHeader({
   disabled?: boolean
   multiple?: boolean
   isDragging: boolean
+  accept?: string
+  maxSizeMB?: number
+  allowedFormats?: string
   onDragOver: (e: React.DragEvent) => void
   onDragLeave: (e: React.DragEvent) => void
   onDrop: (e: React.DragEvent) => void
@@ -288,6 +294,13 @@ function DropZoneHeader({
           {isDragging ? "Suelta los archivos para cargarlos" : "Arrastra y suelta archivos aquí"}
         </span>
       </div>
+
+      {(allowedFormats || accept || maxSizeMB) && (
+        <div className="text-[12px] text-muted-foreground hidden sm:flex items-center gap-1.5 shrink-0">
+          <span>Formatos permitidos: <strong className="font-semibold text-foreground/80">{allowedFormats || (accept ? accept.toUpperCase().replace(/\./g, "") : "PDF")}</strong></span>
+          {maxSizeMB && <span>• Máx. {maxSizeMB}MB</span>}
+        </div>
+      )}
     </div>
   )
 }
@@ -300,6 +313,7 @@ export function FileUpload({
   multiple = false,
   disabled = false,
   required = false,
+  allowedFormats,
   className,
   items = [],
   onFileSelect,
@@ -365,6 +379,9 @@ export function FileUpload({
           disabled={disabled}
           multiple={multiple}
           isDragging={isDragging}
+          accept={accept}
+          maxSizeMB={maxSizeMB}
+          allowedFormats={allowedFormats}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}

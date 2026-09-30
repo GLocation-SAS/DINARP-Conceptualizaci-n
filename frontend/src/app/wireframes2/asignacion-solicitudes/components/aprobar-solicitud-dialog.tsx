@@ -61,7 +61,7 @@ export function AprobarSolicitudDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md p-6">
+      <DialogContent className="max-w-md p-6 max-h-[90vh] overflow-y-auto">
         <DialogHeader className="space-y-2">
           <div className="size-10 rounded-full bg-warning/15 text-warning-foreground border border-warning/30 flex items-center justify-center mb-1">
             <AlertTriangle className="size-5" />

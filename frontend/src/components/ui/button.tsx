@@ -25,7 +25,7 @@ const buttonVariants = cva(
     "isolate",
 
     // Motion
-    "transition-[border-color,color,transform,box-shadow]",
+    "transition-[border-color,color,background-color,transform,box-shadow]",
     "duration-500",
 
     // States
@@ -54,13 +54,16 @@ const buttonVariants = cva(
 
         secondary: [
           "border-secondary",
-          "!text-white",
-          "bg-secondary",
-          "[--radial-bg:color-mix(in_srgb,var(--secondary)_60%,black)]",
+          "text-secondary",
+          "bg-white dark:bg-surface",
+          "[--radial-bg:var(--secondary)]",
           "[--glow:color-mix(in_srgb,var(--secondary)_65%,white)]",
-          "hover:border-transparent",
+          "hover:border-secondary",
+          "hover:bg-secondary",
+          "hover:!text-white",
           "active:bg-[color-mix(in_srgb,var(--secondary)_50%,black)]",
-          "data-[state=active]:bg-[color-mix(in_srgb,var(--secondary)_50%,black)]",
+          "active:!text-white",
+          "data-[state=active]:bg-secondary",
           "data-[state=active]:!text-white",
         ].join(" "),
 

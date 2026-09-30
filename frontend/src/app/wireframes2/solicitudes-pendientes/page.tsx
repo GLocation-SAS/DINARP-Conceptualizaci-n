@@ -127,6 +127,7 @@ import {
 import { AprobarSolicitudDialog } from "./components/aprobar-solicitud-dialog";
 import { RechazarSolicitudDialog } from "./components/rechazar-solicitud-dialog";
 import { AsignarRevisorDialog } from "./components/asignar-revisor-dialog";
+import { buildTramiteTimelineItems } from "../components/tramite-timeline-helper";
 
 interface FilterComboboxProps {
   label?: string;
@@ -233,7 +234,7 @@ function FilterCombobox({
 export default function GestionIngresosPage() {
   const router = useRouter();
   const { activeUser } = useAuthStore();
-  const currentUser = activeUser || MOCK_USERS_BY_ROLE.DIR_GESTION;
+  const currentUser = activeUser || MOCK_USERS_BY_ROLE.EQ_GESTION;
 
   const store = useSolicitudesIngresoStore();
   const {
@@ -285,10 +286,7 @@ export default function GestionIngresosPage() {
   const [isAssignOpen, setIsAssignOpen] = useState(false);
 
   const handleSelectSolicitud = (solicitud: SolicitudIngreso) => {
-    if (currentUser.role === "EQ_GESTION" || currentUser.role === "EQ_NORMATIVA") {
-      store.iniciarRevision(solicitud.id, currentUser.name);
-    }
-    router.push(`/wireframes2/asignacion-solicitudes/${solicitud.id}`);
+    router.push(`/wireframes2/solicitudes-pendientes/${solicitud.id}`);
   };
 
   const handleOpenAssign = (solicitud: SolicitudIngreso) => {
@@ -352,96 +350,7 @@ export default function GestionIngresosPage() {
 
   // Construction of timelineItems for selectedSolicitud using Timeline component
   const timelineItems: TimelineItem[] = useMemo(() => {
-    if (!selectedSolicitud) return [];
-
-    const items: TimelineItem[] = [];
-
-    // Base event: Solicitud Creada
-    items.push({
-      id: "evento-creacion",
-      title: "Solicitud Ingresada en Portal",
-      description: `Formulario ${selectedSolicitud.codigoDocumental || "ARP-R01"} generado y firmado mediante FirmaEC.`,
-      date: selectedSolicitud.fechaSolicitud,
-      status: "success",
-      icon: <FileSignature className="size-4" />,
-      user: selectedSolicitud.anexoA?.representanteLegalNombre || selectedSolicitud.nombreCompleto || "Representante Legal",
-    });
-
-    if (selectedSolicitud.historial && selectedSolicitud.historial.length > 0) {
-      selectedSolicitud.historial.forEach((h, idx) => {
-        const accionLower = h.accion.toLowerCase();
-        const isDanger =
-          accionLower.includes("cancel") ||
-          accionLower.includes("rechaz") ||
-          accionLower.includes("observad") ||
-          accionLower.includes("cierr") ||
-          accionLower.includes("deneg");
-        const isSuccess =
-          accionLower.includes("aprob") ||
-          accionLower.includes("resoluci") ||
-          accionLower.includes("finaliz") ||
-          accionLower.includes("activa");
-        const isAssign =
-          accionLower.includes("asignac") ||
-          accionLower.includes("asignad") ||
-          accionLower.includes("revisor");
-        const isReview =
-          accionLower.includes("revis");
-
-        let status: TimelineItem["status"] = "info";
-        let icon: React.ReactNode = <History className="size-4" />;
-
-        if (isDanger) {
-          status = "danger";
-          icon = <XCircle className="size-4" />;
-        } else if (isSuccess) {
-          status = "success";
-          icon = <CheckCircle2 className="size-4" />;
-        } else if (isAssign) {
-          status = "primary";
-          icon = <UserPlus className="size-4" />;
-        } else if (isReview) {
-          status = "warning";
-          icon = <Clock className="size-4" />;
-        }
-
-        items.push({
-          id: `hist-${idx}`,
-          title: h.accion,
-          description: h.detalles,
-          date: h.fechaHora || h.fecha || "",
-          status,
-          icon,
-          user: h.realizadoPor,
-        });
-      });
-    }
-
-    // Si el trámite fue asignado a un revisor y aún está pendiente de análisis técnico
-    const revisorActual = selectedSolicitud.revisorGestion || selectedSolicitud.revisorNormatividad || selectedSolicitud.revisor;
-    if (
-      revisorActual &&
-      revisorActual !== "Por asignar" &&
-      !selectedSolicitud.revisionIniciada &&
-      !["Aprobada", "APROBADO_FINAL", "Rechazada", "Cancelada"].includes(selectedSolicitud.estado)
-    ) {
-      const yaExistePendiente = items.some((i) =>
-        i.title.toLowerCase().includes("pendiente de revisión")
-      );
-      if (!yaExistePendiente) {
-        items.push({
-          id: "pendiente-revision-step",
-          title: "Pendiente de revisión",
-          description: `Trámite asignado al funcionario ${revisorActual}. En espera de verificación documental.`,
-          date: selectedSolicitud.fechaAsignacionGestion || selectedSolicitud.fechaAsignacionNormatividad || "Reciente",
-          status: "primary",
-          icon: <Clock className="size-4" />,
-          user: revisorActual,
-        });
-      }
-    }
-
-    return items;
+    return buildTramiteTimelineItems(selectedSolicitud);
   }, [selectedSolicitud]);
 
   const procesoOptions = useMemo(() => [
@@ -453,17 +362,9 @@ export default function GestionIngresosPage() {
 
   const estadoOptions = useMemo(() => [
     { value: "Todos", label: "Estado: Todos" },
-    { value: "SIN_ASIGNAR", label: "Sin Asignar" },
-    { value: "ASIGNADOS", label: "Asignados" },
-    { value: "EN_REVISION", label: "En Revisión" },
-    { value: "PENDIENTE_ASIGNACION_GESTION", label: "Pendiente Asignación" },
-    { value: "EN_REVISION_GESTION", label: "En Revisión" },
-    { value: "PENDIENTE_ASIGNACION_NORMATIVIDAD", label: "Pendiente Normatividad" },
-    { value: "EN_REVISION_NORMATIVIDAD", label: "En Revisión Normatividad" },
-    { value: "APROBADO_FINAL", label: "Aprobado Final" },
+    { value: "PENDIENTES", label: "Pendiente de revisión" },
     { value: "Aprobada", label: "Aprobada" },
     { value: "Rechazada", label: "Rechazada" },
-    { value: "Cancelada", label: "Cancelada" },
   ], []);
 
   const institucionOptions = useMemo(() => [
@@ -514,17 +415,26 @@ export default function GestionIngresosPage() {
 
     return {
       pendientes: misSolicitudes.filter(
-        (s) => s.estado === "EN_REVISION_GESTION" && !s.revisionIniciada
-      ).length,
-      enRevision: misSolicitudes.filter(
-        (s) => s.estado === "EN_REVISION_GESTION" && s.revisionIniciada
-      ).length,
-      finalizadas: misSolicitudes.filter(
         (s) =>
-          s.estado === "PENDIENTE_ASIGNACION_NORMATIVIDAD" ||
+          s.estado === "EN_REVISION_GESTION" ||
+          s.estado === "PENDIENTE_ASIGNACION_GESTION" ||
+          s.estado === "Pendiente"
+      ).length,
+      aprobadas: misSolicitudes.filter(
+        (s) =>
+          Boolean(s.fechaAprobacionGestion) ||
           s.estado === "Aprobada" ||
-          s.estado === "Cancelada" ||
-          s.estado === "Rechazada"
+          s.estado === "APROBADO_FINAL" ||
+          s.estado === "PENDIENTE_ASIGNACION_NORMATIVIDAD" ||
+          s.estado === "EN_REVISION_NORMATIVIDAD" ||
+          s.estado === "PENDIENTE_GENERAR_RESOLUCION" ||
+          s.estado === "EN_GENERACION_RESOLUCION" ||
+          s.estado === "GENERACION_PENDIENTE" ||
+          s.estado === "RESOLUCION_GENERADA" ||
+          s.estado === "INSTITUCION_ACTIVA"
+      ).length,
+      rechazadas: misSolicitudes.filter(
+        (s) => s.estado === "Rechazada" || s.estado === "Cancelada"
       ).length,
     };
   }, [solicitudes, currentUser.name]);
@@ -555,14 +465,31 @@ export default function GestionIngresosPage() {
       // Filtro por Estado interactivo desde las cards
       const matchesEstado = (() => {
         if (filterEstado === "Todos") return true;
-        if (filterEstado === "PENDIENTES") {
-          return item.estado === "EN_REVISION_GESTION" && !item.revisionIniciada;
+        if (filterEstado === "PENDIENTES" || filterEstado === "Pendiente de revisión") {
+          return (
+            item.estado === "EN_REVISION_GESTION" ||
+            item.estado === "PENDIENTE_ASIGNACION_GESTION" ||
+            item.estado === "Pendiente"
+          );
         }
-        if (filterEstado === "EN_REVISION") {
-          return item.estado === "EN_REVISION_GESTION" && item.revisionIniciada;
+        if (filterEstado === "Aprobada" || filterEstado === "APROBADAS") {
+          return (
+            Boolean(item.fechaAprobacionGestion) ||
+            [
+              "Aprobada",
+              "APROBADO_FINAL",
+              "PENDIENTE_ASIGNACION_NORMATIVIDAD",
+              "EN_REVISION_NORMATIVIDAD",
+              "PENDIENTE_GENERAR_RESOLUCION",
+              "EN_GENERACION_RESOLUCION",
+              "GENERACION_PENDIENTE",
+              "RESOLUCION_GENERADA",
+              "INSTITUCION_ACTIVA",
+            ].includes(item.estado)
+          );
         }
-        if (filterEstado === "FINALIZADAS") {
-          return ["PENDIENTE_ASIGNACION_NORMATIVIDAD", "Aprobada", "Cancelada", "Rechazada"].includes(item.estado);
+        if (filterEstado === "Rechazada" || filterEstado === "RECHAZADAS") {
+          return item.estado === "Rechazada" || item.estado === "Cancelada";
         }
         return item.estado === filterEstado;
       })();
@@ -673,18 +600,30 @@ export default function GestionIngresosPage() {
     }
   };
 
-  const renderEstadoBadge = (estado: EstadoSolicitudIngreso) => {
-    const { tone, label } = getEstadoBadgeProps(estado);
+  const renderEstadoBadge = (
+    estado: EstadoSolicitudIngreso,
+    revisionIniciada?: boolean,
+    rechazadoPor?: "GESTION" | "NORMATIVIDAD"
+  ) => {
+    const { tone, label } = getEstadoBadgeProps(estado, revisionIniciada, "REVISOR", rechazadoPor);
     return (
-      <Badge
-        tone={tone}
-        appearance="soft"
-        size="sm"
-        dot
-        className="font-semibold text-[11px] normal-case tracking-normal whitespace-nowrap px-2.5 py-0.5 inline-flex shrink-0 shadow-2xs"
-      >
-        {label}
-      </Badge>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Badge
+            tone={tone}
+            appearance="soft"
+            size="sm"
+            dot
+            className="font-semibold text-[11px] normal-case tracking-normal px-2 py-0.5 inline-flex items-center shadow-2xs cursor-pointer hover:opacity-90 transition-opacity max-w-full"
+          >
+            <span className="truncate max-w-[160px] sm:max-w-[200px]">{label}</span>
+          </Badge>
+        </TooltipTrigger>
+        <TooltipContent side="top" variant="surface" className="p-2.5 max-w-xs flex flex-col items-start gap-0.5">
+          <p className="font-bold text-xs text-foreground font-sans">Estado del trámite</p>
+          <p className="text-[11px] text-muted-foreground">{label}</p>
+        </TooltipContent>
+      </Tooltip>
     );
   };
 
@@ -715,12 +654,12 @@ export default function GestionIngresosPage() {
           ]
       }
     >
-      <main className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <main className="w-full pr-3 pl-2 pb-3 pt-1.5 flex-1 min-h-0 flex flex-col overflow-hidden">
         {/* ══════════════════════════════════════════════════════════
             VISTA 1: DETALLE DE SOLICITUD (BREADCRUMB + APROBAR / RECHAZAR)
            ══════════════════════════════════════════════════════════ */}
         {selectedSolicitud ? (
-          <div className="bg-surface border border-border rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-xs space-y-6 animate-in fade-in duration-200">
+          <div className="bg-surface border border-border rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-xs space-y-6 animate-in fade-in duration-200 flex-1 min-h-0 overflow-y-auto">
             {/* Cabecera de Retorno y Acciones */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2">
               <Button
@@ -1014,19 +953,40 @@ export default function GestionIngresosPage() {
 
             {/* ── PASO 0: ENTIDAD Y AUTORIDAD COMPARECIENTE ── */}
             {detailTab === 0 && (
-              <div className="bg-surface border border-border rounded-2xl p-6 sm:p-8 space-y-6 shadow-xs animate-in fade-in duration-200">
-                <div className="bg-primary-100/20 border-b border-primary p-3.5 mb-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-t-lg">
+              <div className="bg-surface border border-border rounded-2xl overflow-hidden shadow-xs animate-in fade-in duration-200">
+                <div className="bg-primary/10 dark:bg-primary/20 border-b border-primary p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+
                   <div>
-                    <h2 className="text-sm font-bold font-heading text-primary flex items-center gap-2">
-                      <Building2 className="size-4 text-primary shrink-0" />
+                    <h2 className="text-base font-bold font-heading text-primary dark:text-primary-300 flex items-center gap-2">
+                      <Building2 className="size-5 text-primary dark:text-primary-300 shrink-0" />
                       <span>Sección I — Cláusula Primera: 1.1 Del Solicitante</span>
                     </h2>
                     <p className="text-xs text-muted-foreground mt-0.5">
                       Información general de la entidad requirente y de su máxima autoridad o delegado.
                     </p>
-                  </div>
-                  <Badge tone="neutral" appearance="soft" size="sm" className="font-semibold border border-border shrink-0">
+                  
+                </div>
+
+                <div className="p-6 sm:p-8 space-y-6">
+<Badge tone="primary" appearance="solid" size="sm" className="font-bold uppercase tracking-wider shrink-0 self-start sm:self-auto !text-white shadow-xs rounded-full px-3 py-1">
                     {selectedSolicitud.anexoA?.entidadTipo === "Publica" ? "ENTIDAD PÚBLICA" : "ENTIDAD PRIVADA"}
+                  </Badge>
+                </div>
+
+                <div className="bg-muted/50 p-3.5 flex items-start sm:items-center justify-between gap-3 rounded-xl border border-border/40">
+                  <div className="flex items-start gap-2.5 min-w-0">
+                    <Building2 className="size-4 text-muted-foreground shrink-0 mt-0.5" />
+                    <div className="min-w-0">
+                      <h3 className="text-sm font-bold font-heading text-foreground leading-snug">
+                        1.1 Naturaleza de la Entidad
+                      </h3>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        Información general de la institución requirente y personería jurídica.
+                      </p>
+                    </div>
+                  </div>
+                  <Badge tone="neutral" appearance="soft" size="sm" className="border border-border shrink-0 self-start sm:self-auto">
+                    ENTIDAD
                   </Badge>
                 </div>
 
@@ -1100,10 +1060,21 @@ export default function GestionIngresosPage() {
                     />
                   </div>
 
-                  <div className="sm:col-span-2 pt-3 pb-1 border-t border-border/60">
-                    <h3 className="text-xs font-bold text-foreground font-heading">
-                      Máxima autoridad / delegado / representante legal o apoderado
-                    </h3>
+                  <div className="sm:col-span-2 bg-muted/50 p-3.5 flex items-start sm:items-center justify-between gap-3 rounded-xl border border-border/40">
+                    <div className="flex items-start gap-2.5 min-w-0">
+                      <User className="size-4 text-muted-foreground shrink-0 mt-0.5" />
+                      <div className="min-w-0">
+                        <h3 className="text-sm font-bold font-heading text-foreground leading-snug">
+                          Datos del firmante del Anexo A
+                        </h3>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          Máxima autoridad / delegado / representante legal o apoderado que suscribe la solicitud.
+                        </p>
+                      </div>
+                    </div>
+                    <Badge tone="neutral" appearance="soft" size="sm" className="border border-border shrink-0 self-start sm:self-auto">
+                      FIRMANTE
+                    </Badge>
                   </div>
 
                   <div className="space-y-1.5">
@@ -1165,12 +1136,31 @@ export default function GestionIngresosPage() {
                     </Button>
                   </div>
                 </div>
+                </div>
               </div>
             )}
 
             {/* ── PASO 1: COORDINADORES INSTITUCIONALES ── */}
             {detailTab === 1 && (
-              <div className="bg-surface border border-border rounded-2xl p-6 sm:p-8 space-y-6 shadow-xs animate-in fade-in duration-200">
+              <div className="bg-surface border border-border rounded-2xl overflow-hidden shadow-xs animate-in fade-in duration-200">
+                <div className="bg-primary/10 dark:bg-primary/20 border-b border-primary p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+
+                  <div>
+                    <h2 className="text-base font-bold font-heading text-primary flex items-center gap-2">
+                      <User className="size-5 text-primary shrink-0" />
+                      <span>Coordinadores Institucionales del SINARP</span>
+                    </h2>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      Designación de coordinadores titular y suplente para la gestión operativa institucional.
+                    </p>
+                  
+                </div>
+
+                <div className="p-6 sm:p-8 space-y-6">
+<Badge tone="primary" appearance="solid" size="sm" className="font-bold uppercase tracking-wider shrink-0 self-start sm:self-auto !text-white shadow-xs rounded-full px-3 py-1">
+                    COORDINACIÓN
+                  </Badge>
+                </div>
                 <div className="space-y-6">
                   {/* Coordinador Titular */}
                   <div className="space-y-4 border border-border/80 rounded-2xl p-5 bg-surface shadow-2xs">
@@ -1345,20 +1335,30 @@ export default function GestionIngresosPage() {
                     Siguiente: Servicios y Procesos →
                   </Button>
                 </div>
+                </div>
               </div>
             )}
 
             {/* ── PASO 2: SERVICIOS Y PROCESOS DE USO ── */}
             {detailTab === 2 && (
-              <div className="bg-surface border border-border rounded-2xl p-6 sm:p-8 space-y-6 shadow-xs animate-in fade-in duration-200">
-                <div className="bg-primary-100/20 border-b border-primary p-3.5 mb-5 rounded-t-lg">
-                  <h2 className="text-sm font-bold font-heading text-primary flex items-center gap-2">
-                    <FileText className="size-4 text-primary shrink-0" />
-                    <span>Sección II — Servicios y Herramientas Informáticas</span>
-                  </h2>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    Procesos y áreas en las que se van a utilizar los servicios y/o herramientas provistos por la DINARP.
-                  </p>
+              <div className="bg-surface border border-border rounded-2xl overflow-hidden shadow-xs animate-in fade-in duration-200">
+                <div className="bg-primary/10 dark:bg-primary/20 border-b border-primary p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+
+                  <div>
+                    <h2 className="text-base font-bold font-heading text-primary dark:text-primary-300 flex items-center gap-2">
+                      <FileText className="size-5 text-primary dark:text-primary-300 shrink-0" />
+                      <span>Sección II — Servicios y Herramientas Informáticas</span>
+                    </h2>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      Procesos y áreas en las que se van a utilizar los servicios y/o herramientas provistos por la DINARP.
+                    </p>
+                  
+                </div>
+
+                <div className="p-6 sm:p-8 space-y-6">
+<Badge tone="primary" appearance="solid" size="sm" className="font-bold uppercase tracking-wider shrink-0 self-start sm:self-auto !text-white shadow-xs rounded-full px-3 py-1">
+                    SERVICIOS DINARP
+                  </Badge>
                 </div>
 
                 <div className="space-y-6">
@@ -1451,20 +1451,30 @@ export default function GestionIngresosPage() {
                     Siguiente: Declaraciones y firma →
                   </Button>
                 </div>
+                </div>
               </div>
             )}
 
             {/* ── PASO 3: DECLARACIONES Y FIRMA ── */}
             {detailTab === 3 && (
-              <div className="bg-surface border border-border rounded-2xl p-6 sm:p-8 space-y-6 shadow-xs animate-in fade-in duration-200">
-                <div className="bg-primary-100/20 border-b border-primary p-3.5 mb-5 rounded-t-lg">
-                  <h2 className="text-sm font-bold font-heading text-primary flex items-center gap-2">
-                    <ShieldCheck className="size-4 text-primary shrink-0" />
-                    <span>Sección III — Cláusula Segunda y Tercera: Declaraciones y Firma</span>
-                  </h2>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    Suscripción digital oficial del instrumento ARP-R01 conforme a la Ley de Comercio Electrónico y Firmas Electrónicas.
-                  </p>
+              <div className="bg-surface border border-border rounded-2xl overflow-hidden shadow-xs animate-in fade-in duration-200">
+                <div className="bg-primary/10 dark:bg-primary/20 border-b border-primary p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+
+                  <div>
+                    <h2 className="text-base font-bold font-heading text-primary dark:text-primary-300 flex items-center gap-2">
+                      <ShieldCheck className="size-5 text-primary dark:text-primary-300 shrink-0" />
+                      <span>Sección III — Cláusula Segunda y Tercera: Declaraciones y Firma</span>
+                    </h2>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      Suscripción digital oficial del instrumento ARP-R01 conforme a la Ley de Comercio Electrónico y Firmas Electrónicas.
+                    </p>
+                  
+                </div>
+
+                <div className="p-6 sm:p-8 space-y-6">
+<Badge tone="primary" appearance="solid" size="sm" className="font-bold uppercase tracking-wider shrink-0 self-start sm:self-auto !text-white shadow-xs rounded-full px-3 py-1">
+                    FORMALIZACIÓN
+                  </Badge>
                 </div>
 
                 <div className="space-y-5">
@@ -1550,13 +1560,13 @@ export default function GestionIngresosPage() {
                             <h4 className="font-mono font-bold text-xs sm:text-sm text-foreground">
                               ARP-R01_Solicitud_Acceso_SINARP_{(selectedSolicitud.anexoA?.entidadSiglas || "ENTIDAD").toUpperCase()}.pdf
                             </h4>
-                            <Badge tone="success" appearance="soft" size="sm" className="font-bold text-[10px] uppercase px-2 py-0.5 shrink-0">
-                              SE FIRMÓ EN FIRMA EC
+                            <Badge tone="success" appearance="soft" size="sm" className="font-bold text-[10px] px-2 py-0.5 shrink-0">
+                              Firma verificada en FirmaEC
                             </Badge>
                           </div>
 
                           <p className="text-xs text-muted-foreground leading-relaxed">
-                            Documento oficial del formulario suscrito digitalmente por el Representante Legal mediante <strong className="text-foreground">FirmaEC</strong> con estampado cronológico y validez jurídica acreditada.
+                            Documento firmado electrónicamente por el Representante Legal. La firma fue confirmada y validada mediante FirmaEC, incluyendo su estampado cronológico. El documento se encuentra disponible para revisión.
                           </p>
                         </div>
                       </div>
@@ -1580,13 +1590,14 @@ export default function GestionIngresosPage() {
                     variant="primary"
                     size="sm"
                     onClick={() => {
-                      alert(`Descargando documento firmado ARP-R01_Solicitud_Acceso_SINARP_${(selectedSolicitud.anexoA?.entidadSiglas || "ENTIDAD").toUpperCase()}.pdf con validación FirmaEC...`);
+                      toast.success(`Descargando documento firmado ARP-R01_Solicitud_Acceso_SINARP_${(selectedSolicitud.anexoA?.entidadSiglas || "ENTIDAD").toUpperCase()}.pdf con validación FirmaEC...`);
                     }}
                     className="h-9 px-4 text-xs font-semibold gap-2 shadow-xs"
                   >
                     <Download className="size-4" />
                     <span>Descargar Anexo A</span>
                   </Button>
+                </div>
                 </div>
               </div>
             )}
@@ -1676,7 +1687,10 @@ export default function GestionIngresosPage() {
           /* ══════════════════════════════════════════════════════════
               VISTA 2: LISTADO DE TRÁMITES (FILTROS POR PROCESO + TABLA)
              ══════════════════════════════════════════════════════════ */
-          <Card className="bg-surface rounded-2xl border border-border shadow-xs p-6 sm:p-8 lg:p-10 flex flex-col gap-6 my-2">
+          <Card
+            className="bg-surface rounded-2xl border border-border shadow-xs flex-1 min-h-0 overflow-hidden flex flex-col my-0"
+            innerClassName="p-4 sm:p-6 lg:p-8 pr-6 sm:pr-8 lg:pr-10 flex flex-col gap-6 overflow-y-auto flex-1 min-h-0 w-full"
+          >
             {/* ── 1. Encabezado Principal ── */}
             {(() => {
               const isDirGestion = currentUser.role === "DIR_GESTION";
@@ -1709,11 +1723,6 @@ export default function GestionIngresosPage() {
               return (
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div className="space-y-1 w-full">
-                    <div className="flex items-center gap-2">
-                      <Badge tone="neutral" appearance="soft" size="sm" className="border border-border">
-                        {badgeText}
-                      </Badge>
-                    </div>
                     <h1 className="font-heading font-extrabold text-2xl sm:text-3xl tracking-tight text-primary">
                       {titleText}
                     </h1>
@@ -1725,8 +1734,8 @@ export default function GestionIngresosPage() {
               );
             })()}
 
-            {/* ── 2. Resumen Superior (Tarjetas Interactivas) ── */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6 w-full">
+            {/* ── 2. Resumen Superior (Tarjetas Interactivas con Layout Horizontal Optimizado) ── */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 lg:gap-4 w-full">
               {/* Card 1: Pendientes de revisión */}
               <Card
                 variant="featured"
@@ -1744,140 +1753,182 @@ export default function GestionIngresosPage() {
                   }
                 }}
                 className={cn(
-                  "group relative overflow-hidden cursor-pointer transition-all duration-300 border rounded-2xl outline-none select-none p-6 lg:p-7 w-full min-h-[170px]",
-                  "hover:-translate-y-1 hover:shadow-lg",
+                  "group relative overflow-hidden cursor-pointer transition-all duration-200 border rounded-xl outline-none select-none p-4 sm:p-4.5 w-full",
+                  "hover:-translate-y-0.5 hover:shadow-md",
                   filterEstado === "PENDIENTES"
-                    ? "bg-warning/15 border-warning ring-2 ring-warning/40 shadow-sm"
-                    : "bg-warning/5 hover:bg-warning/10 border-warning/30 shadow-2xs"
+                    ? "bg-warning/15 border-warning ring-2 ring-warning/40 shadow-xs"
+                    : "bg-warning/5 hover:bg-warning/10 border-warning/25 shadow-2xs"
                 )}
-                innerClassName="p-0 gap-4 text-left h-full justify-between"
+                innerClassName="p-0 h-full justify-center"
               >
-                <div className="flex items-center justify-between w-full">
-                  <span className="font-heading font-extrabold text-4xl lg:text-5xl text-warning tracking-tight">
-                    {dynamicKpis.pendientes}
-                  </span>
-                  <Badge tone="warning" appearance="soft" size="sm" className="font-bold text-xs tracking-wider uppercase gap-1.5 px-3 py-1">
-                    <Clock className="size-3.5 shrink-0" />
-                    <span>PENDIENTES</span>
-                  </Badge>
+                <div className="flex items-center justify-between gap-3 w-full">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div
+                      className={cn(
+                        "size-11 rounded-xl flex items-center justify-center shrink-0 transition-all duration-200",
+                        filterEstado === "PENDIENTES"
+                          ? "bg-warning text-white shadow-xs"
+                          : "bg-warning/15 text-warning group-hover:scale-105 group-hover:bg-warning group-hover:text-white"
+                      )}
+                    >
+                      <Clock className="size-5" />
+                    </div>
+                    <div className="min-w-0 space-y-0.5">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <h3 className="text-sm font-bold text-foreground group-hover:text-warning transition-colors truncate">
+                          Pendientes de revisión
+                        </h3>
+                        {filterEstado === "PENDIENTES" && (
+                          <span className="text-[10px] font-semibold px-1.5 py-0.2 rounded-full bg-warning/20 text-warning border border-warning/30 shrink-0">
+                            Activo
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground font-normal truncate">
+                        Requieren tu revisión
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="text-right shrink-0 pl-2">
+                    <span className="font-heading font-extrabold text-3xl sm:text-4xl text-warning tracking-tight block leading-none">
+                      {dynamicKpis.pendientes}
+                    </span>
+                    <span className="text-[10px] sm:text-[11px] text-muted-foreground font-medium block mt-1">
+                      solicitudes
+                    </span>
+                  </div>
                 </div>
-                <div className="space-y-1">
-                  <h3 className="text-base font-bold text-foreground block group-hover:text-warning transition-colors">
-                    Pendientes de revisión
-                  </h3>
-                  <p className="text-xs text-muted-foreground font-normal block leading-relaxed">
-                    solicitudes nuevas asignadas
-                  </p>
-                </div>
-                <div className="w-full pt-3 border-t border-warning/20 flex items-center justify-between text-xs font-semibold text-warning group-hover:text-warning">
-                  <span>{filterEstado === "PENDIENTES" ? "Filtro activo (clic para quitar)" : "Filtrar por pendientes"}</span>
-                  <ChevronRight className="size-4 transition-transform duration-200 group-hover:translate-x-1" />
-                </div>
-                <CardDecorativeIcon>
-                  <Clock className="size-28 text-warning/15 group-hover:text-warning/25 transition-colors" />
-                </CardDecorativeIcon>
               </Card>
 
-              {/* Card 2: En revisión */}
+              {/* Card 2: Aprobadas */}
               <Card
                 variant="featured"
                 role="button"
                 tabIndex={0}
                 onClick={() => {
-                  setFilterEstado(filterEstado === "EN_REVISION" ? "Todos" : "EN_REVISION");
+                  setFilterEstado(filterEstado === "Aprobada" ? "Todos" : "Aprobada");
                   setCurrentPage(1);
                 }}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
                     e.preventDefault();
-                    setFilterEstado(filterEstado === "EN_REVISION" ? "Todos" : "EN_REVISION");
+                    setFilterEstado(filterEstado === "Aprobada" ? "Todos" : "Aprobada");
                     setCurrentPage(1);
                   }
                 }}
                 className={cn(
-                  "group relative overflow-hidden cursor-pointer transition-all duration-300 border rounded-2xl outline-none select-none p-6 lg:p-7 w-full min-h-[170px]",
-                  "hover:-translate-y-1 hover:shadow-lg",
-                  filterEstado === "EN_REVISION"
-                    ? "bg-primary/15 border-primary ring-2 ring-primary/40 shadow-sm"
-                    : "bg-primary/5 hover:bg-primary/10 border-primary/30 shadow-2xs"
+                  "group relative overflow-hidden cursor-pointer transition-all duration-200 border rounded-xl outline-none select-none p-4 sm:p-4.5 w-full",
+                  "hover:-translate-y-0.5 hover:shadow-md",
+                  filterEstado === "Aprobada"
+                    ? "bg-success/15 border-success ring-2 ring-success/40 shadow-xs"
+                    : "bg-success/5 hover:bg-success/10 border-success/25 shadow-2xs"
                 )}
-                innerClassName="p-0 gap-4 text-left h-full justify-between"
+                innerClassName="p-0 h-full justify-center"
               >
-                <div className="flex items-center justify-between w-full">
-                  <span className="font-heading font-extrabold text-4xl lg:text-5xl text-primary tracking-tight">
-                    {dynamicKpis.enRevision}
-                  </span>
-                  <Badge tone="primary" appearance="soft" size="sm" className="font-bold text-xs tracking-wider uppercase gap-1.5 px-3 py-1">
-                    <Activity className="size-3.5 shrink-0" />
-                    <span>EN REVISIÓN</span>
-                  </Badge>
+                <div className="flex items-center justify-between gap-3 w-full">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div
+                      className={cn(
+                        "size-11 rounded-xl flex items-center justify-center shrink-0 transition-all duration-200",
+                        filterEstado === "Aprobada"
+                          ? "bg-success text-white shadow-xs"
+                          : "bg-success/15 text-success group-hover:scale-105 group-hover:bg-success group-hover:text-white"
+                      )}
+                    >
+                      <CheckCircle2 className="size-5" />
+                    </div>
+                    <div className="min-w-0 space-y-0.5">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <h3 className="text-sm font-bold text-foreground group-hover:text-success transition-colors truncate">
+                          Aprobadas
+                        </h3>
+                        {filterEstado === "Aprobada" && (
+                          <span className="text-[10px] font-semibold px-1.5 py-0.2 rounded-full bg-success/20 text-success border border-success/30 shrink-0">
+                            Activo
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground font-normal truncate">
+                        Solicitudes aprobadas
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="text-right shrink-0 pl-2">
+                    <span className="font-heading font-extrabold text-3xl sm:text-4xl text-success tracking-tight block leading-none">
+                      {dynamicKpis.aprobadas}
+                    </span>
+                    <span className="text-[10px] sm:text-[11px] text-muted-foreground font-medium block mt-1">
+                      solicitudes
+                    </span>
+                  </div>
                 </div>
-                <div className="space-y-1">
-                  <h3 className="text-base font-bold text-foreground block group-hover:text-primary transition-colors">
-                    En revisión
-                  </h3>
-                  <p className="text-xs text-muted-foreground font-normal block leading-relaxed">
-                    análisis documental en curso
-                  </p>
-                </div>
-                <div className="w-full pt-3 border-t border-primary/20 flex items-center justify-between text-xs font-semibold text-primary group-hover:text-primary">
-                  <span>{filterEstado === "EN_REVISION" ? "Filtro activo (clic para quitar)" : "Filtrar por en revisión"}</span>
-                  <ChevronRight className="size-4 transition-transform duration-200 group-hover:translate-x-1" />
-                </div>
-                <CardDecorativeIcon>
-                  <Activity className="size-28 text-primary/15 group-hover:text-primary/25 transition-colors" />
-                </CardDecorativeIcon>
               </Card>
 
-              {/* Card 3: Finalizadas */}
+              {/* Card 3: Rechazadas */}
               <Card
                 variant="featured"
                 role="button"
                 tabIndex={0}
                 onClick={() => {
-                  setFilterEstado(filterEstado === "FINALIZADAS" ? "Todos" : "FINALIZADAS");
+                  setFilterEstado(filterEstado === "Rechazada" ? "Todos" : "Rechazada");
                   setCurrentPage(1);
                 }}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
                     e.preventDefault();
-                    setFilterEstado(filterEstado === "FINALIZADAS" ? "Todos" : "FINALIZADAS");
+                    setFilterEstado(filterEstado === "Rechazada" ? "Todos" : "Rechazada");
                     setCurrentPage(1);
                   }
                 }}
                 className={cn(
-                  "group relative overflow-hidden cursor-pointer transition-all duration-300 border rounded-2xl outline-none select-none p-6 lg:p-7 w-full min-h-[170px]",
-                  "hover:-translate-y-1 hover:shadow-lg",
-                  filterEstado === "FINALIZADAS"
-                    ? "bg-success/15 border-success ring-2 ring-success/40 shadow-sm"
-                    : "bg-success/5 hover:bg-success/10 border-success/30 shadow-2xs"
+                  "group relative overflow-hidden cursor-pointer transition-all duration-200 border rounded-xl outline-none select-none p-4 sm:p-4.5 w-full",
+                  "hover:-translate-y-0.5 hover:shadow-md",
+                  filterEstado === "Rechazada"
+                    ? "bg-danger/15 border-danger ring-2 ring-danger/40 shadow-xs"
+                    : "bg-danger/5 hover:bg-danger/10 border-danger/25 shadow-2xs"
                 )}
-                innerClassName="p-0 gap-4 text-left h-full justify-between"
+                innerClassName="p-0 h-full justify-center"
               >
-                <div className="flex items-center justify-between w-full">
-                  <span className="font-heading font-extrabold text-4xl lg:text-5xl text-success tracking-tight">
-                    {dynamicKpis.finalizadas}
-                  </span>
-                  <Badge tone="success" appearance="soft" size="sm" className="font-bold text-xs tracking-wider uppercase gap-1.5 px-3 py-1">
-                    <CheckCircle2 className="size-3.5 shrink-0" />
-                    <span>FINALIZADAS</span>
-                  </Badge>
+                <div className="flex items-center justify-between gap-3 w-full">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div
+                      className={cn(
+                        "size-11 rounded-xl flex items-center justify-center shrink-0 transition-all duration-200",
+                        filterEstado === "Rechazada"
+                          ? "bg-danger text-white shadow-xs"
+                          : "bg-danger/15 text-danger group-hover:scale-105 group-hover:bg-danger group-hover:text-white"
+                      )}
+                    >
+                      <XCircle className="size-5" />
+                    </div>
+                    <div className="min-w-0 space-y-0.5">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <h3 className="text-sm font-bold text-foreground group-hover:text-danger transition-colors truncate">
+                          Rechazadas
+                        </h3>
+                        {filterEstado === "Rechazada" && (
+                          <span className="text-[10px] font-semibold px-1.5 py-0.2 rounded-full bg-danger/20 text-danger border border-danger/30 shrink-0">
+                            Activo
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground font-normal truncate">
+                        Solicitudes rechazadas
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="text-right shrink-0 pl-2">
+                    <span className="font-heading font-extrabold text-3xl sm:text-4xl text-danger tracking-tight block leading-none">
+                      {dynamicKpis.rechazadas}
+                    </span>
+                    <span className="text-[10px] sm:text-[11px] text-muted-foreground font-medium block mt-1">
+                      solicitudes
+                    </span>
+                  </div>
                 </div>
-                <div className="space-y-1">
-                  <h3 className="text-base font-bold text-foreground block group-hover:text-success transition-colors">
-                    Finalizadas
-                  </h3>
-                  <p className="text-xs text-muted-foreground font-normal block leading-relaxed">
-                    aprobadas o rechazadas
-                  </p>
-                </div>
-                <div className="w-full pt-3 border-t border-success/20 flex items-center justify-between text-xs font-semibold text-success group-hover:text-success">
-                  <span>{filterEstado === "FINALIZADAS" ? "Filtro activo (clic para quitar)" : "Filtrar por finalizadas"}</span>
-                  <ChevronRight className="size-4 transition-transform duration-200 group-hover:translate-x-1" />
-                </div>
-                <CardDecorativeIcon>
-                  <CheckCircle2 className="size-28 text-success/15 group-hover:text-success/25 transition-colors" />
-                </CardDecorativeIcon>
               </Card>
             </div>
 
@@ -1902,7 +1953,7 @@ export default function GestionIngresosPage() {
                 </div>
 
                 {/* Filtros Combobox del UI Kit anchos e independientes */}
-                <div className="flex flex-wrap sm:flex-nowrap items-end gap-2.5 shrink-0 overflow-x-auto pb-0.5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-nowrap items-end gap-2.5">
                   <FilterCombobox
                     label="Proceso"
                     placeholder="Proceso..."
@@ -1913,7 +1964,7 @@ export default function GestionIngresosPage() {
                       setFilterTramite(val);
                       setCurrentPage(1);
                     }}
-                    className="min-w-[175px] max-w-[220px]"
+                    className="w-full lg:w-[195px]"
                   />
 
                   <FilterCombobox
@@ -1926,7 +1977,7 @@ export default function GestionIngresosPage() {
                       setFilterEstado(val);
                       setCurrentPage(1);
                     }}
-                    className="min-w-[170px] max-w-[210px]"
+                    className="w-full lg:w-[205px]"
                   />
 
                   <FilterCombobox
@@ -1939,7 +1990,7 @@ export default function GestionIngresosPage() {
                       setFilterInstitucion(val);
                       setCurrentPage(1);
                     }}
-                    className="min-w-[210px] max-w-[270px]"
+                    className="w-full lg:w-[220px]"
                   />
 
                   <FilterCombobox
@@ -1949,7 +2000,7 @@ export default function GestionIngresosPage() {
                     options={sortOptions}
                     value={sortOrder}
                     onChange={(val) => setSortOrder(val as any)}
-                    className="min-w-[185px] max-w-[230px]"
+                    className="w-full lg:w-[195px]"
                   />
                 </div>
               </div>
@@ -2058,28 +2109,33 @@ export default function GestionIngresosPage() {
 
               return (
                 <>
-                  <Table className="w-full table-fixed">
+                  {/* Vista de Tabla para Escritorio */}
+                  <div className="hidden md:block">
+                    <Table
+                      className="w-full min-w-[1080px] table-fixed"
+                      containerClassName="overflow-x-auto rounded-xl"
+                    >
                     <TableHeader>
-                      <TableRow>
-                        <TableHead className="w-[10%] px-2">
+                      <TableRow className="border-0 h-11">
+                        <TableHead className="w-[130px] px-2 py-2.5 whitespace-nowrap">
                           TRÁMITE
                         </TableHead>
-                        <TableHead className="w-[11%] px-2">
-                          SOLICITUD
+                        <TableHead className="w-[160px] px-2 py-2.5 whitespace-nowrap">
+                          PROCESO
                         </TableHead>
-                        <TableHead className="w-[20%] min-w-[170px] px-2">
+                        <TableHead className="w-[190px] px-2 py-2.5 whitespace-nowrap">
                           SOLICITANTE
                         </TableHead>
-                        <TableHead className="w-[18%] px-2">
+                        <TableHead className="w-[210px] px-2 py-2.5 whitespace-nowrap">
                           INSTITUCIÓN
                         </TableHead>
-                        <TableHead className="w-[10%] px-2">
-                          FECHA
+                        <TableHead className="w-[140px] px-2 py-2.5 whitespace-nowrap">
+                          FECHA ASIGNACIÓN
                         </TableHead>
-                        <TableHead className="w-[16%] min-w-[140px] px-2">
+                        <TableHead className="w-[170px] px-2 py-2.5 whitespace-nowrap">
                           ESTADO
                         </TableHead>
-                        <TableHead className="w-[15%] px-2 text-right">
+                        <TableHead className="w-[90px] px-2 py-2.5 whitespace-nowrap text-right">
                           ACCIONES
                         </TableHead>
                       </TableRow>
@@ -2103,30 +2159,91 @@ export default function GestionIngresosPage() {
                         </TableRow>
                       ) : (
                         paginatedData.map((row) => {
+                          const fechaAsignacionTexto = row.fechaAsignacionGestion || row.fechaSolicitud;
                           return (
                             <TableRow
                               key={row.id}
                               className="cursor-pointer transition-colors hover:bg-muted/40"
                               onClick={() => handleSelectSolicitud(row)}
                             >
-                              {/* N.º Trámite */}
+                              {/* 1. Trámite */}
                               <TableCell className="px-2 font-mono text-xs overflow-hidden">
-                                <div className="flex flex-col truncate">
-                                  <span className="font-bold text-foreground truncate">{row.id}</span>
-                                  <span className="text-[10px] text-muted-foreground truncate">{row.codigoDocumental}</span>
-                                </div>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <div className="flex items-center gap-1.5 truncate cursor-pointer">
+                                      <span className="font-bold text-foreground truncate">{row.id}</span>
+                                    </div>
+                                  </TooltipTrigger>
+                                  <TooltipContent side="top" variant="surface" className="p-2.5 max-w-xs flex flex-col items-start gap-0.5">
+                                    <p className="font-bold text-xs text-foreground font-sans">Identificador de trámite</p>
+                                    <p className="font-mono text-xs text-primary font-bold">{row.id}</p>
+                                    {row.codigoDocumental && (
+                                      <p className="font-mono text-[10px] text-muted-foreground">Documento: {row.codigoDocumental}</p>
+                                    )}
+                                  </TooltipContent>
+                                </Tooltip>
                               </TableCell>
 
-                              {/* Solicitud */}
-                              <TableCell className="px-2 text-xs font-medium text-foreground overflow-hidden">
-                                <span className="truncate block" title={row.tituloTramite}>
-                                  {row.tipoTramite === "PROCESO_A_REGISTRO_INSTITUCION" && "Inst. (Anexo A)"}
-                                  {row.tipoTramite === "PROCESO_B_ENROLAMIENTO_COORDINADOR" && "Coord. (Anexo B)"}
-                                  {row.tipoTramite === "PROCESO_C_CAMBIO_COORDINADOR" && "Cambio (Anexo C)"}
-                                </span>
+                              {/* 2. Proceso / Anexo */}
+                              <TableCell className="px-2 overflow-hidden">
+                                {(() => {
+                                  const procesoLabel =
+                                    row.tipoTramite === "PROCESO_A_REGISTRO_INSTITUCION"
+                                      ? "Anexo A · Registro Institución"
+                                      : row.tipoTramite === "PROCESO_B_ENROLAMIENTO_COORDINADOR"
+                                      ? "Anexo B · Enrolamiento Coordinador"
+                                      : row.tipoTramite === "PROCESO_C_CAMBIO_COORDINADOR"
+                                      ? "Anexo C · Cambio de Coordinador"
+                                      : row.tituloTramite || "Otro trámite";
+
+                                  const procesoShort =
+                                    row.tipoTramite === "PROCESO_A_REGISTRO_INSTITUCION"
+                                      ? "Anexo A"
+                                      : row.tipoTramite === "PROCESO_B_ENROLAMIENTO_COORDINADOR"
+                                      ? "Anexo B"
+                                      : row.tipoTramite === "PROCESO_C_CAMBIO_COORDINADOR"
+                                      ? "Anexo C"
+                                      : "Trámite";
+
+                                  const subtitulo =
+                                    row.tipoTramite === "PROCESO_A_REGISTRO_INSTITUCION"
+                                      ? "Registro Institución"
+                                      : row.tipoTramite === "PROCESO_B_ENROLAMIENTO_COORDINADOR"
+                                      ? "Enrolamiento Coordinador"
+                                      : row.tipoTramite === "PROCESO_C_CAMBIO_COORDINADOR"
+                                      ? "Cambio de Coordinador"
+                                      : row.tituloTramite || "General";
+
+                                  return (
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <div className="flex flex-col min-w-0 group/proc cursor-pointer">
+                                          <span className="font-semibold text-foreground text-xs leading-snug truncate" title={procesoLabel}>
+                                            {procesoLabel}
+                                          </span>
+                                          <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                                            <span className="truncate">{procesoShort}</span>
+                                            <span className="text-[9px] px-1 rounded bg-muted/60 text-muted-foreground font-sans font-semibold group-hover/proc:bg-primary/10 group-hover/proc:text-primary transition-colors shrink-0">
+                                              +
+                                            </span>
+                                          </div>
+                                        </div>
+                                      </TooltipTrigger>
+                                      <TooltipContent side="top" variant="surface" className="p-2.5 max-w-xs flex-col items-start gap-0.5">
+                                        <p className="font-bold text-xs text-foreground font-sans">{procesoLabel}</p>
+                                        <p className="text-[11px] text-muted-foreground">{subtitulo}</p>
+                                        {row.codigoDocumental && (
+                                          <p className="font-mono text-[10px] text-primary mt-1 border-t border-border/60 pt-1">
+                                            Código: {row.codigoDocumental}
+                                          </p>
+                                        )}
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  );
+                                })()}
                               </TableCell>
 
-                              {/* Solicitante */}
+                              {/* 3. Solicitante */}
                               <TableCell className="px-2 overflow-hidden">
                                 <Tooltip>
                                   <TooltipTrigger asChild>
@@ -2135,7 +2252,7 @@ export default function GestionIngresosPage() {
                                         {row.nombreCompleto}
                                       </span>
                                       <div className="flex items-center gap-1 text-[10px] text-muted-foreground font-mono">
-                                        <span className="truncate">{row.cedula}</span>
+                                        <span className="truncate">C.I. {row.cedula}</span>
                                         <span className="text-[9px] px-1 rounded bg-muted/60 text-muted-foreground font-sans font-semibold group-hover/sol:bg-primary/10 group-hover/sol:text-primary transition-colors shrink-0">
                                           +
                                         </span>
@@ -2143,7 +2260,7 @@ export default function GestionIngresosPage() {
                                     </div>
                                   </TooltipTrigger>
                                   <TooltipContent side="top" variant="surface" className="p-3 max-w-xs flex-col items-start gap-1">
-                                    <p className="font-bold text-xs text-foreground">{row.nombreCompleto}</p>
+                                    <p className="font-bold text-xs text-foreground font-sans">{row.nombreCompleto}</p>
                                     <p className="font-mono text-[11px] text-muted-foreground">C.I. {row.cedula}</p>
                                     <p className="text-[11px] text-primary font-medium">{row.correo}</p>
                                     <p className="text-[10px] text-muted-foreground border-t border-border/60 pt-1 mt-1">{row.institucion}</p>
@@ -2151,26 +2268,62 @@ export default function GestionIngresosPage() {
                                 </Tooltip>
                               </TableCell>
 
-                              {/* Institución */}
+                              {/* 4. Institución */}
                               <TableCell className="px-2 text-muted-foreground text-xs font-medium overflow-hidden">
-                                <span className="truncate block" title={row.institucion}>
-                                  {row.institucion}
-                                </span>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <div className="flex flex-col truncate cursor-pointer group/inst">
+                                      <span className="truncate font-semibold text-foreground group-hover/inst:text-primary transition-colors">
+                                        {row.institucion}
+                                      </span>
+                                      <div className="flex items-center gap-1 text-[10px] text-muted-foreground font-mono">
+                                        <span className="truncate">RUC: {row.anexoA?.rucEntidad || "1768000000001"}</span>
+                                        <span className="text-[9px] px-1 rounded bg-muted/60 text-muted-foreground font-sans font-semibold group-hover/inst:bg-primary/10 group-hover/inst:text-primary transition-colors shrink-0">
+                                          +
+                                        </span>
+                                      </div>
+                                    </div>
+                                  </TooltipTrigger>
+                                  <TooltipContent side="top" variant="surface" className="p-2.5 max-w-xs flex flex-col items-start gap-1">
+                                    <p className="font-bold text-xs text-foreground leading-snug font-sans">{row.institucion}</p>
+                                    <p className="font-mono text-[11px] text-muted-foreground">
+                                      RUC: {row.anexoA?.rucEntidad || "1768000000001"}
+                                    </p>
+                                    {row.anexoA?.direccionEntidad && (
+                                      <p className="text-[10px] text-muted-foreground border-t border-border/60 pt-1 mt-0.5">
+                                        {row.anexoA.direccionEntidad}
+                                      </p>
+                                    )}
+                                  </TooltipContent>
+                                </Tooltip>
                               </TableCell>
 
-                              {/* Fecha */}
+                              {/* 5. Fecha de asignación */}
                               <TableCell className="px-2 text-muted-foreground font-mono text-xs overflow-hidden">
-                                <span className="block truncate">{row.fechaSolicitud}</span>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <span className="block truncate cursor-pointer hover:text-foreground transition-colors">
+                                      {fechaAsignacionTexto}
+                                    </span>
+                                  </TooltipTrigger>
+                                  <TooltipContent side="top" variant="surface" className="p-2.5 max-w-xs flex flex-col items-start gap-0.5">
+                                    <p className="font-bold text-xs text-foreground font-sans">Fecha de asignación</p>
+                                    <p className="font-mono text-xs text-muted-foreground">{fechaAsignacionTexto}</p>
+                                    <p className="text-[10px] text-muted-foreground">Registro: {row.fechaSolicitud}</p>
+                                  </TooltipContent>
+                                </Tooltip>
                               </TableCell>
 
-                              {/* Estado */}
-                              <TableCell className="px-2 whitespace-nowrap">
-                                {renderEstadoBadge(row.estado)}
+                              {/* 6. Estado */}
+                              <TableCell className="px-2 overflow-hidden">
+                                <div className="flex items-center min-w-0">
+                                  {renderEstadoBadge(row.estado, row.revisionIniciada, row.rechazadoPor)}
+                                </div>
                               </TableCell>
 
-                              {/* Acciones */}
+                              {/* 7. Acciones */}
                               <TableCell className="px-2 text-right" onClick={(e) => e.stopPropagation()}>
-                                <div className="flex items-center justify-end gap-1">
+                                <div className="flex items-center justify-end">
                                   <Tooltip>
                                     <TooltipTrigger asChild>
                                       <Button
@@ -2182,12 +2335,12 @@ export default function GestionIngresosPage() {
                                           handleSelectSolicitud(row);
                                         }}
                                         className="size-7 rounded-lg border-border/80 text-foreground hover:bg-muted shadow-2xs"
-                                        aria-label={`Ver detalle de trámite ${row.id}`}
+                                        aria-label={`Ver detalle y gestionar trámite ${row.id}`}
                                       >
                                         <Eye className="size-3.5" />
                                       </Button>
                                     </TooltipTrigger>
-                                    <TooltipContent side="top">Ver detalle</TooltipContent>
+                                    <TooltipContent side="top">Ver detalle y gestionar</TooltipContent>
                                   </Tooltip>
                                 </div>
                               </TableCell>
@@ -2197,35 +2350,144 @@ export default function GestionIngresosPage() {
                       )}
                     </TableBody>
                   </Table>
+                </div>
+
+                {/* Vista Mobile Card Row (Responsive) para Pantallas Estrechas */}
+                <div className="block md:hidden">
+                  {paginatedData.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center p-8 bg-surface border border-border rounded-xl text-center space-y-2">
+                      <div className="size-12 rounded-full bg-muted/60 flex items-center justify-center text-muted-foreground mb-1">
+                        <SearchIcon className="size-6" />
+                      </div>
+                      <h3 className="font-heading font-bold text-base text-foreground">
+                        No hay trámites registrados
+                      </h3>
+                      <p className="text-xs text-muted-foreground leading-relaxed">
+                        No se encontraron trámites asignados que coincidan con los filtros seleccionados.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                      {paginatedData.map((row) => {
+                        const fechaAsignacionTexto = row.fechaAsignacionGestion || row.fechaSolicitud;
+                        const procesoLabel =
+                          row.tipoTramite === "PROCESO_A_REGISTRO_INSTITUCION"
+                            ? "Anexo A · Registro Institución"
+                            : row.tipoTramite === "PROCESO_B_ENROLAMIENTO_COORDINADOR"
+                            ? "Anexo B · Enrolamiento Coordinador"
+                            : row.tipoTramite === "PROCESO_C_CAMBIO_COORDINADOR"
+                            ? "Anexo C · Cambio de Coordinador"
+                            : row.tituloTramite || "Otro trámite";
+
+                        return (
+                          <div
+                            key={row.id}
+                            onClick={() => handleSelectSolicitud(row)}
+                            className="p-4 rounded-xl border border-border bg-surface space-y-3 text-left transition-all duration-200 hover:border-primary/40 hover:shadow-xs cursor-pointer"
+                          >
+                            {/* Cabecera: ID + Código + Badge de Estado */}
+                            <div className="flex items-center justify-between gap-2 pb-2 border-b border-border/50 min-w-0">
+                              <div className="flex flex-col min-w-0 shrink-0">
+                                <span className="font-bold text-xs font-mono text-primary whitespace-nowrap">{row.id}</span>
+                                {row.codigoDocumental && (
+                                  <span className="text-[10px] text-muted-foreground font-mono whitespace-nowrap">{row.codigoDocumental}</span>
+                                )}
+                              </div>
+                              <div className="min-w-0 flex justify-end shrink">
+                                {renderEstadoBadge(row.estado, row.revisionIniciada, row.rechazadoPor)}
+                              </div>
+                            </div>
+
+                            {/* Cuerpo: Proceso + Institución con RUC + Solicitante con Cédula y Correo */}
+                            <div className="space-y-2 py-0.5">
+                              <div>
+                                <p className="font-bold text-sm text-foreground leading-snug">{procesoLabel}</p>
+                              </div>
+
+                              <div className="space-y-1.5 text-xs">
+                                {/* Institución */}
+                                <div className="flex items-start gap-2 text-foreground font-medium">
+                                  <Building2 className="size-3.5 text-primary shrink-0 mt-0.5" />
+                                  <div className="flex flex-col min-w-0">
+                                    <span className="break-words leading-tight">{row.institucion}</span>
+                                    <span className="text-[10px] font-mono text-muted-foreground">
+                                      RUC: {row.anexoA?.rucEntidad || "1768000000001"}
+                                    </span>
+                                  </div>
+                                </div>
+
+                                {/* Solicitante */}
+                                <div className="flex items-start gap-2 text-muted-foreground">
+                                  <User className="size-3.5 text-muted-foreground shrink-0 mt-0.5" />
+                                  <div className="flex flex-col min-w-0">
+                                    <span className="text-foreground font-medium break-words leading-tight">{row.nombreCompleto}</span>
+                                    <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[10px] text-muted-foreground font-mono mt-0.5">
+                                      <span>C.I. {row.cedula}</span>
+                                      <span>·</span>
+                                      <span className="font-sans text-primary break-all">{row.correo}</span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Pie: Fecha Asignación + Botón Acción */}
+                            <div className="flex items-center justify-between pt-2.5 border-t border-border/60 gap-2 flex-wrap sm:flex-nowrap">
+                              <div className="flex flex-col min-w-0">
+                                <span className="text-[10px] text-muted-foreground">Asignado el:</span>
+                                <span className="font-mono text-xs text-foreground font-medium whitespace-nowrap">{fechaAsignacionTexto}</span>
+                              </div>
+
+                              <div className="shrink-0 ml-auto" onClick={(e) => e.stopPropagation()}>
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleSelectSolicitud(row);
+                                  }}
+                                  className="h-7 px-2.5 text-xs font-semibold rounded-lg border-border/80 text-foreground hover:bg-muted gap-1 shadow-2xs"
+                                >
+                                  <Eye className="size-3" />
+                                  <span>Ver detalle</span>
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
                 </>
               );
             })()}
 
             {/* ── 6. Paginación y Contador de filas ── */}
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-3 border-t border-border/60 w-full">
-              {/* Texto explicativo de resultados a la izquierda */}
-              <p className="text-xs text-muted-foreground font-medium whitespace-nowrap mr-auto sm:mr-0">
-                Mostrando{" "}
-                <span className="font-bold text-foreground">
-                  {filteredData.length === 0
-                    ? 0
-                    : (currentPage - 1) * itemsPerPage + 1}{" "}
-                  - {Math.min(currentPage * itemsPerPage, filteredData.length)}
-                </span>{" "}
-                de{" "}
-                <span className="font-bold text-foreground">
-                  {filteredData.length}
-                </span>{" "}
-                trámites
-              </p>
+            <div className="flex flex-col md:flex-row items-center justify-center md:justify-between gap-3 sm:gap-4 pt-4 pb-2 w-full border-t border-border/50">
+              {/* Información y Selector de filas */}
+              <div className="flex flex-col sm:flex-row items-center justify-center md:justify-start gap-2.5 sm:gap-4 w-full md:w-auto text-center md:text-left">
+                <p className="text-xs text-muted-foreground font-medium text-center md:text-left">
+                  Mostrando{" "}
+                  <span className="font-bold text-foreground">
+                    {filteredData.length === 0
+                      ? 0
+                      : (currentPage - 1) * itemsPerPage + 1}{" "}
+                    - {Math.min(currentPage * itemsPerPage, filteredData.length)}
+                  </span>{" "}
+                  de{" "}
+                  <span className="font-bold text-foreground">
+                    {filteredData.length}
+                  </span>{" "}
+                  trámites
+                </p>
 
-              {/* Controles de paginación y filas a la derecha */}
-              <div className="flex flex-wrap items-center justify-end gap-4 sm:gap-6 ml-auto">
                 {/* Selector de filas por página */}
-                <div className="flex items-center gap-2 text-xs text-muted-foreground whitespace-nowrap">
+                <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
                   <span>Filas:</span>
                   <div className="inline-flex rounded-full border border-border/80 p-0.5 bg-surface shadow-2xs">
-                    {[5, 10, 20].map((size) => (
+                    {[5, 10, 20, 50].map((size) => (
                       <button
                         key={size}
                         type="button"
@@ -2245,88 +2507,90 @@ export default function GestionIngresosPage() {
                     ))}
                   </div>
                 </div>
+              </div>
 
-                {/* Paginación UI Kit con botones circulares completos (« < 1 2 > ») */}
-                <Pagination className="mx-0 w-auto justify-end">
-                <PaginationContent className="gap-1.5">
-                  <PaginationItem>
-                    <PaginationFirst
-                      href="#"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        if (currentPage > 1) setCurrentPage(1);
-                      }}
-                      className={cn(
-                        "size-8 rounded-full border border-border/70 hover:bg-muted/30 transition-colors",
-                        currentPage <= 1 ? "pointer-events-none opacity-40 cursor-not-allowed" : ""
-                      )}
-                    />
-                  </PaginationItem>
-
-                  <PaginationItem>
-                    <PaginationPrevious
-                      href="#"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        if (currentPage > 1) setCurrentPage(currentPage - 1);
-                      }}
-                      className={cn(
-                        "size-8 rounded-full border border-border/70 hover:bg-muted/30 transition-colors",
-                        currentPage <= 1 ? "pointer-events-none opacity-40 cursor-not-allowed" : ""
-                      )}
-                    />
-                  </PaginationItem>
-
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                    <PaginationItem key={page}>
-                      <PaginationLink
+              {/* Controles de paginación */}
+              <div className="w-full md:w-auto flex items-center justify-center md:justify-end overflow-x-auto py-1">
+                <Pagination className="mx-auto md:mx-0 w-auto justify-center">
+                  <PaginationContent className="gap-1 sm:gap-1.5 flex-nowrap justify-center">
+                    <PaginationItem className="hidden sm:inline-flex">
+                      <PaginationFirst
                         href="#"
-                        isActive={page === currentPage}
                         onClick={(e) => {
                           e.preventDefault();
-                          setCurrentPage(page);
+                          if (currentPage > 1) setCurrentPage(1);
                         }}
                         className={cn(
-                          "size-8 rounded-full font-semibold text-xs transition-all",
-                          page === currentPage
-                            ? "bg-primary text-white font-bold shadow-2xs"
-                            : "border border-border/70 hover:bg-muted/30 text-foreground"
+                          "size-8 rounded-full border border-border/70 hover:bg-muted/30 transition-colors",
+                          currentPage <= 1 ? "pointer-events-none opacity-40 cursor-not-allowed" : ""
                         )}
-                      >
-                        {page}
-                      </PaginationLink>
+                      />
                     </PaginationItem>
-                  ))}
 
-                  <PaginationItem>
-                    <PaginationNext
-                      href="#"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        if (currentPage < totalPages) setCurrentPage(currentPage + 1);
-                      }}
-                      className={cn(
-                        "size-8 rounded-full border border-border/70 hover:bg-muted/30 transition-colors",
-                        currentPage >= totalPages ? "pointer-events-none opacity-40 cursor-not-allowed" : ""
-                      )}
-                    />
-                  </PaginationItem>
+                    <PaginationItem>
+                      <PaginationPrevious
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          if (currentPage > 1) setCurrentPage(currentPage - 1);
+                        }}
+                        className={cn(
+                          "size-8 rounded-full border border-border/70 hover:bg-muted/30 transition-colors",
+                          currentPage <= 1 ? "pointer-events-none opacity-40 cursor-not-allowed" : ""
+                        )}
+                      />
+                    </PaginationItem>
 
-                  <PaginationItem>
-                    <PaginationLast
-                      href="#"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        if (currentPage < totalPages) setCurrentPage(totalPages);
-                      }}
-                      className={cn(
-                        "size-8 rounded-full border border-border/70 hover:bg-muted/30 transition-colors",
-                        currentPage >= totalPages ? "pointer-events-none opacity-40 cursor-not-allowed" : ""
-                      )}
-                    />
-                  </PaginationItem>
-                </PaginationContent>
-              </Pagination>
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                      <PaginationItem key={page}>
+                        <PaginationLink
+                          href="#"
+                          isActive={page === currentPage}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            setCurrentPage(page);
+                          }}
+                          className={cn(
+                            "size-8 rounded-full font-semibold text-xs transition-all",
+                            page === currentPage
+                              ? "bg-primary text-white font-bold shadow-2xs"
+                              : "border border-border/70 hover:bg-muted/30 text-foreground"
+                          )}
+                        >
+                          {page}
+                        </PaginationLink>
+                      </PaginationItem>
+                    ))}
+
+                    <PaginationItem>
+                      <PaginationNext
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          if (currentPage < totalPages) setCurrentPage(currentPage + 1);
+                        }}
+                        className={cn(
+                          "size-8 rounded-full border border-border/70 hover:bg-muted/30 transition-colors",
+                          currentPage >= totalPages ? "pointer-events-none opacity-40 cursor-not-allowed" : ""
+                        )}
+                      />
+                    </PaginationItem>
+
+                    <PaginationItem className="hidden sm:inline-flex">
+                      <PaginationLast
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          if (currentPage < totalPages) setCurrentPage(totalPages);
+                        }}
+                        className={cn(
+                          "size-8 rounded-full border border-border/70 hover:bg-muted/30 transition-colors",
+                          currentPage >= totalPages ? "pointer-events-none opacity-40 cursor-not-allowed" : ""
+                        )}
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
               </div>
             </div>
           </Card>
@@ -2418,3 +2682,4 @@ export default function GestionIngresosPage() {
     </WireframeDashboardLayout>
   );
 }
+

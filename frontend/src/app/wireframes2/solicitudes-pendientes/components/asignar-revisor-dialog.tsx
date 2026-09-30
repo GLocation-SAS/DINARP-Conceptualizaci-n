@@ -286,15 +286,24 @@ export function AsignarRevisorPanel({
       {/* ── 1. CABECERA CON LÍNEA INFERIOR DIVISORIA ── */}
       <div className="flex items-start justify-between gap-4 pb-4 border-b border-border">
         <div className="flex items-center gap-3">
-          <div className="size-10 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0 border border-primary/20">
+          <div
+            className={cn(
+              "size-10 rounded-full flex items-center justify-center shrink-0 border",
+              esTramiteAprobado
+                ? "bg-success-100/40 dark:bg-success-900/40 text-success-800 dark:text-success-300 border-success-300 dark:border-success-700/50"
+                : yaEmpezoRevision
+                  ? "bg-warning-100/40 dark:bg-warning-900/40 text-warning-800 dark:text-warning-300 border-warning-300 dark:border-warning-700/50"
+                  : "bg-primary/10 dark:bg-primary-900/40 text-primary dark:text-primary-300 border-primary/20 dark:border-primary-700/50"
+            )}
+          >
             {esTramiteAprobado ? (
-              <CheckCircle2 className="size-5 text-success" />
+              <CheckCircle2 className="size-5 text-success dark:text-success-300" />
             ) : yaEmpezoRevision ? (
-              <Lock className="size-5 text-warning" />
+              <Lock className="size-5 text-warning dark:text-warning-300" />
             ) : puedeReasignar ? (
-              <RotateCcw className="size-5 text-primary" />
+              <RotateCcw className="size-5 text-primary dark:text-primary-300" />
             ) : (
-              <UserPlus className="size-5 text-primary" />
+              <UserPlus className="size-5 text-primary dark:text-primary-300" />
             )}
           </div>
           <div>
@@ -307,15 +316,15 @@ export function AsignarRevisorPanel({
                     ? `Reasignar Revisor — ${areaTitle}`
                     : `Asignar Revisor — ${areaTitle}`}
             </h3>
-            <p className="text-xs text-muted-foreground mt-0.5 leading-snug">
-              {esTramiteAprobado
-                ? "Este trámite ya fue aprobado. No admite reasignación de funcionario."
-                : yaEmpezoRevision
-                  ? "La revisión técnica ya fue iniciada por el revisor. Reasignación bloqueada."
+            {!yaEmpezoRevision && (
+              <p className="text-xs text-muted-foreground dark:text-neutral-400 mt-0.5 leading-snug">
+                {esTramiteAprobado
+                  ? "Este trámite ya fue aprobado. No admite reasignación de funcionario."
                   : puedeReasignar
                     ? "El revisor aún no ha iniciado la revisión. Puedes reasignar este expediente a otro funcionario."
                     : "Selecciona el funcionario encargado de revisar y validar el trámite."}
-            </p>
+              </p>
+            )}
           </div>
         </div>
       </div>
@@ -323,12 +332,12 @@ export function AsignarRevisorPanel({
       {/* ── AVISO DE ESTADO: TRÁMITE YA APROBADO (BLOQUEO ESTRICTO) ── */}
       {!isMasiva && esTramiteAprobado && (
         <div className="p-3.5 bg-success/10 border border-success/30 rounded-xl flex items-start gap-3 text-xs text-foreground">
-          <CheckCircle2 className="size-4 text-success shrink-0 mt-0.5" />
+          <CheckCircle2 className="size-4 text-success dark:text-success-300 shrink-0 mt-0.5" />
           <div className="space-y-1">
             <strong className="font-semibold block text-success font-heading">
               Trámite Aprobado — Reasignación bloqueada
             </strong>
-            <p className="text-muted-foreground text-[11px] leading-relaxed">
+            <p className="text-muted-foreground dark:text-neutral-300 text-[11px] leading-relaxed">
               {motivoBloqueo || "El trámite ya fue validado y aprobado técnicamente. No es posible reasignar funcionarios en expedientes aprobados o despachados."}
             </p>
           </div>
@@ -337,14 +346,14 @@ export function AsignarRevisorPanel({
 
       {/* ── AVISO DE ESTADO: REVISIÓN YA INICIADA POR EL REVISOR ── */}
       {!isMasiva && !esTramiteAprobado && yaEmpezoRevision && (
-        <div className="p-3.5 bg-warning-100/30 dark:bg-warning-900/20 border border-warning/40 rounded-xl flex items-start gap-3 text-xs text-foreground">
-          <Lock className="size-4 text-warning shrink-0 mt-0.5" />
+        <div className="p-3.5 bg-warning-50/60 dark:bg-warning-900/25 border border-warning/40 dark:border-warning-500/40 rounded-xl flex items-start gap-3 text-xs text-foreground">
+          <Lock className="size-4 text-warning dark:text-warning-400 shrink-0 mt-0.5" />
           <div className="space-y-1">
-            <strong className="font-semibold block text-warning-800 dark:text-warning-300 font-heading">
+            <strong className="font-semibold block text-warning-900 dark:text-warning-200 font-heading">
               Reasignación no permitida
             </strong>
-            <p className="text-muted-foreground text-[11px] leading-relaxed">
-              El revisor de Gestión <strong>{revisorActual}</strong> ya inició el análisis técnico de este expediente. Por normativa institucional, una vez iniciada la revisión técnica no es posible reasignar.
+            <p className="text-muted-foreground dark:text-neutral-300 text-[11px] leading-relaxed">
+              La revisión de este expediente ya fue iniciada por el funcionario asignado.
             </p>
           </div>
         </div>
@@ -434,11 +443,11 @@ export function AsignarRevisorPanel({
                     "relative p-3.5 rounded-xl border text-left transition-all duration-300 flex flex-col justify-between gap-2.5 select-none",
                     yaEmpezoRevision
                       ? isCurrent
-                        ? "bg-warning-50/40 dark:bg-warning-950/20 border-warning/40 ring-1 ring-warning/30 cursor-not-allowed"
-                        : "opacity-45 bg-surface/50 border-border cursor-not-allowed"
+                        ? "bg-warning-50/40 dark:bg-warning-900/20 border-warning/40 dark:border-warning-500/40 ring-1 ring-warning/30 dark:ring-warning-500/20 cursor-not-allowed"
+                        : "opacity-75 bg-surface/80 dark:bg-neutral-900/60 border-border dark:border-neutral-800 cursor-not-allowed"
                       : isSelected
-                        ? "bg-primary/10 dark:bg-primary-950/40 border-2 border-primary ring-2 ring-primary/20 shadow-md -translate-y-0.5 cursor-pointer"
-                        : "bg-surface/80 hover:bg-primary-50/50 dark:hover:bg-primary-950/20 border-border hover:border-primary/50 shadow-2xs hover:shadow-md hover:-translate-y-0.5 cursor-pointer"
+                        ? "bg-primary/10 dark:bg-primary-900/40 border-2 border-primary dark:border-primary-400 ring-2 ring-primary/20 dark:ring-primary-400/20 shadow-md -translate-y-0.5 cursor-pointer"
+                        : "bg-surface/80 dark:bg-neutral-900/80 hover:bg-primary-50/50 dark:hover:bg-primary-900/30 border-border dark:border-neutral-800 hover:border-primary/50 dark:hover:border-primary-400 shadow-2xs hover:shadow-md hover:-translate-y-0.5 cursor-pointer"
                   )}
                 >
                   <div className="flex items-start justify-between gap-2">
@@ -448,31 +457,33 @@ export function AsignarRevisorPanel({
                           "size-8 rounded-full flex items-center justify-center font-bold text-xs shrink-0 transition-colors",
                           isSelected
                             ? "bg-primary text-primary-foreground shadow-2xs"
-                            : "bg-primary/10 text-primary border border-primary/20"
+                            : isCurrent
+                              ? "bg-warning-100 dark:bg-warning-900/50 text-warning-800 dark:text-warning-300 border border-warning-300 dark:border-warning-600/50"
+                              : "bg-primary/10 dark:bg-primary-900/40 text-primary dark:text-primary-300 border border-primary/20 dark:border-primary-700/40"
                         )}
                       >
                         {inicial}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <h4 className="text-xs font-bold text-foreground leading-snug">{rev.nombre}</h4>
-                        <p className="text-[10px] text-muted-foreground leading-snug mt-0.5">{rev.cargo}</p>
+                        <h4 className="text-xs font-bold text-foreground dark:text-neutral-100 leading-snug">{rev.nombre}</h4>
+                        <p className="text-[10px] text-muted-foreground dark:text-neutral-400 leading-snug mt-0.5">{rev.cargo}</p>
                       </div>
                     </div>
 
                     {isCurrent && (
                       <Badge
-                        tone="primary"
-                        appearance="soft"
+                        tone="warning"
+                        appearance="solid"
                         size="sm"
-                        className="text-[9px] h-4.5 px-1.5 font-bold uppercase tracking-wider shrink-0"
+                        className="text-[9px] h-4.5 px-1.5 font-bold uppercase tracking-wider shrink-0 !text-white shadow-2xs"
                       >
                         Actual
                       </Badge>
                     )}
                   </div>
 
-                  <div className="flex items-center justify-between pt-1.5 border-t border-border/60 text-[11px]">
-                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                  <div className="flex items-center justify-between pt-1.5 border-t border-border/60 dark:border-neutral-800 text-[11px]">
+                    <span className="text-[10px] font-bold text-muted-foreground dark:text-neutral-400 uppercase tracking-wider">
                       {rev.pendientes} {rev.pendientes === 1 ? "PENDIENTE" : "PENDIENTES"}
                     </span>
                     {isSelected && (
@@ -669,11 +680,6 @@ export function AsignarRevisorPanel({
               <CheckCircle2 className="size-4 shrink-0 text-success" />
               Expediente aprobado — Reasignación cerrada
             </span>
-          ) : yaEmpezoRevision ? (
-            <span className="text-warning-800 dark:text-warning-300 font-medium flex items-center gap-1.5">
-              <Lock className="size-4 shrink-0 text-warning" />
-              Reasignación bloqueada: la revisión técnica ya fue iniciada.
-            </span>
           ) : null}
         </div>
 
@@ -693,11 +699,15 @@ export function AsignarRevisorPanel({
           {!esTramiteAprobado && (
             <Button
               type="button"
-              variant="primary"
+              variant={yaEmpezoRevision ? "secondary" : "primary"}
               size="sm"
               disabled={!selectedRevisor || yaEmpezoRevision || !permitidaAsignacionOReasignacion}
               onClick={handleExecuteAsignacion}
-              className="text-xs font-semibold h-10 px-6 gap-2 rounded-full shadow-xs"
+              className={cn(
+                "text-xs font-semibold h-10 px-6 gap-2 rounded-full shadow-xs",
+                yaEmpezoRevision &&
+                  "!opacity-100 bg-muted dark:bg-neutral-800 !text-muted-foreground dark:!text-neutral-200 border-border dark:border-neutral-700 cursor-not-allowed"
+              )}
             >
               {puedeReasignar ? <RotateCcw className="size-4" /> : <UserPlus className="size-4" />}
               <span>
@@ -754,7 +764,7 @@ export function AsignarRevisorDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl w-full p-4 sm:p-7">
+      <DialogContent className="max-w-4xl w-full p-4 sm:p-7 max-h-[90vh] overflow-y-auto">
         <AsignarRevisorPanel
           solicitud={solicitud}
           solicitudesMasivas={solicitudesMasivas}

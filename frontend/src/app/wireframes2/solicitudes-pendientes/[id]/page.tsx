@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, use, useMemo } from "react";
+import React, { useState, use, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -39,6 +39,7 @@ import { Label } from "@/components/ui/label";
 import { Stepper } from "@/components/ui/stepper";
 import { Card, CardTitle, CardDescription, CardBadge, CardDecorativeIcon } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Alert } from "@/components/ui/alert";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
@@ -64,6 +65,9 @@ import {
 import { AprobarSolicitudDialog } from "../components/aprobar-solicitud-dialog";
 import { RechazarSolicitudDialog } from "../components/rechazar-solicitud-dialog";
 import { AsignarRevisorDialog, AsignarRevisorPanel } from "../components/asignar-revisor-dialog";
+import { SolicitudAnexoBDetail } from "../../components/solicitud-anexo-b-tabs";
+
+import { buildTramiteTimelineItems } from "../../components/tramite-timeline-helper";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -73,7 +77,7 @@ export default function SolicitudDetailPage({ params }: PageProps) {
   const { id } = use(params);
   const router = useRouter();
   const { activeUser } = useAuthStore();
-  const currentUser = activeUser || MOCK_USERS_BY_ROLE.DIR_GESTION;
+  const currentUser = activeUser || MOCK_USERS_BY_ROLE.EQ_GESTION;
   const isDirector = currentUser.role === "DIR_GESTION" || currentUser.role === "DIR_NORMATIVA";
   const isRevisor = currentUser.role === "EQ_GESTION" || currentUser.role === "EQ_NORMATIVA";
 
@@ -84,108 +88,20 @@ export default function SolicitudDetailPage({ params }: PageProps) {
     return solicitudes.find((s) => s.id === id) || null;
   }, [solicitudes, id]);
 
+  // Helper para nombre dinámico del Anexo según el tipo de trámite
+  const nombreAnexo = useMemo(() => {
+    if (!solicitud) return "Anexo A";
+    if (solicitud.tipoTramite === "PROCESO_A_REGISTRO_INSTITUCION") return "Anexo A";
+    if (solicitud.tipoTramite === "PROCESO_B_ENROLAMIENTO_COORDINADOR") return "Anexo B";
+    if (solicitud.tipoTramite === "PROCESO_C_CAMBIO_COORDINADOR") return "Anexo C";
+    return "Anexo A";
+  }, [solicitud]);
+
   const [detailTab, setDetailTab] = useState<number>(0);
 
-  // Línea de tiempo cronológica con TimelineItem para el UI Kit Timeline
+  // Línea de tiempo cronológica enriquecida con jerarquía semántica, diferenciación visual y deduplicación
   const timelineItems: TimelineItem[] = useMemo(() => {
-    if (!solicitud) return [];
-
-    const items: TimelineItem[] = [];
-
-    // 1. Evento de ingreso digital inicial
-    items.push({
-      id: "ingreso-solicitud",
-      title: "Solicitud registrada en Portal Web DINARP",
-      description: `Ingreso digital del trámite ${solicitud.tituloTramite} (${solicitud.codigoDocumental}) enviado por ${solicitud.institucion}. Formulario y expediente habilitante ingresados en bandeja de entrada.`,
-      date: solicitud.fechaSolicitud,
-      status: "info",
-      icon: <Building2 className="size-4" />,
-      user: solicitud.nombreCompleto || solicitud.institucion,
-    });
-
-    // 2. Historial de eventos registrados en BPM
-    if (solicitud.historial && solicitud.historial.length > 0) {
-      solicitud.historial.forEach((h, idx) => {
-        const accionLower = h.accion.toLowerCase();
-        const isDanger =
-          accionLower.includes("cancel") ||
-          accionLower.includes("rechaz") ||
-          accionLower.includes("observad") ||
-          accionLower.includes("cierr") ||
-          accionLower.includes("deneg");
-        const isSuccess =
-          accionLower.includes("aprob") ||
-          accionLower.includes("resoluci") ||
-          accionLower.includes("finaliz") ||
-          accionLower.includes("activa");
-        const isAssign =
-          accionLower.includes("asignac") ||
-          accionLower.includes("asignad") ||
-          accionLower.includes("revisor");
-        const isReview =
-          accionLower.includes("revis");
-
-        let status: TimelineItem["status"] = "info";
-        let statusLabel = "REGISTRO";
-        let icon: React.ReactNode = <History className="size-4" />;
-
-        if (isDanger) {
-          status = "danger";
-          statusLabel = "OBSERVADO";
-          icon = <XCircle className="size-4" />;
-        } else if (isSuccess) {
-          status = "success";
-          statusLabel = "APROBADO";
-          icon = <CheckCircle2 className="size-4" />;
-        } else if (isAssign) {
-          status = "primary";
-          statusLabel = "ASIGNADO";
-          icon = <UserPlus className="size-4" />;
-        } else if (isReview) {
-          status = "warning";
-          statusLabel = "EN REVISIÓN";
-          icon = <Clock className="size-4" />;
-        }
-
-        items.push({
-          id: `hist-${idx}`,
-          title: h.accion,
-          description: h.detalles || undefined,
-          date: h.fechaHora || h.fecha || "Fecha desconocida",
-          status,
-          statusLabel,
-          icon,
-          user: h.realizadoPor || undefined,
-        });
-      });
-    }
-
-    // Si el trámite fue asignado a un revisor y aún está pendiente de análisis técnico
-    const revisorActual = solicitud.revisorGestion || solicitud.revisorNormatividad || solicitud.revisor;
-    if (
-      revisorActual &&
-      revisorActual !== "Por asignar" &&
-      !solicitud.revisionIniciada &&
-      !["Aprobada", "APROBADO_FINAL", "Rechazada", "Cancelada"].includes(solicitud.estado)
-    ) {
-      const yaExistePendiente = items.some((i) =>
-        i.title.toLowerCase().includes("pendiente de revisión")
-      );
-      if (!yaExistePendiente) {
-        items.push({
-          id: "pendiente-revision-step",
-          title: "Pendiente de revisión",
-          description: `Trámite asignado al funcionario ${revisorActual}. En espera de verificación documental.`,
-          date: solicitud.fechaAsignacionGestion || solicitud.fechaAsignacionNormatividad || "Reciente",
-          status: "primary",
-          statusLabel: "ASIGNADO",
-          icon: <Clock className="size-4" />,
-          user: revisorActual,
-        });
-      }
-    }
-
-    return items;
+    return buildTramiteTimelineItems(solicitud);
   }, [solicitud]);
 
   // Dialog states
@@ -225,17 +141,21 @@ export default function SolicitudDetailPage({ params }: PageProps) {
     });
   };
 
-  const renderEstadoBadge = (estado: any) => {
-    const { tone, label } = getEstadoBadgeProps(estado);
+  const renderEstadoBadge = (
+    estado: any,
+    revisionIniciada?: boolean,
+    rechazadoPor?: "GESTION" | "NORMATIVIDAD"
+  ) => {
+    const { tone, label } = getEstadoBadgeProps(estado, revisionIniciada, "REVISOR", rechazadoPor);
     return (
       <Badge
         tone={tone}
         appearance="soft"
         size="sm"
         dot
-        className="font-semibold text-[11px] normal-case tracking-normal whitespace-nowrap px-2.5 py-0.5 inline-flex shrink-0 shadow-2xs"
+        className="font-semibold text-[11px] normal-case tracking-normal px-2.5 py-0.5 inline-flex items-center shrink-0 shadow-2xs max-w-full"
       >
-        {label}
+        <span className="truncate max-w-[200px] sm:max-w-none">{label}</span>
       </Badge>
     );
   };
@@ -259,7 +179,7 @@ export default function SolicitudDetailPage({ params }: PageProps) {
           <Button
             type="button"
             variant="outline"
-            onClick={() => router.push("/wireframes2/asignacion-solicitudes")}
+            onClick={() => router.push("/wireframes2/solicitudes-pendientes")}
             className="h-10 px-4 text-xs font-semibold gap-1.5"
           >
             <ArrowLeft className="size-4" />
@@ -291,139 +211,36 @@ export default function SolicitudDetailPage({ params }: PageProps) {
         { label: `Detalle solicitud` },
       ]}
     >
-      <main className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <main className="w-full px-2.5 sm:px-4 md:px-6 pb-4 pt-1 flex-1 min-h-0 flex flex-col overflow-hidden">
         {/* White outer container card holding all page information */}
-        <div className="bg-surface border border-border rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-border/80">
+        <div className="bg-surface border border-border rounded-xl sm:rounded-3xl p-3.5 sm:p-6 md:p-8 shadow-xs space-y-6 flex-1 min-h-0 overflow-y-auto">
+          {/* Cabecera interna del trámite con botón Volver */}
+          <div className="pb-4 border-b border-border/80 space-y-3">
             <div>
-              <div className="flex items-center gap-2">
-                <h1 className="font-heading font-extrabold text-xl sm:text-2xl text-foreground">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => router.push("/wireframes2/solicitudes-pendientes")}
+                className="h-8 px-2.5 text-xs font-semibold gap-1.5 rounded-xl border-border text-foreground hover:bg-muted shrink-0"
+                title="Volver a la bandeja"
+              >
+                <ArrowLeft className="size-3.5" />
+                <span>Volver</span>
+              </Button>
+            </div>
+
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h1 className="font-heading font-extrabold text-lg sm:text-2xl text-foreground">
                   Trámite {solicitud.id}
                 </h1>
-                <Badge tone="neutral" appearance="soft" size="sm" className="border border-border font-mono">
-                  {solicitud.codigoDocumental}
-                </Badge>
               </div>
-              <p className="text-xs text-muted-foreground mt-0.5">
+              <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2 sm:line-clamp-1">
                 {solicitud.tituloTramite} · Registrado el {solicitud.fechaSolicitud} · {solicitud.institucion}
               </p>
             </div>
-
-            {/* Botones de acción y badge de estado en la cabecera */}
-            <div className="flex items-center gap-3 self-start sm:self-auto">
-              {renderEstadoBadge(solicitud.estado)}
-            </div>
           </div>
-
-          {/* Banners contextuales según estado */}
-          {solicitud.estado === "Aprobada" && (
-            <div className="p-4 rounded-2xl bg-muted/40 border border-border text-foreground">
-              <div className="flex items-center gap-2 font-bold text-sm text-foreground">
-                <CheckCircle2 className="size-4 shrink-0 text-foreground" />
-                <span>
-                  {solicitud.tipoTramite === "PROCESO_A_REGISTRO_INSTITUCION" &&
-                    "Institución aprobada: Coordinadores prerregistrados e invitados al Proceso B"}
-                  {solicitud.tipoTramite === "PROCESO_B_ENROLAMIENTO_COORDINADOR" &&
-                    "Acuerdo de Confidencialidad aprobado: Coordinador institucional ACTIVO"}
-                  {solicitud.tipoTramite === "PROCESO_C_CAMBIO_COORDINADOR" &&
-                    "Cambio aprobado: Nuevo coordinador prerregistrado e invitado al Proceso B"}
-                </span>
-              </div>
-              <div className="pt-2 mt-2 border-t border-border/80 grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
-                <div>
-                  <span className="text-muted-foreground">Fecha de resolución: </span>
-                  <strong className="text-foreground">{solicitud.fechaRevision || "Reciente"}</strong>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Revisado por: </span>
-                  <strong className="text-foreground">{solicitud.revisor || "Dirección de Gestión y Registro"}</strong>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {solicitud.estado === "Rechazada" && (
-            <div className="p-4 rounded-2xl bg-muted/40 border border-border text-foreground space-y-2">
-              <div className="flex items-center gap-2 font-bold text-sm text-foreground">
-                <XCircle className="size-4 shrink-0 text-muted-foreground" />
-                <span>Trámite Denegado / Observado</span>
-              </div>
-              <div className="p-3 bg-surface rounded-xl border border-border text-xs">
-                <span className="font-semibold text-foreground block mb-1">Motivo registrado para notificación:</span>
-                <p className="text-foreground leading-relaxed">{solicitud.motivoRechazo || "No se especificó motivo de rechazo."}</p>
-              </div>
-              <div className="pt-2 border-t border-border/80 grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
-                <div>
-                  <span className="text-muted-foreground">Fecha de resolución: </span>
-                  <strong className="text-foreground">{solicitud.fechaRevision || "Reciente"}</strong>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Revisado por: </span>
-                  <strong className="text-foreground">{solicitud.revisor || "Dirección de Gestión y Registro"}</strong>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {solicitud.estado === "Cancelada" && (
-            <div className="p-5 rounded-2xl bg-danger/5 border border-danger/30 text-foreground space-y-3">
-              <div className="flex items-center gap-2 font-bold text-sm text-danger">
-                <AlertTriangle className="size-5 shrink-0" />
-                <span>Trámite Cerrado y Cancelado Definitivamente</span>
-              </div>
-              <div className="p-3.5 bg-surface rounded-xl border border-danger/20 text-xs">
-                <span className="font-semibold text-danger block mb-1">
-                  Dictamen técnico de revisión:
-                </span>
-                <p className="text-foreground leading-relaxed">
-                  {solicitud.motivoRechazo ||
-                    "Revisión técnica desfavorable por documentación caducada o inconsistencias insubsanables en la firma. El expediente ha sido cerrado."}
-                </p>
-              </div>
-              <div className="p-3 bg-muted/40 rounded-xl border border-border text-xs flex items-start gap-2.5 text-muted-foreground">
-                <Info className="size-4 shrink-0 text-foreground mt-0.5" />
-                <p className="leading-relaxed">
-                  <strong className="text-foreground">Acción obligatoria para la institución:</strong> Al haberse cerrado y cancelado este trámite formalmente, no admite subsanación en esta instancia. La entidad requirente debe regularizar sus requisitos habilitantes y realizar un nuevo ingreso de solicitud desde cero en el portal.
-                </p>
-              </div>
-              <div className="pt-2 border-t border-border/80 grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
-                <div>
-                  <span className="text-muted-foreground">Fecha de cancelación: </span>
-                  <strong className="text-foreground">{solicitud.fechaRevision || "20/09/2026 16:45"}</strong>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Revisado por: </span>
-                  <strong className="text-foreground">{solicitud.revisor || "Ana Torres (Área de Gestión)"}</strong>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {solicitud.estado === "APROBADO_FINAL" && (
-            <div className="p-4 rounded-2xl bg-muted/40 border border-border text-foreground space-y-2">
-              <div className="flex items-center gap-2 font-bold text-sm text-foreground">
-                <CheckCircle2 className="size-4 shrink-0 text-success" />
-                <span>Trámite Aprobado con Resolución Oficial Emitida</span>
-              </div>
-              <div className="p-3 bg-surface rounded-xl border border-border text-xs">
-                <span className="font-semibold text-foreground block mb-1">Resolución Final:</span>
-                <p className="font-mono font-bold text-primary">{solicitud.resolucion || "RES-DINARP-2026-088"}</p>
-              </div>
-              <div className="pt-2 border-t border-border/80 grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
-                <div>
-                  <span className="text-muted-foreground">Fecha de resolución: </span>
-                  <strong className="text-foreground">{solicitud.fechaRevision || "Reciente"}</strong>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Revisores intervinientes: </span>
-                  <strong className="text-foreground">
-                    {solicitud.revisorGestion ? `${solicitud.revisorGestion} (Gestión)` : "Gestión"} ·{" "}
-                    {solicitud.revisorNormatividad ? `${solicitud.revisorNormatividad} (Normatividad)` : "Normatividad"}
-                  </strong>
-                </div>
-              </div>
-            </div>
-          )}
 
           {/* DISTRIBUCIÓN EN 2 COLUMNAS: IZQUIERDA RESUMEN/TRAZABILIDAD, DERECHA PANEL DE ASIGNACIÓN */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
@@ -431,24 +248,26 @@ export default function SolicitudDetailPage({ params }: PageProps) {
             <div className="lg:col-span-7 xl:col-span-7 space-y-6">
               <Tabs defaultValue="resumen" className="w-full space-y-6">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border/80 pb-3">
-                  <TabsList className="h-auto p-1.5 rounded-full bg-background border border-border/40 inline-flex gap-1.5 w-full sm:w-auto justify-start">
-                    <TabsTrigger
-                      value="resumen"
-                      className="px-5 py-2 text-xs font-bold gap-2"
-                    >
-                      <Building2 className="size-4 shrink-0" />
-                      <span>Solicitud Registro Institución</span>
-                    </TabsTrigger>
-                    <TabsTrigger
-                      value="trazabilidad"
-                      className="px-5 py-2 text-xs font-bold gap-2"
-                    >
-                      <History className="size-4 shrink-0" />
-                      <span>Trazabilidad</span>
-                    </TabsTrigger>
-                  </TabsList>
+                  <div className="overflow-x-auto w-full sm:w-auto -mx-1 px-1">
+                    <TabsList className="h-auto p-1 rounded-full bg-background border border-border/40 inline-flex gap-1 w-max sm:w-auto justify-start flex-nowrap">
+                      <TabsTrigger
+                        value="resumen"
+                        className="px-3.5 sm:px-5 py-1.5 sm:py-2 text-xs font-bold gap-1.5 sm:gap-2 shrink-0"
+                      >
+                        <Building2 className="size-3.5 sm:size-4 shrink-0" />
+                        <span className="truncate max-w-[210px] sm:max-w-none">{nombreAnexo} — {solicitud.tituloTramite || "Solicitud"}</span>
+                      </TabsTrigger>
+                      <TabsTrigger
+                        value="trazabilidad"
+                        className="px-3.5 sm:px-5 py-1.5 sm:py-2 text-xs font-bold gap-1.5 sm:gap-2 shrink-0"
+                      >
+                        <History className="size-3.5 sm:size-4 shrink-0" />
+                        <span>Trazabilidad</span>
+                      </TabsTrigger>
+                    </TabsList>
+                  </div>
 
-                  <div className="text-xs text-muted-foreground flex items-center gap-2">
+                  <div className="text-xs text-muted-foreground flex items-center gap-2 self-start sm:self-auto flex-wrap">
                     <span>Formulario oficial:</span>
                     <Badge tone="neutral" appearance="soft" size="sm" className="font-mono border border-border">
                       {solicitud.codigoDocumental}
@@ -465,12 +284,13 @@ export default function SolicitudDetailPage({ params }: PageProps) {
                           </button>
                         </TooltipTrigger>
                         <TooltipContent side="top" variant="primary" className="max-w-xs text-xs leading-relaxed">
-                          Anexo A: Formulario diligenciado por la institución solicitante para iniciar su proceso de registro en el SINARP.
+                          {nombreAnexo}: Formulario diligenciado por la institución solicitante para su trámite en el SINARP.
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
                   </div>
                 </div>
+
 
                 {/* TAB 1: RESUMEN DE SOLICITUD (FORMULARIO CON PESTAÑAS CÁPSULA SIN ESTADOS PENDIENTES) */}
                 <TabsContent value="resumen" className="space-y-6 animate-in fade-in duration-200">
@@ -482,16 +302,19 @@ export default function SolicitudDetailPage({ params }: PageProps) {
                   >
                     <div className="flex items-center gap-2">
                       <CardBadge className="bg-primary/20 text-primary text-[10px] uppercase font-bold tracking-wider px-2.5 py-0.5 border-0">
-                        FORMULARIO OFICIAL ARP-R01
+                        {solicitud.codigoDocumental || "FORMULARIO OFICIAL"}
                       </CardBadge>
                     </div>
 
                     <CardTitle className="text-lg sm:text-xl font-bold font-heading text-primary">
-                      Anexo A — Solicitud de Acceso al Sistema Nacional de Registros Públicos
+                      {nombreAnexo} — {solicitud.tituloTramite || "Solicitud de Acceso al SINARP"}
                     </CardTitle>
 
                     <CardDescription className="text-xs text-primary-800/80 dark:text-primary-200/80 font-medium">
-                      Proceso A · Enrolamiento institucional al SINARP
+                      {solicitud.tipoTramite === "PROCESO_A_REGISTRO_INSTITUCION" && "Proceso A · Enrolamiento institucional al SINARP"}
+                      {solicitud.tipoTramite === "PROCESO_B_ENROLAMIENTO_COORDINADOR" && "Proceso B · Enrolamiento de coordinador institucional"}
+                      {solicitud.tipoTramite === "PROCESO_C_CAMBIO_COORDINADOR" && "Proceso C · Cambio de coordinador institucional"}
+                      {!["PROCESO_A_REGISTRO_INSTITUCION", "PROCESO_B_ENROLAMIENTO_COORDINADOR", "PROCESO_C_CAMBIO_COORDINADOR"].includes(solicitud.tipoTramite) && "Trámite de acceso al SINARP"}
                     </CardDescription>
 
                     <CardDecorativeIcon className="-bottom-10 -right-10 opacity-20 group-hover/card:scale-100">
@@ -499,61 +322,66 @@ export default function SolicitudDetailPage({ params }: PageProps) {
                     </CardDecorativeIcon>
                   </Card>
 
-                  {/* Pestañas Cápsula UI Kit para navegar secciones (sin badges de estado) */}
-                  <div className="overflow-x-auto py-1">
-                    <Tabs
-                      defaultValue="tab-0"
-                      value={`tab-${detailTab}`}
-                      onValueChange={(val) => setDetailTab(Number(val.replace("tab-", "")))}
-                      className="w-full"
-                    >
-                      <TabsList className="h-auto p-1.5 rounded-full bg-background border border-border/40 inline-flex gap-1.5 flex-nowrap w-full sm:w-auto justify-start">
-                        <TabsTrigger
-                          value="tab-0"
-                          className="px-4 py-2 text-xs font-bold gap-2 data-[state=active]:bg-primary-300 data-[state=active]:text-white data-[state=active]:[&_svg]:text-white dark:data-[state=active]:bg-primary-300 dark:data-[state=active]:text-white dark:data-[state=active]:[&_svg]:text-white"
+                  {/* Si es Anexo B (Enrolamiento de Coordinador), renderizar sus 3 tabs dedicados */}
+                  {solicitud.tipoTramite === "PROCESO_B_ENROLAMIENTO_COORDINADOR" ? (
+                    <SolicitudAnexoBDetail solicitud={solicitud} />
+                  ) : (
+                    <>
+                      {/* Pestañas Cápsula UI Kit para navegar secciones (sin badges de estado) */}
+                      <div className="overflow-x-auto py-1">
+                        <Tabs
+                          defaultValue="tab-0"
+                          value={`tab-${detailTab}`}
+                          onValueChange={(val) => setDetailTab(Number(val.replace("tab-", "")))}
+                          className="w-full"
                         >
-                          <Building2 className="size-3.5 shrink-0" />
-                          <span>1. Entidad y Autoridad</span>
-                        </TabsTrigger>
-                        <TabsTrigger
-                          value="tab-1"
-                          className="px-4 py-2 text-xs font-bold gap-2 data-[state=active]:bg-primary-300 data-[state=active]:text-white data-[state=active]:[&_svg]:text-white dark:data-[state=active]:bg-primary-300 dark:data-[state=active]:text-white dark:data-[state=active]:[&_svg]:text-white"
-                        >
-                          <User className="size-3.5 shrink-0" />
-                          <span>2. Coordinadores</span>
-                        </TabsTrigger>
-                        <TabsTrigger
-                          value="tab-2"
-                          className="px-4 py-2 text-xs font-bold gap-2 data-[state=active]:bg-primary-300 data-[state=active]:text-white data-[state=active]:[&_svg]:text-white dark:data-[state=active]:bg-primary-300 dark:data-[state=active]:text-white dark:data-[state=active]:[&_svg]:text-white"
-                        >
-                          <FileText className="size-3.5 shrink-0" />
-                          <span>3. Servicios y Procesos</span>
-                        </TabsTrigger>
-                        <TabsTrigger
-                          value="tab-3"
-                          className="px-4 py-2 text-xs font-bold gap-2 data-[state=active]:bg-primary-300 data-[state=active]:text-white data-[state=active]:[&_svg]:text-white dark:data-[state=active]:bg-primary-300 dark:data-[state=active]:text-white dark:data-[state=active]:[&_svg]:text-white"
-                        >
-                          <ShieldCheck className="size-3.5 shrink-0" />
-                          <span>4. Declaraciones y firma</span>
-                        </TabsTrigger>
-                      </TabsList>
-                    </Tabs>
-                  </div>
+                          <TabsList className="h-auto p-1 rounded-full bg-background border border-border/40 inline-flex gap-1 flex-nowrap w-max sm:w-auto justify-start">
+                            <TabsTrigger
+                              value="tab-0"
+                              className="px-3 sm:px-4 py-1.5 sm:py-2 text-xs font-bold gap-1.5 sm:gap-2 whitespace-nowrap data-[state=active]:bg-primary-300 data-[state=active]:text-white data-[state=active]:[&_svg]:text-white dark:data-[state=active]:bg-primary-300 dark:data-[state=active]:text-white dark:data-[state=active]:[&_svg]:text-white"
+                            >
+                              <Building2 className="size-3.5 shrink-0" />
+                              <span>1. Entidad y Autoridad</span>
+                            </TabsTrigger>
+                            <TabsTrigger
+                              value="tab-1"
+                              className="px-3 sm:px-4 py-1.5 sm:py-2 text-xs font-bold gap-1.5 sm:gap-2 whitespace-nowrap data-[state=active]:bg-primary-300 data-[state=active]:text-white data-[state=active]:[&_svg]:text-white dark:data-[state=active]:bg-primary-300 dark:data-[state=active]:text-white dark:data-[state=active]:[&_svg]:text-white"
+                            >
+                              <User className="size-3.5 shrink-0" />
+                              <span>2. Coordinadores</span>
+                            </TabsTrigger>
+                            <TabsTrigger
+                              value="tab-2"
+                              className="px-3 sm:px-4 py-1.5 sm:py-2 text-xs font-bold gap-1.5 sm:gap-2 whitespace-nowrap data-[state=active]:bg-primary-300 data-[state=active]:text-white data-[state=active]:[&_svg]:text-white dark:data-[state=active]:bg-primary-300 dark:data-[state=active]:text-white dark:data-[state=active]:[&_svg]:text-white"
+                            >
+                              <FileText className="size-3.5 shrink-0" />
+                              <span>3. Servicios y Procesos</span>
+                            </TabsTrigger>
+                            <TabsTrigger
+                              value="tab-3"
+                              className="px-3 sm:px-4 py-1.5 sm:py-2 text-xs font-bold gap-1.5 sm:gap-2 whitespace-nowrap data-[state=active]:bg-primary-300 data-[state=active]:text-white data-[state=active]:[&_svg]:text-white dark:data-[state=active]:bg-primary-300 dark:data-[state=active]:text-white dark:data-[state=active]:[&_svg]:text-white"
+                            >
+                              <ShieldCheck className="size-3.5 shrink-0" />
+                              <span>4. Declaraciones y firma</span>
+                            </TabsTrigger>
+                          </TabsList>
+                        </Tabs>
+                      </div>
 
                   {/* PASO 0: ENTIDAD Y AUTORIDAD */}
                   {detailTab === 0 && (
                     <div className="bg-surface border border-border rounded-2xl p-4 sm:p-6 space-y-6 shadow-xs animate-in fade-in duration-200">
-                      <div className="bg-primary-100/20 border-b border-primary p-3.5 mb-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-t-lg">
+                      <div className="bg-primary-100/20 dark:bg-black/35 border-b border-primary dark:border-primary/40 p-3.5 mb-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-t-lg">
                         <div>
-                          <h2 className="text-sm font-bold font-heading text-primary flex items-center gap-2">
-                            <Building2 className="size-4 text-primary shrink-0" />
+                          <h2 className="text-sm font-bold font-heading text-primary dark:text-primary-300 flex items-center gap-2">
+                            <Building2 className="size-4 text-primary dark:text-primary-300 shrink-0" />
                             <span>Sección I — Cláusula Primera: 1.1 Del Solicitante</span>
                           </h2>
                           <p className="text-xs text-muted-foreground mt-0.5">
                             Información general de la entidad requirente y de su máxima autoridad o delegado.
                           </p>
                         </div>
-                        <Badge tone="neutral" appearance="soft" size="sm" className="font-semibold border border-border shrink-0">
+                        <Badge tone="primary" appearance="solid" size="sm" className="font-bold shrink-0 !text-white shadow-xs">
                           {solicitud.anexoA?.entidadTipo === "Publica" ? "ENTIDAD PÚBLICA" : "ENTIDAD PRIVADA"}
                         </Badge>
                       </div>
@@ -686,7 +514,7 @@ export default function SolicitudDetailPage({ params }: PageProps) {
                           variant="primary"
                           size="sm"
                           onClick={() => setDetailTab(1)}
-                          className="text-xs font-semibold gap-1.5"
+                          className="w-full sm:w-auto text-xs font-semibold gap-1.5"
                         >
                           Siguiente: 2. Coordinadores →
                         </Button>
@@ -710,7 +538,7 @@ export default function SolicitudDetailPage({ params }: PageProps) {
                                 Ingresa los datos del coordinador institucional titular designado por la entidad.
                               </p>
                             </div>
-                            <Badge tone="neutral" appearance="soft" size="sm" className="font-bold uppercase tracking-wider px-2.5 py-0.5">
+                            <Badge tone="primary" appearance="solid" size="sm" className="font-bold uppercase tracking-wider px-2.5 py-0.5 !text-white shadow-2xs">
                               TITULAR
                             </Badge>
                           </div>
@@ -786,7 +614,7 @@ export default function SolicitudDetailPage({ params }: PageProps) {
                                 Ingresa los datos del coordinador institucional suplente designado por la entidad.
                               </p>
                             </div>
-                            <Badge tone="neutral" appearance="soft" size="sm" className="font-bold uppercase tracking-wider px-2.5 py-0.5">
+                            <Badge tone="primary" appearance="solid" size="sm" className="font-bold uppercase tracking-wider px-2.5 py-0.5 !text-white shadow-2xs">
                               SUPLENTE
                             </Badge>
                           </div>
@@ -851,13 +679,13 @@ export default function SolicitudDetailPage({ params }: PageProps) {
                         </div>
                       </div>
 
-                      <div className="pt-4 border-t border-border flex items-center justify-between gap-3">
+                      <div className="pt-4 border-t border-border flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
                         <Button
                           type="button"
                           variant="neutral"
                           size="sm"
                           onClick={() => setDetailTab(0)}
-                          className="text-xs font-semibold gap-1.5"
+                          className="w-full sm:w-auto text-xs font-semibold gap-1.5"
                         >
                           ← Volver a Entidad
                         </Button>
@@ -866,7 +694,7 @@ export default function SolicitudDetailPage({ params }: PageProps) {
                           variant="primary"
                           size="sm"
                           onClick={() => setDetailTab(2)}
-                          className="text-xs font-semibold gap-1.5"
+                          className="w-full sm:w-auto text-xs font-semibold gap-1.5"
                         >
                           Siguiente: Servicios y Procesos →
                         </Button>
@@ -877,9 +705,9 @@ export default function SolicitudDetailPage({ params }: PageProps) {
                   {/* PASO 2: SERVICIOS Y PROCESOS */}
                   {detailTab === 2 && (
                     <div className="bg-surface border border-border rounded-2xl p-4 sm:p-6 space-y-6 shadow-xs animate-in fade-in duration-200">
-                      <div className="bg-primary-100/20 border-b border-primary p-3.5 mb-5 rounded-t-lg">
-                        <h2 className="text-sm font-bold font-heading text-primary flex items-center gap-2">
-                          <FileText className="size-4 text-primary shrink-0" />
+                      <div className="bg-primary-100/20 dark:bg-black/35 border-b border-primary dark:border-primary/40 p-3.5 mb-5 rounded-t-lg">
+                        <h2 className="text-sm font-bold font-heading text-primary dark:text-primary-300 flex items-center gap-2">
+                          <FileText className="size-4 text-primary dark:text-primary-300 shrink-0" />
                           <span>Sección II — Servicios y Herramientas Informáticas</span>
                         </h2>
                         <p className="text-xs text-muted-foreground mt-0.5">
@@ -957,13 +785,13 @@ export default function SolicitudDetailPage({ params }: PageProps) {
                         </div>
                       </div>
 
-                      <div className="pt-4 border-t border-border flex items-center justify-between gap-3">
+                      <div className="pt-4 border-t border-border flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
                         <Button
                           type="button"
                           variant="neutral"
                           size="sm"
                           onClick={() => setDetailTab(1)}
-                          className="text-xs font-semibold gap-1.5"
+                          className="w-full sm:w-auto text-xs font-semibold gap-1.5"
                         >
                           ← Volver a Coordinadores
                         </Button>
@@ -972,7 +800,7 @@ export default function SolicitudDetailPage({ params }: PageProps) {
                           variant="primary"
                           size="sm"
                           onClick={() => setDetailTab(3)}
-                          className="text-xs font-semibold gap-1.5"
+                          className="w-full sm:w-auto text-xs font-semibold gap-1.5"
                         >
                           Siguiente: Declaraciones y firma →
                         </Button>
@@ -983,9 +811,9 @@ export default function SolicitudDetailPage({ params }: PageProps) {
                   {/* PASO 3: DOCUMENTACIÓN HABILITANTE */}
                   {detailTab === 3 && (
                     <div className="bg-surface border border-border rounded-2xl p-4 sm:p-6 space-y-6 shadow-xs animate-in fade-in duration-200">
-                      <div className="bg-primary-100/20 border-b border-primary p-3.5 mb-5 rounded-t-lg">
-                        <h2 className="text-sm font-bold font-heading text-primary flex items-center gap-2">
-                          <ShieldCheck className="size-4 text-primary shrink-0" />
+                      <div className="bg-primary-100/20 dark:bg-black/35 border-b border-primary dark:border-primary/40 p-3.5 mb-5 rounded-t-lg">
+                        <h2 className="text-sm font-bold font-heading text-primary dark:text-primary-300 flex items-center gap-2">
+                          <ShieldCheck className="size-4 text-primary dark:text-primary-300 shrink-0" />
                           <span>Sección III — Cláusula Segunda y Tercera: Declaraciones y Firma</span>
                         </h2>
                         <p className="text-xs text-muted-foreground mt-0.5">
@@ -1076,7 +904,7 @@ export default function SolicitudDetailPage({ params }: PageProps) {
                                   <h4 className="font-mono font-bold text-xs sm:text-sm text-foreground">
                                     ARP-R01_Solicitud_Acceso_SINARP_{(solicitud.anexoA?.entidadSiglas || "ENTIDAD").toUpperCase()}.pdf
                                   </h4>
-                                  <Badge tone="success" appearance="soft" size="sm" className="font-bold text-[10px] uppercase px-2 py-0.5 shrink-0">
+                                  <Badge tone="success" appearance="solid" size="sm" className="font-bold text-[10px] uppercase px-2 py-0.5 shrink-0 !text-white shadow-2xs">
                                     SE FIRMÓ EN FIRMA EC
                                   </Badge>
                                 </div>
@@ -1090,13 +918,13 @@ export default function SolicitudDetailPage({ params }: PageProps) {
                         </div>
                       </div>
 
-                      <div className="pt-4 border-t border-border flex items-center justify-between gap-3">
+                      <div className="pt-4 border-t border-border flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
                         <Button
                           type="button"
                           variant="neutral"
                           size="sm"
                           onClick={() => setDetailTab(2)}
-                          className="text-xs font-semibold gap-1.5"
+                          className="w-full sm:w-auto text-xs font-semibold gap-1.5"
                         >
                           ← Volver a Servicios
                         </Button>
@@ -1106,15 +934,17 @@ export default function SolicitudDetailPage({ params }: PageProps) {
                           variant="primary"
                           size="sm"
                           onClick={() => {
-                            alert(`Descargando documento firmado ARP-R01_Solicitud_Acceso_SINARP_${(solicitud.anexoA?.entidadSiglas || "ENTIDAD").toUpperCase()}.pdf con validación FirmaEC...`);
+                            toast.success(`Descargando documento firmado ARP-R01_Solicitud_Acceso_SINARP_${(solicitud.anexoA?.entidadSiglas || "ENTIDAD").toUpperCase()}.pdf con validación FirmaEC...`);
                           }}
-                          className="h-9 px-4 text-xs font-semibold gap-2 shadow-xs"
+                          className="w-full sm:w-auto h-9 px-4 text-xs font-semibold gap-2 shadow-xs"
                         >
                           <Download className="size-4" />
                           <span>Descargar Anexo A</span>
                         </Button>
                       </div>
                     </div>
+                  )}
+                    </>
                   )}
                 </TabsContent>
 
@@ -1158,100 +988,167 @@ export default function SolicitudDetailPage({ params }: PageProps) {
 
             {/* COLUMNA DERECHA (5 cols en lg, 5 en xl): PANEL SEGÚN ROL */}
             <div className="lg:col-span-5 xl:col-span-5 space-y-5 lg:sticky lg:top-6">
-              {/* SI ES REVISOR (gestion.revisor@gmail.com / EQ_GESTION o EQ_NORMATIVA): Panel de Revisión Técnica y Dictamen */}
+              {/* SI ES REVISOR: Panel de Revisión de la solicitud y Decisión de Gestión */}
               {isRevisor && (
                 <div className="bg-surface border border-border rounded-2xl p-5 shadow-xs space-y-4">
-                  <div className="flex items-center justify-between pb-3 border-b border-border/70">
+                  {/* Encabezado: Revisión de la solicitud + Badge dinámico */}
+                  <div className="flex items-center justify-between gap-2 pb-3 border-b border-border/70">
                     <div className="flex items-center gap-2">
                       <UserCheck className="size-5 text-primary" />
-                      <div>
-                        <h3 className="font-heading font-bold text-sm text-foreground">
-                          Revisión Técnica Asignada
-                        </h3>
-                        <p className="text-[11px] text-muted-foreground">
-                          Responsable: <strong className="text-foreground">{currentUser.name}</strong>
-                        </p>
-                      </div>
+                      <h3 className="font-heading font-bold text-sm text-foreground">
+                        Revisión de la solicitud
+                      </h3>
                     </div>
-                    <Badge tone={solicitud.estado.includes("REVISION") ? "warning" : "neutral"} appearance="soft" size="sm">
-                      {solicitud.estado.includes("REVISION") ? "EN REVISIÓN" : solicitud.estado}
-                    </Badge>
+                    {renderEstadoBadge(solicitud.estado, solicitud.revisionIniciada, solicitud.rechazadoPor)}
                   </div>
 
+                  {/* Datos del contexto de revisión */}
                   <div className="p-3 bg-muted/30 rounded-xl border border-border text-xs space-y-2">
-                    <div className="flex justify-between items-center text-[11px]">
-                      <span className="text-muted-foreground">Institución requirente:</span>
-                      <strong className="text-foreground truncate max-w-[180px]">{solicitud.institucion}</strong>
+                    <div className="flex flex-col gap-0.5 text-[11px]">
+                      <span className="text-muted-foreground">Tipo:</span>
+                      <strong className="text-foreground leading-snug">
+                        {solicitud.tipoTramite === "PROCESO_A_REGISTRO_INSTITUCION"
+                          ? "Anexo A — Solicitud de Registro de Institución"
+                          : solicitud.tipoTramite === "PROCESO_B_ENROLAMIENTO_COORDINADOR"
+                          ? "Anexo B — Solicitud de Registro de Coordinador"
+                          : solicitud.tipoTramite === "PROCESO_C_CAMBIO_COORDINADOR"
+                          ? "Anexo C — Solicitud de Cambio de Coordinador"
+                          : "Solicitud de Ingreso"}
+                      </strong>
                     </div>
-                    <div className="flex justify-between items-center text-[11px]">
-                      <span className="text-muted-foreground">Fecha de registro:</span>
-                      <strong className="text-foreground">{solicitud.fechaSolicitud}</strong>
+
+                    <div className="flex justify-between items-center text-[11px] pt-1 border-t border-border/50">
+                      <span className="text-muted-foreground">Institución:</span>
+                      <strong className="text-foreground truncate max-w-[190px] text-right">
+                        {solicitud.institucion}
+                      </strong>
                     </div>
-                    {solicitud.revisor && (
+
+                    <div className="flex justify-between items-center text-[11px]">
+                      <span className="text-muted-foreground">Revisor:</span>
+                      <strong className="text-foreground">
+                        {solicitud.revisorGestion || solicitud.revisor || currentUser.name}
+                      </strong>
+                    </div>
+
+                    {solicitud.fechaInicioRevision && (
                       <div className="flex justify-between items-center text-[11px]">
-                        <span className="text-muted-foreground">Revisor asignado:</span>
-                        <strong className="text-foreground">{solicitud.revisor}</strong>
-                      </div>
-                    )}
-                    {solicitud.observacionesAsignacion && (
-                      <div className="pt-2 border-t border-border/60 text-[11px]">
-                        <span className="text-muted-foreground block mb-0.5">Instrucciones del Director:</span>
-                        <p className="text-foreground italic bg-surface p-2 rounded-lg border border-border/60">
-                          "{solicitud.observacionesAsignacion}"
-                        </p>
-                      </div>
-                    )}
-                    {solicitud.motivoRechazo && (solicitud.estado === "Rechazada" || solicitud.estado === "Cancelada") && (
-                      <div className="pt-2 border-t border-danger/30 text-[11px]">
-                        <span className="text-danger font-bold block mb-0.5 flex items-center gap-1">
-                          <XCircle className="size-3" /> Motivo del Rechazo:
-                        </span>
-                        <p className="text-foreground bg-danger/5 p-2 rounded-lg border border-danger/20">
-                          {solicitud.motivoRechazo}
-                        </p>
+                        <span className="text-muted-foreground">Fecha de inicio de revisión:</span>
+                        <strong className="text-foreground">
+                          {solicitud.fechaInicioRevision}
+                        </strong>
                       </div>
                     )}
                   </div>
 
-                  {/* Acciones de dictamen para Revisor */}
-                  {(solicitud.estado === "EN_REVISION_GESTION" || solicitud.estado === "EN_REVISION_NORMATIVIDAD") && (
-                    <div className="space-y-3 pt-2">
-                      <div className="flex items-center justify-between">
-                        <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                          Dictamen y Resolución
-                        </h4>
+                  {/* CASO: PENDIENTE DE REVISIÓN (Flujo simplificado: PENDIENTE DE REVISIÓN → APROBADA o → RECHAZADA) */}
+                  {(solicitud.estado === "EN_REVISION_GESTION" ||
+                    solicitud.estado === "PENDIENTE_ASIGNACION_GESTION" ||
+                    solicitud.estado === "Pendiente") && (
+                    <div className="space-y-4 pt-1">
+                      <Alert
+                        variant="warning"
+                        icon={<Clock className="size-4" />}
+                        title="Esta solicitud está pendiente de tu revisión"
+                        className="p-3 text-xs"
+                      >
+                        <p className="text-[11px] leading-relaxed text-muted-foreground mt-0.5">
+                          Revisa la información del {nombreAnexo} en todas sus secciones, verifica los datos registrados, documentos, soportes y la validez de la firma electrónica antes de tomar una decisión.
+                        </p>
+                      </Alert>
+
+                      {/* Bloque: ¿Cuál es tu decisión? con acciones */}
+                      <div className="space-y-3 pt-2 border-t border-border/70">
+                        <div>
+                          <h4 className="font-heading font-bold text-sm text-foreground">
+                            ¿Cuál es tu decisión?
+                          </h4>
+                          <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
+                            Después de revisar toda la información del {nombreAnexo}, selecciona una opción para continuar.
+                          </p>
+                        </div>
+                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 pt-1">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setIsRejectOpen(true)}
+                            className="flex-1 text-xs font-semibold text-danger border-danger/30 hover:bg-danger/10 gap-1.5"
+                          >
+                            <XCircle className="size-3.5" />
+                            <span>Rechazar solicitud</span>
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="primary"
+                            size="sm"
+                            onClick={() => setIsApproveOpen(true)}
+                            className="flex-1 text-xs font-semibold gap-1.5 shadow-2xs"
+                          >
+                            <CheckCircle2 className="size-3.5" />
+                            <span>Aprobar solicitud</span>
+                          </Button>
+                        </div>
                       </div>
-                      <p className="text-xs text-muted-foreground leading-relaxed">
-                        Verifica la documentación adjunta y emite el dictamen de aprobación o devolución.
-                      </p>
-                      <div className="flex items-center gap-2 pt-1">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setIsRejectOpen(true)}
-                          className="flex-1 text-xs font-semibold text-danger border-danger/30 hover:bg-danger/10 gap-1.5"
-                        >
-                          <XCircle className="size-3.5" />
-                          <span>Observar / Rechazar</span>
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="primary"
-                          size="sm"
-                          onClick={() => {
-                            if (currentUser.role === "EQ_GESTION") {
-                              setIsApproveOpen(true);
-                            } else {
-                              store.aprobarNormatividad(solicitud.id, currentUser.name, "RES-DINARP-2026-001");
-                              toast.success("Resolución generada. Trámite finalizado exitosamente.");
-                            }
-                          }}
-                          className="flex-1 text-xs font-semibold gap-1.5 shadow-2xs"
-                        >
-                          <CheckCircle2 className="size-3.5" />
-                          <span>{currentUser.role === "EQ_GESTION" ? "Aprobar revisión" : "Finalizar trámite"}</span>
-                        </Button>
+                    </div>
+                  )}
+
+                  {/* CASO 3: RECHAZADA */}
+                  {(solicitud.estado === "Rechazada" || solicitud.estado === "Cancelada") && (
+                    <div className="space-y-3 pt-1">
+                      <Alert
+                        variant="danger"
+                        icon={<XCircle className="size-4" />}
+                        title="Solicitud rechazada"
+                        className="p-3 text-xs"
+                      >
+                        <p className="text-[11px] leading-relaxed text-muted-foreground mt-0.5">
+                          La revisión ha finalizado y la solicitud no fue aprobada.
+                        </p>
+                      </Alert>
+
+                      {/* Motivo del rechazo en solo lectura */}
+                      <div className="p-3 bg-danger/5 rounded-xl border border-danger/20 text-xs space-y-1.5">
+                        <span className="font-semibold text-danger block text-[11px] flex items-center gap-1.5">
+                          <XCircle className="size-3.5 shrink-0" /> Motivo del rechazo:
+                        </span>
+                        <p className="text-foreground text-[11px] leading-relaxed whitespace-pre-wrap bg-surface p-2.5 rounded-lg border border-danger/15 font-sans">
+                          {solicitud.motivoRechazo || "No se registraron observaciones adicionales."}
+                        </p>
+                      </div>
+
+                      {/* Fecha y hora de la decisión */}
+                      <div className="flex justify-between items-center text-[11px] pt-1 px-1 text-muted-foreground border-t border-border/50">
+                        <span>Fecha y hora de decisión:</span>
+                        <strong className="text-foreground font-mono">
+                          {solicitud.fechaRevision || "Reciente"}
+                        </strong>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* CASO 4: APROBADA (AVANZÓ A NORMATIVIDAD O FINALIZÓ) */}
+                  {(solicitud.estado === "PENDIENTE_ASIGNACION_NORMATIVIDAD" ||
+                    solicitud.estado === "APROBADO_FINAL" ||
+                    solicitud.estado === "Aprobada") && (
+                    <div className="space-y-3 pt-1">
+                      <Alert
+                        variant="success"
+                        icon={<CheckCircle2 className="size-4" />}
+                        title="Revisión finalizada"
+                        className="p-3 text-xs"
+                      >
+                        <p className="text-[11px] leading-relaxed text-muted-foreground mt-0.5">
+                          Aprobaste esta solicitud y fue enviada a Normatividad para continuar con el proceso.
+                        </p>
+                      </Alert>
+
+                      {/* Fecha y hora de la decisión */}
+                      <div className="flex justify-between items-center text-[11px] pt-1 px-1 text-muted-foreground border-t border-border/50">
+                        <span>Fecha y hora de decisión:</span>
+                        <strong className="text-foreground font-mono">
+                          {solicitud.fechaAprobacionGestion || solicitud.fechaRevision || "Reciente"}
+                        </strong>
                       </div>
                     </div>
                   )}

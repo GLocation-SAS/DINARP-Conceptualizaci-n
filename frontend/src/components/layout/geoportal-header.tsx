@@ -216,7 +216,7 @@ function DropdownNav({ item, isActive, isChildActive }: { item: NavItem; isActiv
         {/* Flecha indicadora */}
         <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 size-3 rotate-45 bg-surface border-l border-t border-border rounded-xs" />
 
-        <div className="relative py-2 px-2 flex flex-col gap-1">
+        <div className="relative py-2 px-2 flex flex-col gap-1 max-h-[75vh] overflow-y-auto">
           {item.children?.map((child) => {
             const isChildCurrent = isChildActive(child.href);
             return (
@@ -431,18 +431,30 @@ export function GeoportalHeader({
   extraActions,
   isStatic = false,
   className,
+  innerClassName,
+  leftSlot,
+  userProps,
+  onRoleChange,
+  showAccentBar = false,
 }: {
   customNavItems?: NavItem[];
-  customConfig?: HeaderConfig;
+  customConfig?: Partial<HeaderConfig>;
   hideUserActions?: boolean;
   variant?: "full" | "navigation" | "user-actions";
   extraActions?: React.ReactNode;
   isStatic?: boolean;
   className?: string;
+  innerClassName?: string;
+  leftSlot?: React.ReactNode;
+  userProps?: any;
+  onRoleChange?: (role: any) => void;
+  showAccentBar?: boolean;
 }) {
   const pathname = usePathname();
   const [displayNavItems, setDisplayNavItems] = React.useState(customNavItems || defaultNavItems);
-  const [headerConfig, setHeaderConfig] = React.useState(customConfig || defaultHeaderConfig);
+  const [headerConfig, setHeaderConfig] = React.useState<HeaderConfig>(
+    customConfig ? { ...defaultHeaderConfig, ...customConfig } : defaultHeaderConfig
+  );
   const [searchOpen, setSearchOpen] = React.useState(false);
   const [sheetOpen, setSheetOpen] = React.useState(false);
   const [scrolled, setScrolled] = React.useState(false);
@@ -455,7 +467,7 @@ export function GeoportalHeader({
 
   React.useEffect(() => {
     if (customConfig) {
-      setHeaderConfig(customConfig);
+      setHeaderConfig((prev) => ({ ...prev, ...customConfig }));
     }
   }, [customConfig]);
 
@@ -514,18 +526,26 @@ export function GeoportalHeader({
           className
         )}
       >
-        <div className="w-full bg-surface/90 backdrop-blur-md rounded-xl shadow-lg border border-border">
+        <div className={cn("w-full bg-surface/90 backdrop-blur-md rounded-xl shadow-lg border border-border", innerClassName)}>
+          {showAccentBar && (
+            <div className="bg-primary w-full h-1.5 shrink-0 rounded-t-xl" />
+          )}
           <div className="w-full px-3 sm:px-6">
-            <div className="relative flex items-center justify-between h-14 sm:h-16">
+            <div className={cn("relative flex items-center justify-between", variant === "user-actions" ? "h-16" : "h-14 sm:h-16")}>
               {/* ── Logo oficial de la marca ── */}
-              <Link
-                href="/"
-                className={cn(
-                  "flex items-center shrink-0 group",
-                  "focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none rounded-md"
-                )}
-              >
-                {headerConfig.showLogo && (
+              {leftSlot ? (
+                <div className="flex items-center min-w-0 flex-1">
+                  {leftSlot}
+                </div>
+              ) : (
+                <Link
+                  href="/"
+                  className={cn(
+                    "flex items-center shrink-0 group",
+                    "focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none rounded-md"
+                  )}
+                >
+                  {headerConfig.showLogo && (
                   <>
                     <img
                       src={getAssetPath(headerConfig.logoUrlLight || "/logo-horizontal.svg")}
@@ -539,7 +559,8 @@ export function GeoportalHeader({
                     />
                   </>
                 )}
-              </Link>
+                </Link>
+              )}
 
               {/* ── Navegación desktop ── */}
               {showNav && (
@@ -606,7 +627,7 @@ export function GeoportalHeader({
                 {showUser && headerConfig.showNotifications && headerConfig.showUserMenu && <div className="w-px h-6 bg-border mx-2" aria-hidden="true" />}
 
                 {/* User menu */}
-                {showUser && headerConfig.showUserMenu && <UserMenu />}
+                {showUser && headerConfig.showUserMenu && <UserMenu user={userProps} onRoleChange={onRoleChange} />}
               </div>
 
               {/* ── Mobile: toggle + burger ── */}
@@ -617,7 +638,7 @@ export function GeoportalHeader({
                 {variant === "user-actions" ? (
                   <>
                     {showUser && headerConfig.showNotifications && <NotificationsMenu isEmpty={false} />}
-                    {showUser && headerConfig.showUserMenu && <UserMenu />}
+                    {showUser && headerConfig.showUserMenu && <UserMenu user={userProps} onRoleChange={onRoleChange} />}
                   </>
                 ) : (
                   <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>

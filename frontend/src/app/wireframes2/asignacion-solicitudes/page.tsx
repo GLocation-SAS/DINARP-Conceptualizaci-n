@@ -127,6 +127,7 @@ import {
 import { AprobarSolicitudDialog } from "./components/aprobar-solicitud-dialog";
 import { RechazarSolicitudDialog } from "./components/rechazar-solicitud-dialog";
 import { AsignarRevisorDialog } from "./components/asignar-revisor-dialog";
+import { buildTramiteTimelineItems } from "../components/tramite-timeline-helper";
 
 interface FilterComboboxProps {
   label?: string;
@@ -189,7 +190,7 @@ function FilterCombobox({
   };
 
   return (
-    <div className={cn("flex flex-col gap-1 min-w-[170px]", className)}>
+    <div className={cn("flex flex-col gap-1", className)}>
       {label && (
         <label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider text-left ml-1 truncate">
           {label}
@@ -285,9 +286,6 @@ export default function GestionIngresosPage() {
   const [isAssignOpen, setIsAssignOpen] = useState(false);
 
   const handleSelectSolicitud = (solicitud: SolicitudIngreso) => {
-    if (currentUser.role === "EQ_GESTION" || currentUser.role === "EQ_NORMATIVA") {
-      store.iniciarRevision(solicitud.id, currentUser.name);
-    }
     router.push(`/wireframes2/asignacion-solicitudes/${solicitud.id}`);
   };
 
@@ -352,135 +350,71 @@ export default function GestionIngresosPage() {
 
   // Construction of timelineItems for selectedSolicitud using Timeline component
   const timelineItems: TimelineItem[] = useMemo(() => {
-    if (!selectedSolicitud) return [];
-
-    const items: TimelineItem[] = [];
-
-    // Base event: Solicitud Creada
-    items.push({
-      id: "evento-creacion",
-      title: "Solicitud Ingresada en Portal",
-      description: `Formulario ${selectedSolicitud.codigoDocumental || "ARP-R01"} generado y firmado mediante FirmaEC.`,
-      date: selectedSolicitud.fechaSolicitud,
-      status: "success",
-      icon: <FileSignature className="size-4" />,
-      user: selectedSolicitud.anexoA?.representanteLegalNombre || selectedSolicitud.nombreCompleto || "Representante Legal",
-    });
-
-    if (selectedSolicitud.historial && selectedSolicitud.historial.length > 0) {
-      selectedSolicitud.historial.forEach((h, idx) => {
-        const accionLower = h.accion.toLowerCase();
-        const isDanger =
-          accionLower.includes("cancel") ||
-          accionLower.includes("rechaz") ||
-          accionLower.includes("observad") ||
-          accionLower.includes("cierr") ||
-          accionLower.includes("deneg");
-        const isSuccess =
-          accionLower.includes("aprob") ||
-          accionLower.includes("resoluci") ||
-          accionLower.includes("finaliz") ||
-          accionLower.includes("activa");
-        const isAssign =
-          accionLower.includes("asignac") ||
-          accionLower.includes("asignad") ||
-          accionLower.includes("revisor");
-        const isReview =
-          accionLower.includes("revis");
-
-        let status: TimelineItem["status"] = "info";
-        let icon: React.ReactNode = <History className="size-4" />;
-
-        if (isDanger) {
-          status = "danger";
-          icon = <XCircle className="size-4" />;
-        } else if (isSuccess) {
-          status = "success";
-          icon = <CheckCircle2 className="size-4" />;
-        } else if (isAssign) {
-          status = "primary";
-          icon = <UserPlus className="size-4" />;
-        } else if (isReview) {
-          status = "warning";
-          icon = <Clock className="size-4" />;
-        }
-
-        items.push({
-          id: `hist-${idx}`,
-          title: h.accion,
-          description: h.detalles,
-          date: h.fechaHora || h.fecha || "",
-          status,
-          icon,
-          user: h.realizadoPor,
-        });
-      });
-    }
-
-    // Si el trámite fue asignado a un revisor y aún está pendiente de análisis técnico
-    const revisorActual = selectedSolicitud.revisorGestion || selectedSolicitud.revisorNormatividad || selectedSolicitud.revisor;
-    if (
-      revisorActual &&
-      revisorActual !== "Por asignar" &&
-      !selectedSolicitud.revisionIniciada &&
-      !["Aprobada", "APROBADO_FINAL", "Rechazada", "Cancelada"].includes(selectedSolicitud.estado)
-    ) {
-      const yaExistePendiente = items.some((i) =>
-        i.title.toLowerCase().includes("pendiente de revisión")
-      );
-      if (!yaExistePendiente) {
-        items.push({
-          id: "pendiente-revision-step",
-          title: "Pendiente de revisión",
-          description: `Trámite asignado al funcionario ${revisorActual}. En espera de verificación documental.`,
-          date: selectedSolicitud.fechaAsignacionGestion || selectedSolicitud.fechaAsignacionNormatividad || "Reciente",
-          status: "primary",
-          icon: <Clock className="size-4" />,
-          user: revisorActual,
-        });
-      }
-    }
-
-    return items;
+    return buildTramiteTimelineItems(selectedSolicitud);
   }, [selectedSolicitud]);
 
   const procesoOptions = useMemo(() => [
-    { value: "TODOS", label: "Proceso: Todos" },
+    { value: "TODOS", label: "Todos" },
     { value: "PROCESO_A_REGISTRO_INSTITUCION", label: "Institución" },
     { value: "PROCESO_B_ENROLAMIENTO_COORDINADOR", label: "Coordinador" },
     { value: "PROCESO_C_CAMBIO_COORDINADOR", label: "Cambio de coordinador" },
   ], []);
 
-  const estadoOptions = useMemo(() => [
-    { value: "Todos", label: "Estado: Todos" },
-    { value: "SIN_ASIGNAR", label: "Sin Asignar" },
-    { value: "ASIGNADOS", label: "Asignados" },
-    { value: "EN_REVISION", label: "En Revisión" },
-    { value: "PENDIENTE_ASIGNACION_GESTION", label: "Pendiente Asignación" },
-    { value: "EN_REVISION_GESTION", label: "En Revisión" },
-    { value: "PENDIENTE_ASIGNACION_NORMATIVIDAD", label: "Pendiente Normatividad" },
-    { value: "EN_REVISION_NORMATIVIDAD", label: "En Revisión Normatividad" },
-    { value: "APROBADO_FINAL", label: "Aprobado Final" },
-    { value: "Aprobada", label: "Aprobada" },
-    { value: "Rechazada", label: "Rechazada" },
-    { value: "Cancelada", label: "Cancelada" },
-  ], []);
+  const estadoOptions = useMemo(() => {
+    if (currentUser.role === "EQ_GESTION") {
+      return [
+        { value: "Todos", label: "Estado: Todos" },
+        { value: "PENDIENTES", label: "Pendiente de revisión" },
+        { value: "Aprobada", label: "Aprobada" },
+        { value: "Rechazada", label: "Rechazada" },
+      ];
+    }
+    if (currentUser.role === "DIR_NORMATIVA" || currentUser.role === "EQ_NORMATIVA") {
+      return [
+        { value: "Todos", label: "Todos" },
+        { value: "SIN_ASIGNAR", label: "Sin Asignar" },
+        { value: "ASIGNADOS", label: "Asignados" },
+        { value: "PENDIENTE_ASIGNACION_NORMATIVIDAD", label: "Pendiente de Asignación · Normatividad" },
+        { value: "PENDIENTE_GENERAR_RESOLUCION", label: "Pendiente de Generar Resolución" },
+        { value: "EN_GENERACION_RESOLUCION", label: "En Generación de Resolución" },
+        { value: "GENERACION_PENDIENTE", label: "Generación Pendiente" },
+        { value: "RESOLUCION_GENERADA", label: "Resolución Generada" },
+        { value: "Rechazada", label: "Rechazada" },
+        { value: "Cancelada", label: "Cancelada" },
+      ];
+    }
+    return [
+      { value: "Todos", label: "Todos" },
+      { value: "PENDIENTE_ENVIO", label: "Pendiente de Envío" },
+      { value: "SIN_ASIGNAR", label: "Sin Asignar" },
+      { value: "ASIGNADOS", label: "Asignados" },
+      { value: "EN_REVISION", label: "En Revisión" },
+      { value: "PENDIENTE_ASIGNACION_GESTION", label: "Pendiente Asignación" },
+      { value: "EN_REVISION_GESTION", label: "En Revisión" },
+      { value: "PENDIENTE_ASIGNACION_NORMATIVIDAD", label: "Pendiente Normatividad" },
+      { value: "EN_REVISION_NORMATIVIDAD", label: "En Revisión Normatividad" },
+      { value: "APROBADO_FINAL", label: "Aprobado Final" },
+      { value: "Aprobada", label: "Aprobada" },
+      { value: "Rechazada", label: "Rechazada" },
+      { value: "Cancelada", label: "Cancelada" },
+    ];
+  }, [currentUser.role]);
 
   const institucionOptions = useMemo(() => [
-    { value: "Todas", label: "Institución: Todas" },
+    { value: "Todas", label: "Todas" },
     ...institucionesList.map((inst) => ({ value: inst, label: inst })),
   ], [institucionesList]);
 
   const sortOptions = useMemo(() => [
-    { value: "fecha-desc", label: "Ordenar: Más recientes primero" },
-    { value: "fecha-asc", label: "Ordenar: Más antiguas primero" },
-    { value: "nombre-asc", label: "Ordenar: Nombre (A - Z)" },
-    { value: "estado-prioridad", label: "Ordenar: Pendientes primero" },
+    { value: "fecha-desc", label: "Más recientes" },
+    { value: "fecha-asc", label: "Más antiguas" },
+    { value: "nombre-asc", label: "Nombre (A - Z)" },
+    { value: "estado-prioridad", label: "Pendientes primero" },
   ], []);
 
   const activeSectionTitle = useMemo(() => {
     if (currentUser.role === "DIR_GESTION" || currentUser.role === "DIR_NORMATIVA") {
-      return "Asignación de solicitudes de enrolamiento";
+      return "Asignación de solicitudes";
     }
     if (currentUser.role === "EQ_GESTION" || currentUser.role === "EQ_NORMATIVA") {
       return "Solicitudes asignadas";
@@ -507,6 +441,60 @@ export default function GestionIngresosPage() {
 
   // KPIs globales por rol
   const dynamicKpis = useMemo(() => {
+    if (currentUser.role === "EQ_GESTION") {
+      const misSolicitudes = solicitudes.filter(
+        (s) => (s.revisorGestion === currentUser.name || s.revisor === currentUser.name)
+      );
+      return {
+        pendientes: misSolicitudes.filter(
+          (s) =>
+            s.estado === "EN_REVISION_GESTION" ||
+            s.estado === "PENDIENTE_ASIGNACION_GESTION" ||
+            s.estado === "Pendiente"
+        ).length,
+        aprobadas: misSolicitudes.filter(
+          (s) =>
+            Boolean(s.fechaAprobacionGestion) ||
+            s.estado === "Aprobada" ||
+            s.estado === "APROBADO_FINAL" ||
+            s.estado === "PENDIENTE_ASIGNACION_NORMATIVIDAD" ||
+            s.estado === "EN_REVISION_NORMATIVIDAD" ||
+            s.estado === "PENDIENTE_GENERAR_RESOLUCION" ||
+            s.estado === "EN_GENERACION_RESOLUCION" ||
+            s.estado === "GENERACION_PENDIENTE" ||
+            s.estado === "RESOLUCION_GENERADA" ||
+            s.estado === "INSTITUCION_ACTIVA"
+        ).length,
+        rechazadas: misSolicitudes.filter(
+          (s) => s.estado === "Rechazada" || s.estado === "Cancelada"
+        ).length,
+        sinAsignar: 0,
+        enRevision: 0,
+        resueltas: 0,
+      };
+    }
+    const isNormativa = currentUser.role === "DIR_NORMATIVA" || currentUser.role === "EQ_NORMATIVA";
+    if (isNormativa) {
+      return {
+        sinAsignar: solicitudes.filter(
+          (s) => s.estado === "PENDIENTE_ASIGNACION_NORMATIVIDAD" || (!s.revisorNormatividad && (s.estado as string).includes("NORMATIVIDAD"))
+        ).length,
+        enRevision: solicitudes.filter(
+          (s) =>
+            s.estado === "PENDIENTE_GENERAR_RESOLUCION" ||
+            s.estado === "EN_GENERACION_RESOLUCION" ||
+            s.estado === "EN_REVISION_NORMATIVIDAD" ||
+            s.estado === "GENERACION_PENDIENTE"
+        ).length,
+        resueltas: solicitudes.filter(
+          (s) =>
+            s.estado === "RESOLUCION_GENERADA" ||
+            s.estado === "APROBADO_FINAL" ||
+            s.estado === "Rechazada" ||
+            s.estado === "Cancelada"
+        ).length,
+      };
+    }
     return {
       sinAsignar: solicitudes.filter(
         (s) =>
@@ -523,11 +511,12 @@ export default function GestionIngresosPage() {
         (s) =>
           s.estado === "Aprobada" ||
           s.estado === "APROBADO_FINAL" ||
+          s.estado === "RESOLUCION_GENERADA" ||
           s.estado === "Rechazada" ||
           s.estado === "Cancelada"
       ).length,
     };
-  }, [solicitudes]);
+  }, [solicitudes, currentUser.role]);
 
   // Filter & Sort
   const filteredData = useMemo(() => {
@@ -554,6 +543,10 @@ export default function GestionIngresosPage() {
           "EN_REVISION_GESTION",
           "PENDIENTE_ASIGNACION_NORMATIVIDAD",
           "EN_REVISION_NORMATIVIDAD",
+          "PENDIENTE_GENERAR_RESOLUCION",
+          "EN_GENERACION_RESOLUCION",
+          "GENERACION_PENDIENTE",
+          "RESOLUCION_GENERADA",
           "APROBADO_FINAL",
           "Aprobada",
           "Rechazada",
@@ -568,6 +561,10 @@ export default function GestionIngresosPage() {
           "PENDIENTE_ASIGNACION_GESTION",
           "PENDIENTE_ASIGNACION_NORMATIVIDAD",
           "EN_REVISION_NORMATIVIDAD",
+          "PENDIENTE_GENERAR_RESOLUCION",
+          "EN_GENERACION_RESOLUCION",
+          "GENERACION_PENDIENTE",
+          "RESOLUCION_GENERADA",
           "APROBADO_FINAL",
           "Aprobada",
           "Rechazada",
@@ -587,6 +584,10 @@ export default function GestionIngresosPage() {
         currentUser.role === "DIR_NORMATIVA" &&
         ![
           "PENDIENTE_ASIGNACION_NORMATIVIDAD",
+          "PENDIENTE_GENERAR_RESOLUCION",
+          "EN_GENERACION_RESOLUCION",
+          "GENERACION_PENDIENTE",
+          "RESOLUCION_GENERADA",
           "EN_REVISION_NORMATIVIDAD",
           "APROBADO_FINAL",
           "Aprobada",
@@ -599,6 +600,10 @@ export default function GestionIngresosPage() {
       if (
         currentUser.role === "EQ_NORMATIVA" &&
         ![
+          "PENDIENTE_GENERAR_RESOLUCION",
+          "EN_GENERACION_RESOLUCION",
+          "GENERACION_PENDIENTE",
+          "RESOLUCION_GENERADA",
           "EN_REVISION_NORMATIVIDAD",
           "APROBADO_FINAL",
           "Aprobada",
@@ -610,7 +615,38 @@ export default function GestionIngresosPage() {
 
       const matchesEstado = (() => {
         if (filterEstado === "Todos") return true;
+        if (currentUser.role === "EQ_GESTION") {
+          if (filterEstado === "PENDIENTES" || filterEstado === "Pendiente de revisión") {
+            return (
+              item.estado === "EN_REVISION_GESTION" ||
+              item.estado === "PENDIENTE_ASIGNACION_GESTION" ||
+              item.estado === "Pendiente"
+            );
+          }
+          if (filterEstado === "Aprobada" || filterEstado === "APROBADAS") {
+            return (
+              Boolean(item.fechaAprobacionGestion) ||
+              [
+                "Aprobada",
+                "APROBADO_FINAL",
+                "PENDIENTE_ASIGNACION_NORMATIVIDAD",
+                "EN_REVISION_NORMATIVIDAD",
+                "PENDIENTE_GENERAR_RESOLUCION",
+                "EN_GENERACION_RESOLUCION",
+                "GENERACION_PENDIENTE",
+                "RESOLUCION_GENERADA",
+                "INSTITUCION_ACTIVA",
+              ].includes(item.estado)
+            );
+          }
+          if (filterEstado === "Rechazada" || filterEstado === "RECHAZADAS") {
+            return item.estado === "Rechazada" || item.estado === "Cancelada";
+          }
+        }
         if (filterEstado === "SIN_ASIGNAR") {
+          if (currentUser.role === "DIR_NORMATIVA") {
+            return item.estado === "PENDIENTE_ASIGNACION_NORMATIVIDAD" || !item.revisorNormatividad;
+          }
           return (
             item.estado === "PENDIENTE_ASIGNACION_GESTION" ||
             item.estado === "PENDIENTE_ASIGNACION_NORMATIVIDAD" ||
@@ -622,6 +658,9 @@ export default function GestionIngresosPage() {
           );
         }
         if (filterEstado === "ASIGNADOS") {
+          if (currentUser.role === "DIR_NORMATIVA") {
+            return Boolean(item.revisorNormatividad && item.estado !== "Cancelada" && item.estado !== "Rechazada");
+          }
           return Boolean(
             (item.revisorGestion || item.revisorNormatividad || item.revisor) &&
               item.estado !== "Cancelada" &&
@@ -631,11 +670,13 @@ export default function GestionIngresosPage() {
         if (filterEstado === "EN_REVISION") {
           return (
             item.estado === "EN_REVISION_GESTION" ||
-            item.estado === "EN_REVISION_NORMATIVIDAD"
+            item.estado === "EN_REVISION_NORMATIVIDAD" ||
+            item.estado === "PENDIENTE_GENERAR_RESOLUCION" ||
+            item.estado === "EN_GENERACION_RESOLUCION"
           );
         }
-        if (filterEstado === "Aprobada" || filterEstado === "APROBADO_FINAL") {
-          return item.estado === "Aprobada" || item.estado === "APROBADO_FINAL";
+        if (filterEstado === "RESOLUCION_GENERADA" || filterEstado === "APROBADO_FINAL" || filterEstado === "Aprobada") {
+          return item.estado === "RESOLUCION_GENERADA" || item.estado === "APROBADO_FINAL" || item.estado === "Aprobada";
         }
         return item.estado === filterEstado;
       })();
@@ -746,18 +787,26 @@ export default function GestionIngresosPage() {
     }
   };
 
-  const renderEstadoBadge = (estado: EstadoSolicitudIngreso) => {
-    const { tone, label } = getEstadoBadgeProps(estado);
+  const renderEstadoBadge = (estado: EstadoSolicitudIngreso, revisionIniciada?: boolean) => {
+    const { tone, label } = getEstadoBadgeProps(estado, revisionIniciada);
     return (
-      <Badge
-        tone={tone}
-        appearance="soft"
-        size="sm"
-        dot
-        className="font-semibold text-[11px] normal-case tracking-normal whitespace-nowrap px-2.5 py-0.5 inline-flex shrink-0 shadow-2xs"
-      >
-        {label}
-      </Badge>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Badge
+            tone={tone}
+            appearance="soft"
+            size="sm"
+            dot
+            className="font-semibold text-[11px] normal-case tracking-normal px-2 py-0.5 inline-flex items-center shadow-2xs cursor-pointer hover:opacity-90 transition-opacity max-w-full"
+          >
+            <span className="truncate max-w-[160px] sm:max-w-[200px]">{label}</span>
+          </Badge>
+        </TooltipTrigger>
+        <TooltipContent side="top" variant="surface" className="p-2.5 max-w-xs flex flex-col items-start gap-0.5">
+          <p className="font-bold text-xs text-foreground">Estado del trámite</p>
+          <p className="text-[11px] text-muted-foreground">{label}</p>
+        </TooltipContent>
+      </Tooltip>
     );
   };
 
@@ -771,6 +820,9 @@ export default function GestionIngresosPage() {
 
   return (
     <WireframeDashboardLayout
+      currentUser={currentUser}
+      currentRole={currentUser.role}
+      activeMenu="asignacion-solicitudes"
       breadcrumbs={
         selectedSolicitud
           ? [
@@ -781,19 +833,26 @@ export default function GestionIngresosPage() {
                 setSelectedSolicitud(null);
               },
             },
-            { label: `Trámite ${selectedSolicitud.id}` },
+            {
+              label: selectedSolicitud.tituloTramite || "Solicitud de Registro de Institución",
+              onClick: (e: React.MouseEvent) => {
+                e.preventDefault();
+                setSelectedSolicitud(null);
+              },
+            },
+            { label: selectedSolicitud.id },
           ]
           : [
             { label: activeSectionTitle },
           ]
       }
     >
-      <main className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <main className="w-full pr-3 pl-2 pb-3 pt-1.5 flex-1 min-h-0 flex flex-col overflow-hidden">
         {/* ══════════════════════════════════════════════════════════
             VISTA 1: DETALLE DE SOLICITUD (BREADCRUMB + APROBAR / RECHAZAR)
            ══════════════════════════════════════════════════════════ */}
         {selectedSolicitud ? (
-          <div className="bg-surface border border-border rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-xs space-y-6 animate-in fade-in duration-200">
+          <div className="bg-surface border border-border rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-xs space-y-6 animate-in fade-in duration-200 flex-1 min-h-0 overflow-y-auto">
             {/* Cabecera de Retorno y Acciones */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2">
               <Button
@@ -873,7 +932,7 @@ export default function GestionIngresosPage() {
                     FORMULARIO OFICIAL {selectedSolicitud.codigoDocumental} · {selectedSolicitud.id}
                   </CardBadge>
                 </div>
-                {renderEstadoBadge(selectedSolicitud.estado)}
+                {renderEstadoBadge(selectedSolicitud.estado, selectedSolicitud.revisionIniciada)}
               </div>
 
               <CardTitle className="text-xl sm:text-2xl font-bold font-heading text-primary">
@@ -890,8 +949,52 @@ export default function GestionIngresosPage() {
             </Card>
 
             {/* Banners contextuales según estado */}
+            {(selectedSolicitud.estado === "EN_REVISION_GESTION" || selectedSolicitud.estado === "EN_REVISION_NORMATIVIDAD") && (
+              <div className="p-4 rounded-2xl bg-primary/5 border border-primary/20 text-foreground space-y-2 animate-in fade-in duration-150 mb-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div className="flex items-center gap-2.5">
+                    <div className="size-8 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0 text-primary">
+                      <UserCheck className="size-4" />
+                    </div>
+                    <div>
+                      <h3 className="font-heading font-bold text-sm text-foreground">
+                        Solicitud en revisión
+                      </h3>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        La revisión técnica y documental se encuentra en curso bajo la responsabilidad del revisor asignado.
+                      </p>
+                    </div>
+                  </div>
+                  <Badge tone="primary" appearance="soft" size="md" className="font-bold text-xs shrink-0 self-start sm:self-auto">
+                    EN REVISIÓN
+                  </Badge>
+                </div>
+
+                <div className="pt-2 border-t border-primary/10 flex flex-wrap items-center justify-between gap-2 text-[11px]">
+                  <div className="flex items-center gap-3">
+                    <span className="text-muted-foreground">Tipo de solicitud:</span>
+                    <strong className="text-foreground font-semibold">
+                      {selectedSolicitud.tipoTramite === "PROCESO_A_REGISTRO_INSTITUCION"
+                        ? "Anexo A — Solicitud de Registro de Institución"
+                        : selectedSolicitud.tipoTramite === "PROCESO_B_ENROLAMIENTO_COORDINADOR"
+                        ? "Anexo B — Solicitud de Registro de Coordinador"
+                        : selectedSolicitud.tipoTramite === "PROCESO_C_CAMBIO_COORDINADOR"
+                        ? "Anexo C — Solicitud de Cambio de Coordinador"
+                        : "Solicitud de Ingreso"}
+                    </strong>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Revisor responsable: </span>
+                    <strong className="text-foreground">
+                      {selectedSolicitud.revisorGestion || selectedSolicitud.revisor || "Revisor asignado"}
+                    </strong>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {selectedSolicitud.estado === "Cancelada" && (
-              <div className="p-5 rounded-2xl bg-danger-100/30 dark:bg-danger-900/20 border border-danger/40 text-foreground space-y-3">
+              <div className="p-5 rounded-2xl bg-danger-100/30 dark:bg-danger-900/20 border border-danger/40 text-foreground space-y-3 mb-4">
                 <div className="flex flex-wrap items-center justify-between gap-2 border-b border-danger/20 pb-3">
                   <div className="flex items-center gap-2.5">
                     <div className="size-8 rounded-full bg-danger/10 border border-danger/30 flex items-center justify-center shrink-0">
@@ -899,10 +1002,10 @@ export default function GestionIngresosPage() {
                     </div>
                     <div>
                       <h3 className="text-sm font-bold font-heading text-danger">
-                        Trámite Cancelado y Expediente Cerrado Definitivamente
+                        Trámite Cancelado y Solicitud Cerrada Definitivamente
                       </h3>
                       <p className="text-xs text-muted-foreground mt-0.5">
-                        Este expediente no superó la revisión técnica obligatoria del Área de Gestión.
+                        Esta solicitud no superó la revisión técnica obligatoria del Área de Gestión.
                       </p>
                     </div>
                   </div>
@@ -1021,11 +1124,11 @@ export default function GestionIngresosPage() {
               </div>
 
               <CardTitle className="text-lg sm:text-xl font-bold font-heading text-primary">
-                Anexo A — Solicitud de Acceso al Sistema Nacional de Registros Públicos
+                Anexo A — Solicitud de Registro de Institución
               </CardTitle>
 
               <CardDescription className="text-xs text-primary-800/80 dark:text-primary-200/80 font-medium">
-                Proceso A · Enrolamiento de Institución al SINARP
+                Proceso A · Enrolamiento institucional al SINARP
               </CardDescription>
 
               <CardDecorativeIcon className="-bottom-10 -right-10 opacity-20 group-hover/card:scale-100">
@@ -1087,19 +1190,40 @@ export default function GestionIngresosPage() {
 
             {/* ── PASO 0: ENTIDAD Y AUTORIDAD COMPARECIENTE ── */}
             {detailTab === 0 && (
-              <div className="bg-surface border border-border rounded-2xl p-6 sm:p-8 space-y-6 shadow-xs animate-in fade-in duration-200">
-                <div className="bg-primary-100/20 border-b border-primary p-3.5 mb-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-t-lg">
+              <div className="bg-surface border border-border rounded-2xl overflow-hidden shadow-xs animate-in fade-in duration-200">
+                <div className="bg-primary/10 dark:bg-primary/20 border-b border-primary p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+
                   <div>
-                    <h2 className="text-sm font-bold font-heading text-primary flex items-center gap-2">
-                      <Building2 className="size-4 text-primary shrink-0" />
-                      <span>Sección I — Cláusula Primera: 1.1 Del Solicitante</span>
+                    <h2 className="text-base font-bold font-heading text-primary dark:text-primary-300 flex items-center gap-2">
+                      <Building2 className="size-5 text-primary dark:text-primary-300 shrink-0" />
+                      <span>Sección I — Datos de la Institución y Máxima Autoridad</span>
                     </h2>
                     <p className="text-xs text-muted-foreground mt-0.5">
-                      Información general de la entidad requirente y de su máxima autoridad o delegado.
+                      Información de identificación de la institución solicitante y de su máxima autoridad o delegado.
                     </p>
+                  
+                </div>
+
+                <div className="p-6 sm:p-8 space-y-6">
+<Badge tone="primary" appearance="solid" size="sm" className="font-bold uppercase tracking-wider shrink-0 self-start sm:self-auto !text-white shadow-xs rounded-full px-3 py-1">
+                    {selectedSolicitud.anexoA?.entidadTipo === "Privada" ? "ENTIDAD PRIVADA" : "ENTIDAD PÚBLICA"}
+                  </Badge>
+                </div>
+
+                <div className="bg-muted/50 p-3.5 flex items-start sm:items-center justify-between gap-3 rounded-xl border border-border/40">
+                  <div className="flex items-start gap-2.5 min-w-0">
+                    <Building2 className="size-4 text-muted-foreground shrink-0 mt-0.5" />
+                    <div className="min-w-0">
+                      <h3 className="text-sm font-bold font-heading text-foreground leading-snug">
+                        1.1 Naturaleza de la Entidad
+                      </h3>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        Información general de la institución requirente y personería jurídica.
+                      </p>
+                    </div>
                   </div>
-                  <Badge tone="neutral" appearance="soft" size="sm" className="font-semibold border border-border shrink-0">
-                    {selectedSolicitud.anexoA?.entidadTipo === "Publica" ? "ENTIDAD PÚBLICA" : "ENTIDAD PRIVADA"}
+                  <Badge tone="neutral" appearance="soft" size="sm" className="border border-border shrink-0 self-start sm:self-auto">
+                    ENTIDAD
                   </Badge>
                 </div>
 
@@ -1115,7 +1239,7 @@ export default function GestionIngresosPage() {
                           disabled
                           className="size-4 text-primary accent-primary cursor-not-allowed"
                         />
-                        <span>Entidad Pública</span>
+                        <span>Institución pública</span>
                       </label>
                       <label className="flex items-center gap-2 text-xs font-medium text-foreground cursor-not-allowed">
                         <input
@@ -1125,7 +1249,7 @@ export default function GestionIngresosPage() {
                           disabled
                           className="size-4 text-primary accent-primary cursor-not-allowed"
                         />
-                        <span>Entidad Privada</span>
+                        <span>Institución privada</span>
                       </label>
                     </div>
                   </div>
@@ -1173,14 +1297,51 @@ export default function GestionIngresosPage() {
                     />
                   </div>
 
-                  <div className="sm:col-span-2 pt-3 pb-1 border-t border-border/60">
-                    <h3 className="text-xs font-bold text-foreground font-heading">
-                      Máxima autoridad / delegado / representante legal o apoderado
-                    </h3>
+                  <div className="sm:col-span-2 bg-muted/50 p-3.5 flex items-start sm:items-center justify-between gap-3 rounded-xl border border-border/40">
+                    <div className="flex items-start gap-2.5 min-w-0">
+                      <User className="size-4 text-muted-foreground shrink-0 mt-0.5" />
+                      <div className="min-w-0">
+                        <h3 className="text-sm font-bold font-heading text-foreground leading-snug">
+                          Datos del firmante del Anexo A
+                        </h3>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          Información de la máxima autoridad o delegado institucional que suscribirá mediante FirmaEC.
+                        </p>
+                      </div>
+                    </div>
+                    <Badge tone="neutral" appearance="soft" size="sm" className="border border-border shrink-0 self-start sm:self-auto">
+                      FIRMANTE
+                    </Badge>
+                  </div>
+
+                  <div className="sm:col-span-2 space-y-1.5">
+                    <Label className="text-xs font-semibold text-foreground block">¿Quién firmará el Anexo A? *</Label>
+                    <div className="flex items-center gap-6 pt-1">
+                      <label className="flex items-center gap-2 text-xs font-medium text-foreground cursor-not-allowed">
+                        <input
+                          type="radio"
+                          name="esDelegadoRadio"
+                          checked={!selectedSolicitud.anexoA?.esDelegado}
+                          disabled
+                          className="size-4 text-primary accent-primary cursor-not-allowed"
+                        />
+                        <span>Máxima autoridad institucional</span>
+                      </label>
+                      <label className="flex items-center gap-2 text-xs font-medium text-foreground cursor-not-allowed">
+                        <input
+                          type="radio"
+                          name="esDelegadoRadio"
+                          checked={Boolean(selectedSolicitud.anexoA?.esDelegado)}
+                          disabled
+                          className="size-4 text-primary accent-primary cursor-not-allowed"
+                        />
+                        <span>Delegado de la máxima autoridad</span>
+                      </label>
+                    </div>
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-semibold text-foreground">Nombre de la máxima autoridad o apoderado *</Label>
+                    <Label className="text-xs font-semibold text-foreground">Nombre completo *</Label>
                     <InputGroup leftIcon={<User className="size-4 text-muted-foreground" />}>
                       <InputGroupInput
                         value={selectedSolicitud.anexoA?.representanteLegalNombre || selectedSolicitud.nombreCompleto}
@@ -1191,7 +1352,7 @@ export default function GestionIngresosPage() {
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-semibold text-foreground">Denominación del Cargo *</Label>
+                    <Label className="text-xs font-semibold text-foreground">Denominación del cargo *</Label>
                     <InputGroup leftIcon={<Building2 className="size-4 text-muted-foreground" />}>
                       <InputGroupInput
                         value={selectedSolicitud.anexoA?.representanteLegalCargo || "Ministro de Telecomunicaciones (Representante Legal)"}
@@ -1202,7 +1363,7 @@ export default function GestionIngresosPage() {
                   </div>
 
                   <div className="sm:col-span-2 space-y-1.5">
-                    <Label className="text-xs font-semibold text-foreground">Correo Electrónico de la Autoridad *</Label>
+                    <Label className="text-xs font-semibold text-foreground">Correo electrónico *</Label>
                     <InputGroup leftIcon={<Mail className="size-4 text-muted-foreground" />}>
                       <InputGroupInput
                         value={selectedSolicitud.anexoA?.representanteLegalEmail || selectedSolicitud.correo || "ministro@mintel.gob.ec"}
@@ -1212,21 +1373,23 @@ export default function GestionIngresosPage() {
                     </InputGroup>
                   </div>
 
-                  <div className="sm:col-span-2 p-4 rounded-xl border border-border bg-muted/20 flex items-center gap-3">
-                    <Checkbox checked={selectedSolicitud.anexoA?.esDelegado || false} disabled />
-                    <div>
-                      <Label className="text-xs font-semibold text-foreground block">
-                        Firma en Calidad de Delegado Oficial
-                      </Label>
-                      <span className="text-[11px] text-muted-foreground">
-                        {selectedSolicitud.anexoA?.esDelegado
-                          ? "Suscrito bajo Resolución de Delegación / Acción de Personal (Documento habilitante adjunto en Paso 4)."
-                          : "Suscrito directamente por la Máxima Autoridad Institucional."}
-                      </span>
+                  {selectedSolicitud.anexoA?.esDelegado && (
+                    <div className="sm:col-span-2 p-4 rounded-xl border border-border bg-muted/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                      <div className="space-y-1">
+                        <Label className="text-xs font-semibold text-foreground block">
+                          Autorización de delegación adjunta
+                        </Label>
+                        <p className="text-[11px] text-muted-foreground">
+                          Documento habilitante de delegación de firma oficial cargado en el expediente.
+                        </p>
+                      </div>
+                      <Badge tone="primary" appearance="soft" size="sm" className="font-mono text-xs shrink-0 self-start sm:self-auto">
+                        {selectedSolicitud.anexoA?.archivoSoporteDelegacion || "Resolucion_Delegacion_Firma.pdf"}
+                      </Badge>
                     </div>
-                  </div>
+                  )}
 
-                  <div className="pt-4 border-t border-border flex justify-end">
+                  <div className="pt-4 border-t border-border flex justify-end sm:col-span-2">
                     <Button
                       type="button"
                       variant="primary"
@@ -1238,12 +1401,31 @@ export default function GestionIngresosPage() {
                     </Button>
                   </div>
                 </div>
+                </div>
               </div>
             )}
 
             {/* ── PASO 1: COORDINADORES INSTITUCIONALES ── */}
             {detailTab === 1 && (
-              <div className="bg-surface border border-border rounded-2xl p-6 sm:p-8 space-y-6 shadow-xs animate-in fade-in duration-200">
+              <div className="bg-surface border border-border rounded-2xl overflow-hidden shadow-xs animate-in fade-in duration-200">
+                <div className="bg-primary/10 dark:bg-primary/20 border-b border-primary p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+
+                  <div>
+                    <h2 className="text-base font-bold font-heading text-primary flex items-center gap-2">
+                      <User className="size-5 text-primary shrink-0" />
+                      <span>Coordinadores Institucionales del SINARP</span>
+                    </h2>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      Designación de coordinadores titular y suplente para la gestión operativa institucional.
+                    </p>
+                  
+                </div>
+
+                <div className="p-6 sm:p-8 space-y-6">
+<Badge tone="primary" appearance="solid" size="sm" className="font-bold uppercase tracking-wider shrink-0 self-start sm:self-auto !text-white shadow-xs rounded-full px-3 py-1">
+                    COORDINACIÓN
+                  </Badge>
+                </div>
                 <div className="space-y-6">
                   {/* Coordinador Titular */}
                   <div className="space-y-4 border border-border/80 rounded-2xl p-5 bg-surface shadow-2xs">
@@ -1301,21 +1483,21 @@ export default function GestionIngresosPage() {
                       <div className="space-y-1">
                         <Label className="text-xs font-semibold text-foreground">Teléfono Fijo Institucional *</Label>
                         <InputGroup leftIcon={<Phone className="size-4 text-muted-foreground" />}>
-                          <InputGroupInput value={selectedSolicitud.anexoA?.titularTelefonoFijo || "022200200 ext 120"} disabled className="bg-muted/30 cursor-not-allowed text-xs text-foreground" />
+                          <InputGroupInput value={selectedSolicitud.anexoA?.titularTelefonoFijo || "023814400 ext 123"} disabled className="bg-muted/30 cursor-not-allowed text-xs text-foreground" />
                         </InputGroup>
                       </div>
 
                       <div className="space-y-1">
                         <Label className="text-xs font-semibold text-foreground">Móvil Institucional *</Label>
                         <InputGroup leftIcon={<Smartphone className="size-4 text-muted-foreground" />}>
-                          <InputGroupInput value={selectedSolicitud.anexoA?.titularMovilInstitucional || "0995544332"} disabled className="bg-muted/30 cursor-not-allowed text-xs text-foreground" />
+                          <InputGroupInput value={selectedSolicitud.anexoA?.titularMovilInstitucional || "0991234567"} disabled className="bg-muted/30 cursor-not-allowed text-xs text-foreground" />
                         </InputGroup>
                       </div>
 
                       <div className="space-y-1">
                         <Label className="text-xs font-semibold text-foreground">Móvil Personal *</Label>
                         <InputGroup leftIcon={<Smartphone className="size-4 text-muted-foreground" />}>
-                          <InputGroupInput value={selectedSolicitud.anexoA?.titularMovilPersonal || "0984433221"} disabled className="bg-muted/30 cursor-not-allowed text-xs text-foreground" />
+                          <InputGroupInput value={selectedSolicitud.anexoA?.titularMovilPersonal || "0987654321"} disabled className="bg-muted/30 cursor-not-allowed text-xs text-foreground" />
                         </InputGroup>
                       </div>
                     </div>
@@ -1356,42 +1538,42 @@ export default function GestionIngresosPage() {
                       <div className="space-y-1">
                         <Label className="text-xs font-semibold text-foreground">Cargo / Rol en la Institución *</Label>
                         <InputGroup leftIcon={<Building2 className="size-4 text-muted-foreground" />}>
-                          <InputGroupInput value={selectedSolicitud.anexoA?.suplenteCargo || "Especialista de Interoperabilidad Gubernamental"} disabled className="bg-muted/30 cursor-not-allowed text-xs text-foreground" />
+                          <InputGroupInput value={selectedSolicitud.anexoA?.suplenteCargo || "Especialista de Infraestructura"} disabled className="bg-muted/30 cursor-not-allowed text-xs text-foreground" />
                         </InputGroup>
                       </div>
 
                       <div className="space-y-1">
                         <Label className="text-xs font-semibold text-foreground">Área / Unidad a la que pertenece *</Label>
                         <InputGroup leftIcon={<Building2 className="size-4 text-muted-foreground" />}>
-                          <InputGroupInput value={selectedSolicitud.anexoA?.suplenteAreaUnidad || "Dirección de Gobierno Digital"} disabled className="bg-muted/30 cursor-not-allowed text-xs text-foreground" />
+                          <InputGroupInput value={selectedSolicitud.anexoA?.suplenteAreaUnidad || "Dirección de Tecnologías de Información"} disabled className="bg-muted/30 cursor-not-allowed text-xs text-foreground" />
                         </InputGroup>
                       </div>
 
                       <div className="space-y-1">
                         <Label className="text-xs font-semibold text-foreground">Correo Electrónico Institucional *</Label>
                         <InputGroup leftIcon={<Mail className="size-4 text-muted-foreground" />}>
-                          <InputGroupInput value={selectedSolicitud.anexoA?.suplenteEmail || "carmen.vinueza@mintel.gob.ec"} disabled className="bg-muted/30 cursor-not-allowed text-xs text-foreground" />
+                          <InputGroupInput value={selectedSolicitud.anexoA?.suplenteEmail || "suplente@institucion.gob.ec"} disabled className="bg-muted/30 cursor-not-allowed text-xs text-foreground" />
                         </InputGroup>
                       </div>
 
                       <div className="space-y-1">
                         <Label className="text-xs font-semibold text-foreground">Teléfono Fijo Institucional *</Label>
                         <InputGroup leftIcon={<Phone className="size-4 text-muted-foreground" />}>
-                          <InputGroupInput value={selectedSolicitud.anexoA?.suplenteTelefonoFijo || "022200200 ext 125"} disabled className="bg-muted/30 cursor-not-allowed text-xs text-foreground" />
+                          <InputGroupInput value={selectedSolicitud.anexoA?.suplenteTelefonoFijo || "023814400 ext 124"} disabled className="bg-muted/30 cursor-not-allowed text-xs text-foreground" />
                         </InputGroup>
                       </div>
 
                       <div className="space-y-1">
                         <Label className="text-xs font-semibold text-foreground">Móvil Institucional *</Label>
                         <InputGroup leftIcon={<Smartphone className="size-4 text-muted-foreground" />}>
-                          <InputGroupInput value={selectedSolicitud.anexoA?.suplenteMovilInstitucional || "0991122334"} disabled className="bg-muted/30 cursor-not-allowed text-xs text-foreground" />
+                          <InputGroupInput value={selectedSolicitud.anexoA?.suplenteMovilInstitucional || "0998877665"} disabled className="bg-muted/30 cursor-not-allowed text-xs text-foreground" />
                         </InputGroup>
                       </div>
 
                       <div className="space-y-1">
                         <Label className="text-xs font-semibold text-foreground">Móvil Personal *</Label>
                         <InputGroup leftIcon={<Smartphone className="size-4 text-muted-foreground" />}>
-                          <InputGroupInput value={selectedSolicitud.anexoA?.suplenteMovilPersonal || "0982233445"} disabled className="bg-muted/30 cursor-not-allowed text-xs text-foreground" />
+                          <InputGroupInput value={selectedSolicitud.anexoA?.suplenteMovilPersonal || "0981122334"} disabled className="bg-muted/30 cursor-not-allowed text-xs text-foreground" />
                         </InputGroup>
                       </div>
                     </div>
@@ -1418,20 +1600,30 @@ export default function GestionIngresosPage() {
                     Siguiente: Servicios y Procesos →
                   </Button>
                 </div>
+                </div>
               </div>
             )}
 
             {/* ── PASO 2: SERVICIOS Y PROCESOS DE USO ── */}
             {detailTab === 2 && (
-              <div className="bg-surface border border-border rounded-2xl p-6 sm:p-8 space-y-6 shadow-xs animate-in fade-in duration-200">
-                <div className="bg-primary-100/20 border-b border-primary p-3.5 mb-5 rounded-t-lg">
-                  <h2 className="text-sm font-bold font-heading text-primary flex items-center gap-2">
-                    <FileText className="size-4 text-primary shrink-0" />
-                    <span>Sección II — Servicios y Herramientas Informáticas</span>
-                  </h2>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    Procesos y áreas en las que se van a utilizar los servicios y/o herramientas provistos por la DINARP.
-                  </p>
+              <div className="bg-surface border border-border rounded-2xl overflow-hidden shadow-xs animate-in fade-in duration-200">
+                <div className="bg-primary/10 dark:bg-primary/20 border-b border-primary p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+
+                  <div>
+                    <h2 className="text-base font-bold font-heading text-primary dark:text-primary-300 flex items-center gap-2">
+                      <FileCheck2 className="size-5 text-primary dark:text-primary-300 shrink-0" />
+                      <span>Sección II — Servicios y Herramientas Informáticas</span>
+                    </h2>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      Procesos y áreas en las que se van a utilizar los servicios y/o herramientas provistos por la DINARP.
+                    </p>
+                  
+                </div>
+
+                <div className="p-6 sm:p-8 space-y-6">
+<Badge tone="primary" appearance="solid" size="sm" className="font-bold uppercase tracking-wider shrink-0 self-start sm:self-auto !text-white shadow-xs rounded-full px-3 py-1">
+                    SERVICIOS DINARP
+                  </Badge>
                 </div>
 
                 <div className="space-y-6">
@@ -1439,7 +1631,7 @@ export default function GestionIngresosPage() {
                   <div className="space-y-3">
                     <div className="bg-muted/50 p-3 rounded-xl border border-border/40">
                       <div className="flex items-center gap-2 font-bold text-xs text-foreground">
-                        <FileText className="size-4 text-muted-foreground shrink-0" />
+                        <FileCheck2 className="size-4 text-muted-foreground shrink-0" />
                         <span>2.1 Servicios y/o herramientas requeridas *</span>
                       </div>
                       <p className="text-[11px] text-muted-foreground mt-0.5">
@@ -1448,18 +1640,17 @@ export default function GestionIngresosPage() {
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                      <div className="p-3.5 rounded-2xl border border-border bg-surface flex items-center gap-2.5 shadow-2xs">
-                        <Checkbox checked disabled />
-                        <span className="text-xs font-bold text-foreground">Interoperabilidad</span>
-                      </div>
-                      <div className="p-3.5 rounded-2xl border border-border bg-surface flex items-center gap-2.5 shadow-2xs">
-                        <Checkbox checked disabled />
-                        <span className="text-xs font-bold text-foreground">Infodigital</span>
-                      </div>
-                      <div className="p-3.5 rounded-2xl border border-border bg-surface flex items-center gap-2.5 shadow-2xs">
-                        <Checkbox checked disabled />
-                        <span className="text-xs font-bold text-foreground">Ficha de Registro Único del Ciudadano</span>
-                      </div>
+                      {["Interoperabilidad", "Infodigital", "Ficha de Registro Único del Ciudadano"].map((s) => {
+                        const isChecked = selectedSolicitud.anexoA?.serviciosHerramientas
+                          ? selectedSolicitud.anexoA.serviciosHerramientas.includes(s)
+                          : true;
+                        return (
+                          <div key={s} className="p-3.5 rounded-2xl border border-border bg-surface flex items-center gap-2.5 shadow-2xs">
+                            <Checkbox checked={isChecked} disabled />
+                            <span className="text-xs font-bold text-foreground">{s}</span>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
 
@@ -1476,7 +1667,7 @@ export default function GestionIngresosPage() {
                     </div>
 
                     <Textarea
-                      value={selectedSolicitud.anexoA?.areasUso || "Dirección de Gobierno Electrónico y Dirección de Datos Públicos"}
+                      value={selectedSolicitud.anexoA?.areasUso || "Dirección de Tecnologías de la Información, Dirección de Atención Ciudadana"}
                       disabled
                       rows={2}
                       className="bg-muted/30 cursor-not-allowed text-xs font-medium text-foreground rounded-2xl p-3.5 border-border/80"
@@ -1496,7 +1687,7 @@ export default function GestionIngresosPage() {
                     </div>
 
                     <Textarea
-                      value={selectedSolicitud.anexoA?.procesosUso || "Verificación de interoperabilidad nacional de trámites ciudadanos en línea del Portal Único gob.ec."}
+                      value={selectedSolicitud.anexoA?.procesosUso || "Validación de identidad ciudadana, verificación de registros y simplificación de trámites institucionales."}
                       disabled
                       rows={2}
                       className="bg-muted/30 cursor-not-allowed text-xs font-medium text-foreground rounded-2xl p-3.5 border-border/80"
@@ -1524,20 +1715,30 @@ export default function GestionIngresosPage() {
                     Siguiente: Declaraciones y firma →
                   </Button>
                 </div>
+                </div>
               </div>
             )}
 
             {/* ── PASO 3: DECLARACIONES Y FIRMA ── */}
             {detailTab === 3 && (
-              <div className="bg-surface border border-border rounded-2xl p-6 sm:p-8 space-y-6 shadow-xs animate-in fade-in duration-200">
-                <div className="bg-primary-100/20 border-b border-primary p-3.5 mb-5 rounded-t-lg">
-                  <h2 className="text-sm font-bold font-heading text-primary flex items-center gap-2">
-                    <ShieldCheck className="size-4 text-primary shrink-0" />
-                    <span>Sección III — Cláusula Segunda y Tercera: Declaraciones y Firma</span>
-                  </h2>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    Suscripción digital oficial del instrumento ARP-R01 conforme a la Ley de Comercio Electrónico y Firmas Electrónicas.
-                  </p>
+              <div className="bg-surface border border-border rounded-2xl overflow-hidden shadow-xs animate-in fade-in duration-200">
+                <div className="bg-primary/10 dark:bg-primary/20 border-b border-primary p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+
+                  <div>
+                    <h2 className="text-base font-bold font-heading text-primary dark:text-primary-300 flex items-center gap-2">
+                      <ShieldCheck className="size-5 text-primary dark:text-primary-300 shrink-0" />
+                      <span>Sección III — Declaraciones y Firma</span>
+                    </h2>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      Declaraciones correspondientes a la solicitud y formalización mediante la firma de la máxima autoridad o delegado.
+                    </p>
+                  
+                </div>
+
+                <div className="p-6 sm:p-8 space-y-6">
+<Badge tone="primary" appearance="solid" size="sm" className="font-bold uppercase tracking-wider shrink-0 self-start sm:self-auto !text-white shadow-xs rounded-full px-3 py-1">
+                    FORMALIZACIÓN
+                  </Badge>
                 </div>
 
                 <div className="space-y-5">
@@ -1549,7 +1750,7 @@ export default function GestionIngresosPage() {
                     </p>
 
                     <div className="flex items-center gap-2.5 pt-1">
-                      <Checkbox checked disabled />
+                      <Checkbox checked={selectedSolicitud.anexoA?.declaracionesAceptadas ?? true} disabled />
                       <span className="text-xs font-bold text-foreground">
                         Acepto expresamente las declaraciones legales, términos y responsabilidades del Anexo A.
                       </span>
@@ -1610,6 +1811,14 @@ export default function GestionIngresosPage() {
                     </Card>
                   </div>
 
+                  {/* Certificación de datos */}
+                  <div className="p-4 rounded-xl border border-border bg-muted/30 flex items-center gap-3">
+                    <Checkbox checked={selectedSolicitud.anexoA?.firmadoDigitalmente ?? true} disabled />
+                    <span className="text-xs font-bold text-foreground">
+                      Confirmo que la información del Anexo A está completa y es correcta.
+                    </span>
+                  </div>
+
                   {/* Certificación y Documento Firmado FirmaEC */}
                   <div className="p-5 rounded-2xl border border-success/30 bg-success/5 space-y-4 shadow-2xs">
                     <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
@@ -1621,15 +1830,15 @@ export default function GestionIngresosPage() {
                         <div className="space-y-1 min-w-0">
                           <div className="flex flex-wrap items-center gap-2">
                             <h4 className="font-mono font-bold text-xs sm:text-sm text-foreground">
-                              ARP-R01_Solicitud_Acceso_SINARP_{(selectedSolicitud.anexoA?.entidadSiglas || "ENTIDAD").toUpperCase()}.pdf
+                              {selectedSolicitud.anexoA?.archivoDocumentoFirmado || `ARP-R01_Solicitud_Acceso_SINARP_${(selectedSolicitud.anexoA?.entidadSiglas || "ENTIDAD").toUpperCase()}.pdf`}
                             </h4>
-                            <Badge tone="success" appearance="soft" size="sm" className="font-bold text-[10px] uppercase px-2 py-0.5 shrink-0">
-                              SE FIRMÓ EN FIRMA EC
+                            <Badge tone="success" appearance="soft" size="sm" className="font-bold text-[10px] px-2 py-0.5 shrink-0">
+                              Firma verificada en FirmaEC
                             </Badge>
                           </div>
 
                           <p className="text-xs text-muted-foreground leading-relaxed">
-                            Documento oficial del formulario suscrito digitalmente por el Representante Legal mediante <strong className="text-foreground">FirmaEC</strong> con estampado cronológico y validez jurídica acreditada.
+                            Documento firmado electrónicamente por el Representante Legal. La firma fue confirmada y validada mediante FirmaEC, incluyendo su estampado cronológico. El documento se encuentra disponible para revisión.
                           </p>
                         </div>
                       </div>
@@ -1660,6 +1869,7 @@ export default function GestionIngresosPage() {
                     <Download className="size-4" />
                     <span>Descargar Anexo A</span>
                   </Button>
+                </div>
                 </div>
               </div>
             )}
@@ -1749,7 +1959,10 @@ export default function GestionIngresosPage() {
           /* ══════════════════════════════════════════════════════════
               VISTA 2: LISTADO DE TRÁMITES (FILTROS POR PROCESO + TABLA)
              ══════════════════════════════════════════════════════════ */
-          <Card className="bg-surface rounded-2xl border border-border shadow-xs p-6 sm:p-8 lg:p-10 flex flex-col gap-6 my-2">
+          <Card
+            className="bg-surface rounded-2xl border border-border shadow-xs flex-1 min-h-0 overflow-hidden flex flex-col my-0"
+            innerClassName="p-4 sm:p-6 lg:p-8 pr-6 sm:pr-8 lg:pr-10 flex flex-col gap-6 overflow-y-auto flex-1 min-h-0 w-full"
+          >
             {/* ── 1. Encabezado Principal ── */}
             {(() => {
               const isDirGestion = currentUser.role === "DIR_GESTION";
@@ -1758,35 +1971,30 @@ export default function GestionIngresosPage() {
               const isEqNormativa = currentUser.role === "EQ_NORMATIVA";
 
               let badgeText = "Dirección de Gestión y Registro · DINARP";
-              let titleText = "Asignación de solicitudes de enrolamiento";
-              let subtitleText = "Gestiona la asignación de solicitudes de enrolamiento institucional y coordinadores a los revisores del área de gestión.";
+              let titleText = "Asignación de solicitudes";
+              let subtitleText = "Gestiona y asigna las solicitudes pendientes a los revisores del área correspondiente.";
 
               if (isEqGestion) {
                 badgeText = "Equipo de Gestión y Registro · DINARP";
                 titleText = "Solicitudes pendientes de revisión";
-                subtitleText = "Consulta y revisa las solicitudes de enrolamiento asignadas para su aprobación o rechazo.";
+                subtitleText = "Consulta y revisa las solicitudes asignadas para su aprobación o rechazo.";
               } else if (isDirNormativa) {
                 badgeText = "Dirección de Normatividad · DINARP";
-                titleText = "Asignación de solicitudes de enrolamiento";
-                subtitleText = "Gestiona la asignación de solicitudes de enrolamiento institucional y coordinadores a los revisores del equipo de normatividad.";
+                titleText = "Asignación de solicitudes";
+                subtitleText = "Gestiona y asigna las solicitudes pendientes a los revisores del área correspondiente.";
               } else if (isEqNormativa) {
                 badgeText = "Equipo de Normatividad · DINARP";
-                titleText = "Bandeja de Solicitudes Asignadas - Normatividad";
-                subtitleText = "Análisis normativo y resolución jurídica de solicitudes de enrolamiento asignadas a tu usuario.";
+                titleText = "Bandeja de En revisión - Normatividad";
+                subtitleText = "Análisis normativo y resolución jurídica de solicitudes asignadas a tu usuario.";
               } else if (isDirGestion) {
                 badgeText = "Dirección de Gestión y Registro · DINARP";
-                titleText = "Asignación de solicitudes de enrolamiento";
-                subtitleText = "Gestiona la asignación de solicitudes de enrolamiento institucional y coordinadores a los revisores del área de gestión.";
+                titleText = "Asignación de solicitudes";
+                subtitleText = "Gestiona y asigna las solicitudes pendientes a los revisores del área correspondiente.";
               }
-
               return (
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div className="space-y-1 w-full">
-                    <div className="flex items-center gap-2">
-                      <Badge tone="neutral" appearance="soft" size="sm" className="border border-border">
-                        {badgeText}
-                      </Badge>
-                    </div>
+
                     <h1 className="font-heading font-extrabold text-2xl sm:text-3xl tracking-tight text-primary">
                       {titleText}
                     </h1>
@@ -1798,159 +2006,253 @@ export default function GestionIngresosPage() {
               );
             })()}
 
-            {/* ── 2. Resumen Superior (Tarjetas Interactivas Anchas con Hover y Navegación) ── */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6 w-full">
-              {/* Card 1: Sin Asignar / Pendientes */}
+            {/* ── 2. Resumen Superior (Tarjetas Interactivas con Layout Horizontal Optimizado) ── */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 lg:gap-4 w-full">
+              {/* Card 1: Sin Asignar / Pendientes de revisión */}
               <Card
                 variant="featured"
                 role="button"
                 tabIndex={0}
                 onClick={() => {
-                  setFilterEstado(filterEstado === "SIN_ASIGNAR" ? "Todos" : "SIN_ASIGNAR");
+                  const targetFilter = currentUser.role === "EQ_GESTION" ? "PENDIENTES" : "SIN_ASIGNAR";
+                  setFilterEstado(filterEstado === targetFilter ? "Todos" : targetFilter);
                   setCurrentPage(1);
                 }}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
                     e.preventDefault();
-                    setFilterEstado(filterEstado === "SIN_ASIGNAR" ? "Todos" : "SIN_ASIGNAR");
+                    const targetFilter = currentUser.role === "EQ_GESTION" ? "PENDIENTES" : "SIN_ASIGNAR";
+                    setFilterEstado(filterEstado === targetFilter ? "Todos" : targetFilter);
                     setCurrentPage(1);
                   }
                 }}
                 className={cn(
-                  "group relative overflow-hidden cursor-pointer transition-all duration-300 border rounded-2xl outline-none select-none p-6 lg:p-7 w-full min-h-[170px]",
-                  "hover:-translate-y-1 hover:shadow-lg",
-                  filterEstado === "SIN_ASIGNAR"
-                    ? "bg-warning/15 border-warning ring-2 ring-warning/40 shadow-sm"
-                    : "bg-warning/5 hover:bg-warning/10 border-warning/30 shadow-2xs"
+                  "group relative overflow-hidden cursor-pointer transition-all duration-200 border rounded-xl outline-none select-none p-4 sm:p-4.5 w-full",
+                  "hover:-translate-y-0.5 hover:shadow-md",
+                  (currentUser.role === "EQ_GESTION" ? filterEstado === "PENDIENTES" : filterEstado === "SIN_ASIGNAR")
+                    ? "bg-warning/15 border-warning ring-2 ring-warning/40 shadow-xs"
+                    : "bg-warning/5 hover:bg-warning/10 border-warning/25 shadow-2xs"
                 )}
-                innerClassName="p-0 gap-4 text-left h-full justify-between"
+                innerClassName="p-0 h-full justify-center"
               >
-                <div className="flex items-center justify-between w-full">
-                  <span className="font-heading font-extrabold text-4xl lg:text-5xl text-warning tracking-tight">
-                    {dynamicKpis.sinAsignar}
-                  </span>
-                  <Badge tone="warning" appearance="soft" size="sm" className="font-bold text-xs tracking-wider uppercase gap-1.5 px-3 py-1">
-                    <Clock className="size-3.5 shrink-0" />
-                    <span>SIN ASIGNAR</span>
-                  </Badge>
+                <div className="flex items-center justify-between gap-3 w-full">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div
+                      className={cn(
+                        "size-11 rounded-xl flex items-center justify-center shrink-0 transition-all duration-200",
+                        (currentUser.role === "EQ_GESTION" ? filterEstado === "PENDIENTES" : filterEstado === "SIN_ASIGNAR")
+                          ? "bg-warning text-white shadow-xs"
+                          : "bg-warning/15 text-warning group-hover:scale-105 group-hover:bg-warning group-hover:text-white"
+                      )}
+                    >
+                      <Clock className="size-5" />
+                    </div>
+                    <div className="min-w-0 space-y-0.5">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <h3 className="text-sm font-bold text-foreground group-hover:text-warning transition-colors truncate">
+                          {currentUser.role === "EQ_GESTION" ? "Pendientes de revisión" : "Pendientes de asignación"}
+                        </h3>
+                        {(currentUser.role === "EQ_GESTION" ? filterEstado === "PENDIENTES" : filterEstado === "SIN_ASIGNAR") && (
+                          <span className="text-[10px] font-semibold px-1.5 py-0.2 rounded-full bg-warning/20 text-warning border border-warning/30 shrink-0">
+                            Activo
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground font-normal truncate">
+                        {currentUser.role === "EQ_GESTION" ? "Requieren tu revisión" : "Requieren asignar un revisor"}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="text-right shrink-0 pl-2">
+                    <span className="font-heading font-extrabold text-3xl sm:text-4xl text-warning tracking-tight block leading-none">
+                      {currentUser.role === "EQ_GESTION" ? dynamicKpis.pendientes : dynamicKpis.sinAsignar}
+                    </span>
+                    <span className="text-[10px] sm:text-[11px] text-muted-foreground font-medium block mt-1">
+                      solicitudes
+                    </span>
+                  </div>
                 </div>
-                <div className="space-y-1">
-                  <h3 className="text-base font-bold text-foreground block group-hover:text-warning transition-colors">
-                    Solicitudes Pendientes
-                  </h3>
-                  <p className="text-xs text-muted-foreground font-normal block leading-relaxed">
-                    esperando asignación de revisor
-                  </p>
-                </div>
-                <div className="w-full pt-3 border-t border-warning/20 flex items-center justify-between text-xs font-semibold text-warning group-hover:text-warning">
-                  <span>{filterEstado === "SIN_ASIGNAR" ? "Filtro activo (clic para quitar)" : "Filtrar por sin asignar"}</span>
-                  <ChevronRight className="size-4 transition-transform duration-200 group-hover:translate-x-1" />
-                </div>
-                <CardDecorativeIcon>
-                  <Clock className="size-28 text-warning/15 group-hover:text-warning/25 transition-colors" />
-                </CardDecorativeIcon>
               </Card>
 
-              {/* Card 2: En Revisión / Asignadas */}
+              {/* Card 2: En Revisión (Director) / Aprobadas (Revisor) */}
               <Card
                 variant="featured"
                 role="button"
                 tabIndex={0}
                 onClick={() => {
-                  setFilterEstado(filterEstado === "EN_REVISION" ? "Todos" : "EN_REVISION");
+                  const targetFilter = currentUser.role === "EQ_GESTION" ? "Aprobada" : "EN_REVISION";
+                  setFilterEstado(filterEstado === targetFilter ? "Todos" : targetFilter);
                   setCurrentPage(1);
                 }}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
                     e.preventDefault();
-                    setFilterEstado(filterEstado === "EN_REVISION" ? "Todos" : "EN_REVISION");
+                    const targetFilter = currentUser.role === "EQ_GESTION" ? "Aprobada" : "EN_REVISION";
+                    setFilterEstado(filterEstado === targetFilter ? "Todos" : targetFilter);
                     setCurrentPage(1);
                   }
                 }}
                 className={cn(
-                  "group relative overflow-hidden cursor-pointer transition-all duration-300 border rounded-2xl outline-none select-none p-6 lg:p-7 w-full min-h-[170px]",
-                  "hover:-translate-y-1 hover:shadow-lg",
-                  filterEstado === "EN_REVISION"
-                    ? "bg-primary/15 border-primary ring-2 ring-primary/40 shadow-sm"
-                    : "bg-primary/5 hover:bg-primary/10 border-primary/30 shadow-2xs"
+                  "group relative overflow-hidden cursor-pointer transition-all duration-200 border rounded-xl outline-none select-none p-4 sm:p-4.5 w-full",
+                  "hover:-translate-y-0.5 hover:shadow-md",
+                  currentUser.role === "EQ_GESTION"
+                    ? filterEstado === "Aprobada"
+                      ? "bg-success/15 border-success ring-2 ring-success/40 shadow-xs"
+                      : "bg-success/5 hover:bg-success/10 border-success/25 shadow-2xs"
+                    : filterEstado === "EN_REVISION"
+                    ? "bg-primary/15 border-primary ring-2 ring-primary/40 shadow-xs"
+                    : "bg-primary/5 hover:bg-primary/10 border-primary/25 shadow-2xs"
                 )}
-                innerClassName="p-0 gap-4 text-left h-full justify-between"
+                innerClassName="p-0 h-full justify-center"
               >
-                <div className="flex items-center justify-between w-full">
-                  <span className="font-heading font-extrabold text-4xl lg:text-5xl text-primary tracking-tight">
-                    {dynamicKpis.enRevision}
-                  </span>
-                  <Badge tone="primary" appearance="soft" size="sm" className="font-bold text-xs tracking-wider uppercase gap-1.5 px-3 py-1">
-                    <Activity className="size-3.5 shrink-0" />
-                    <span>EN REVISIÓN</span>
-                  </Badge>
+                <div className="flex items-center justify-between gap-3 w-full">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div
+                      className={cn(
+                        "size-11 rounded-xl flex items-center justify-center shrink-0 transition-all duration-200",
+                        currentUser.role === "EQ_GESTION"
+                          ? filterEstado === "Aprobada"
+                            ? "bg-success text-white shadow-xs"
+                            : "bg-success/15 text-success group-hover:scale-105 group-hover:bg-success group-hover:text-white"
+                          : filterEstado === "EN_REVISION"
+                          ? "bg-primary text-white shadow-xs"
+                          : "bg-primary/15 text-primary group-hover:scale-105 group-hover:bg-primary group-hover:text-white"
+                      )}
+                    >
+                      {currentUser.role === "EQ_GESTION" ? (
+                        <CheckCircle2 className="size-5" />
+                      ) : (
+                        <Activity className="size-5" />
+                      )}
+                    </div>
+                    <div className="min-w-0 space-y-0.5">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <h3 className={cn(
+                          "text-sm font-bold text-foreground transition-colors truncate",
+                          currentUser.role === "EQ_GESTION" ? "group-hover:text-success" : "group-hover:text-primary"
+                        )}>
+                          {currentUser.role === "EQ_GESTION" ? "Aprobadas" : "En revisión"}
+                        </h3>
+                        {(currentUser.role === "EQ_GESTION" ? filterEstado === "Aprobada" : filterEstado === "EN_REVISION") && (
+                          <span className={cn(
+                            "text-[10px] font-semibold px-1.5 py-0.2 rounded-full border shrink-0",
+                            currentUser.role === "EQ_GESTION"
+                              ? "bg-success/20 text-success border-success/30"
+                              : "bg-primary/20 text-primary border-primary/30"
+                          )}>
+                            Activo
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground font-normal truncate">
+                        {currentUser.role === "EQ_GESTION" ? "Solicitudes aprobadas" : "Actualmente en análisis"}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="text-right shrink-0 pl-2">
+                    <span className={cn(
+                      "font-heading font-extrabold text-3xl sm:text-4xl tracking-tight block leading-none",
+                      currentUser.role === "EQ_GESTION" ? "text-success" : "text-primary"
+                    )}>
+                      {currentUser.role === "EQ_GESTION" ? dynamicKpis.aprobadas : dynamicKpis.enRevision}
+                    </span>
+                    <span className="text-[10px] sm:text-[11px] text-muted-foreground font-medium block mt-1">
+                      solicitudes
+                    </span>
+                  </div>
                 </div>
-                <div className="space-y-1">
-                  <h3 className="text-base font-bold text-foreground block group-hover:text-primary transition-colors">
-                    Solicitudes Asignadas
-                  </h3>
-                  <p className="text-xs text-muted-foreground font-normal block leading-relaxed">
-                    en análisis activo por el equipo
-                  </p>
-                </div>
-                <div className="w-full pt-3 border-t border-primary/20 flex items-center justify-between text-xs font-semibold text-primary group-hover:text-primary">
-                  <span>{filterEstado === "EN_REVISION" ? "Filtro activo (clic para quitar)" : "Filtrar por en revisión"}</span>
-                  <ChevronRight className="size-4 transition-transform duration-200 group-hover:translate-x-1" />
-                </div>
-                <CardDecorativeIcon>
-                  <Activity className="size-28 text-primary/15 group-hover:text-primary/25 transition-colors" />
-                </CardDecorativeIcon>
               </Card>
 
-              {/* Card 3: Resueltas / Aprobadas */}
+              {/* Card 3: Finalizadas (Director) / Rechazadas (Revisor) */}
               <Card
                 variant="featured"
                 role="button"
                 tabIndex={0}
                 onClick={() => {
-                  setFilterEstado(filterEstado === "Aprobada" ? "Todos" : "Aprobada");
+                  const targetFilter = currentUser.role === "EQ_GESTION" ? "Rechazada" : "Aprobada";
+                  setFilterEstado(filterEstado === targetFilter ? "Todos" : targetFilter);
                   setCurrentPage(1);
                 }}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
                     e.preventDefault();
-                    setFilterEstado(filterEstado === "Aprobada" ? "Todos" : "Aprobada");
+                    const targetFilter = currentUser.role === "EQ_GESTION" ? "Rechazada" : "Aprobada";
+                    setFilterEstado(filterEstado === targetFilter ? "Todos" : targetFilter);
                     setCurrentPage(1);
                   }
                 }}
                 className={cn(
-                  "group relative overflow-hidden cursor-pointer transition-all duration-300 border rounded-2xl outline-none select-none p-6 lg:p-7 w-full min-h-[170px]",
-                  "hover:-translate-y-1 hover:shadow-lg",
-                  filterEstado === "Aprobada"
-                    ? "bg-success/15 border-success ring-2 ring-success/40 shadow-sm"
-                    : "bg-success/5 hover:bg-success/10 border-success/30 shadow-2xs"
+                  "group relative overflow-hidden cursor-pointer transition-all duration-200 border rounded-xl outline-none select-none p-4 sm:p-4.5 w-full",
+                  "hover:-translate-y-0.5 hover:shadow-md",
+                  currentUser.role === "EQ_GESTION"
+                    ? filterEstado === "Rechazada"
+                      ? "bg-danger/15 border-danger ring-2 ring-danger/40 shadow-xs"
+                      : "bg-danger/5 hover:bg-danger/10 border-danger/25 shadow-2xs"
+                    : filterEstado === "Aprobada"
+                    ? "bg-success/15 border-success ring-2 ring-success/40 shadow-xs"
+                    : "bg-success/5 hover:bg-success/10 border-success/25 shadow-2xs"
                 )}
-                innerClassName="p-0 gap-4 text-left h-full justify-between"
+                innerClassName="p-0 h-full justify-center"
               >
-                <div className="flex items-center justify-between w-full">
-                  <span className="font-heading font-extrabold text-4xl lg:text-5xl text-success tracking-tight">
-                    {dynamicKpis.resueltas}
-                  </span>
-                  <Badge tone="success" appearance="soft" size="sm" className="font-bold text-xs tracking-wider uppercase gap-1.5 px-3 py-1">
-                    <CheckCircle2 className="size-3.5 shrink-0" />
-                    <span>RESUELTAS</span>
-                  </Badge>
+                <div className="flex items-center justify-between gap-3 w-full">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div
+                      className={cn(
+                        "size-11 rounded-xl flex items-center justify-center shrink-0 transition-all duration-200",
+                        currentUser.role === "EQ_GESTION"
+                          ? filterEstado === "Rechazada"
+                            ? "bg-danger text-white shadow-xs"
+                            : "bg-danger/15 text-danger group-hover:scale-105 group-hover:bg-danger group-hover:text-white"
+                          : filterEstado === "Aprobada"
+                          ? "bg-success text-white shadow-xs"
+                          : "bg-success/15 text-success group-hover:scale-105 group-hover:bg-success group-hover:text-white"
+                      )}
+                    >
+                      {currentUser.role === "EQ_GESTION" ? (
+                        <XCircle className="size-5" />
+                      ) : (
+                        <CheckCircle2 className="size-5" />
+                      )}
+                    </div>
+                    <div className="min-w-0 space-y-0.5">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <h3 className={cn(
+                          "text-sm font-bold text-foreground transition-colors truncate",
+                          currentUser.role === "EQ_GESTION" ? "group-hover:text-danger" : "group-hover:text-success"
+                        )}>
+                          {currentUser.role === "EQ_GESTION" ? "Rechazadas" : "Finalizadas"}
+                        </h3>
+                        {(currentUser.role === "EQ_GESTION" ? filterEstado === "Rechazada" : filterEstado === "Aprobada") && (
+                          <span className={cn(
+                            "text-[10px] font-semibold px-1.5 py-0.2 rounded-full border shrink-0",
+                            currentUser.role === "EQ_GESTION"
+                              ? "bg-danger/20 text-danger border-danger/30"
+                              : "bg-success/20 text-success border-success/30"
+                          )}>
+                            Activo
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground font-normal truncate">
+                        {currentUser.role === "EQ_GESTION" ? "Solicitudes rechazadas" : "Trámites concluidos"}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="text-right shrink-0 pl-2">
+                    <span className={cn(
+                      "font-heading font-extrabold text-3xl sm:text-4xl tracking-tight block leading-none",
+                      currentUser.role === "EQ_GESTION" ? "text-danger" : "text-success"
+                    )}>
+                      {currentUser.role === "EQ_GESTION" ? dynamicKpis.rechazadas : dynamicKpis.resueltas}
+                    </span>
+                    <span className="text-[10px] sm:text-[11px] text-muted-foreground font-medium block mt-1">
+                      solicitudes
+                    </span>
+                  </div>
                 </div>
-                <div className="space-y-1">
-                  <h3 className="text-base font-bold text-foreground block group-hover:text-success transition-colors">
-                    Solicitudes Finalizadas
-                  </h3>
-                  <p className="text-xs text-muted-foreground font-normal block leading-relaxed">
-                    aprobadas y cerradas exitosamente
-                  </p>
-                </div>
-                <div className="w-full pt-3 border-t border-success/20 flex items-center justify-between text-xs font-semibold text-success group-hover:text-success">
-                  <span>{filterEstado === "Aprobada" ? "Filtro activo (clic para quitar)" : "Filtrar por resueltas"}</span>
-                  <ChevronRight className="size-4 transition-transform duration-200 group-hover:translate-x-1" />
-                </div>
-                <CardDecorativeIcon>
-                  <CheckCircle2 className="size-28 text-success/15 group-hover:text-success/25 transition-colors" />
-                </CardDecorativeIcon>
               </Card>
             </div>
 
@@ -1961,7 +2263,7 @@ export default function GestionIngresosPage() {
             <div className="space-y-3">
               <div className="flex flex-col lg:flex-row items-stretch lg:items-end justify-between gap-3 w-full">
                 {/* Buscador amplio y flexible */}
-                <div className="flex-1 min-w-[320px] sm:min-w-[400px] lg:min-w-[480px]">
+                <div className="flex-1 min-w-[240px] sm:min-w-[280px]">
                   <Search
                     placeholder="Buscar por cédula, nombre, código, correo o entidad..."
                     value={searchQuery}
@@ -1974,8 +2276,8 @@ export default function GestionIngresosPage() {
                   />
                 </div>
 
-                {/* Filtros Combobox del UI Kit anchos e independientes */}
-                <div className="flex flex-wrap sm:flex-nowrap items-end gap-2.5 shrink-0 overflow-x-auto pb-0.5">
+                {/* Filtros Combobox del UI Kit con ancho holgado y responsivo */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-nowrap items-end gap-2.5">
                   <FilterCombobox
                     label="Proceso"
                     placeholder="Proceso..."
@@ -1986,7 +2288,7 @@ export default function GestionIngresosPage() {
                       setFilterTramite(val);
                       setCurrentPage(1);
                     }}
-                    className="min-w-[175px] max-w-[220px]"
+                    className="w-full lg:w-[195px]"
                   />
 
                   <FilterCombobox
@@ -1999,7 +2301,7 @@ export default function GestionIngresosPage() {
                       setFilterEstado(val);
                       setCurrentPage(1);
                     }}
-                    className="min-w-[170px] max-w-[210px]"
+                    className="w-full lg:w-[205px]"
                   />
 
                   <FilterCombobox
@@ -2012,7 +2314,7 @@ export default function GestionIngresosPage() {
                       setFilterInstitucion(val);
                       setCurrentPage(1);
                     }}
-                    className="min-w-[210px] max-w-[270px]"
+                    className="w-full lg:w-[215px]"
                   />
 
                   <FilterCombobox
@@ -2022,7 +2324,7 @@ export default function GestionIngresosPage() {
                     options={sortOptions}
                     value={sortOrder}
                     onChange={(val) => setSortOrder(val as any)}
-                    className="min-w-[185px] max-w-[230px]"
+                    className="w-full lg:w-[195px]"
                   />
                 </div>
               </div>
@@ -2131,10 +2433,15 @@ export default function GestionIngresosPage() {
 
               return (
                 <>
-                  <Table className="w-full table-fixed">
+                  {/* Vista de Tabla para Escritorio */}
+                  <div className="hidden md:block">
+                    <Table
+                      className="w-full min-w-[1080px] table-fixed"
+                      containerClassName="overflow-x-auto rounded-xl"
+                    >
                     <TableHeader>
-                      <TableRow>
-                        <TableHead className="w-9 px-2 text-center">
+                      <TableRow className="border-0 h-11">
+                        <TableHead className="w-9 px-2 py-2.5 text-center shrink-0">
                           <Checkbox
                             disabled={assignableRows.length === 0}
                             checked={isAllAssignableSelected}
@@ -2142,28 +2449,28 @@ export default function GestionIngresosPage() {
                             aria-label="Seleccionar todos los trámites asignables"
                           />
                         </TableHead>
-                        <TableHead className="w-[10%] px-2">
+                        <TableHead className="w-[130px] px-2 py-2.5 whitespace-nowrap">
                           TRÁMITE
                         </TableHead>
-                        <TableHead className="w-[11%] px-2">
-                          SOLICITUD
+                        <TableHead className="w-[160px] px-2 py-2.5 whitespace-nowrap">
+                          PROCESO
                         </TableHead>
-                        <TableHead className="w-[20%] min-w-[170px] px-2">
+                        <TableHead className="w-[190px] px-2 py-2.5 whitespace-nowrap">
                           SOLICITANTE
                         </TableHead>
-                        <TableHead className="w-[16%] px-2">
+                        <TableHead className="w-[210px] px-2 py-2.5 whitespace-nowrap">
                           INSTITUCIÓN
                         </TableHead>
-                        <TableHead className="w-[9%] px-2">
+                        <TableHead className="w-[110px] px-2 py-2.5 whitespace-nowrap">
                           FECHA
                         </TableHead>
-                        <TableHead className="w-[15%] min-w-[140px] px-2">
+                        <TableHead className="w-[170px] px-2 py-2.5 whitespace-nowrap">
                           ESTADO
                         </TableHead>
-                        <TableHead className="w-[11%] px-2">
+                        <TableHead className="w-[150px] px-2 py-2.5 whitespace-nowrap">
                           ASIGNADO
                         </TableHead>
-                        <TableHead className="w-[8%] px-2 text-right">
+                        <TableHead className="w-[90px] px-2 py-2.5 whitespace-nowrap text-right">
                           ACCIONES
                         </TableHead>
                       </TableRow>
@@ -2217,19 +2524,80 @@ export default function GestionIngresosPage() {
 
                               {/* N.º Trámite */}
                               <TableCell className="px-2 font-mono text-xs overflow-hidden">
-                                <div className="flex flex-col truncate">
-                                  <span className="font-bold text-foreground truncate">{row.id}</span>
-                                  <span className="text-[10px] text-muted-foreground truncate">{row.codigoDocumental}</span>
-                                </div>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <div className="flex flex-col truncate cursor-pointer">
+                                      <span className="font-bold text-foreground truncate">{row.id}</span>
+                                      <span className="text-[10px] text-muted-foreground truncate">{row.codigoDocumental}</span>
+                                    </div>
+                                  </TooltipTrigger>
+                                  <TooltipContent side="top" variant="surface" className="p-2.5 max-w-xs flex flex-col items-start gap-0.5">
+                                    <p className="font-bold text-xs text-foreground font-sans">Identificador de trámite</p>
+                                    <p className="font-mono text-xs text-primary font-bold">{row.id}</p>
+                                    {row.codigoDocumental && (
+                                      <p className="font-mono text-[10px] text-muted-foreground">Documento: {row.codigoDocumental}</p>
+                                    )}
+                                  </TooltipContent>
+                                </Tooltip>
                               </TableCell>
 
-                              {/* Solicitud */}
-                              <TableCell className="px-2 text-xs font-medium text-foreground overflow-hidden">
-                                <span className="truncate block" title={row.tituloTramite}>
-                                  {row.tipoTramite === "PROCESO_A_REGISTRO_INSTITUCION" && "Inst. (Anexo A)"}
-                                  {row.tipoTramite === "PROCESO_B_ENROLAMIENTO_COORDINADOR" && "Coord. (Anexo B)"}
-                                  {row.tipoTramite === "PROCESO_C_CAMBIO_COORDINADOR" && "Cambio (Anexo C)"}
-                                </span>
+                              {/* Proceso */}
+                              <TableCell className="px-2 overflow-hidden">
+                                {(() => {
+                                  const procesoLabel =
+                                    row.tipoTramite === "PROCESO_A_REGISTRO_INSTITUCION"
+                                      ? "Anexo A · Registro Institución"
+                                      : row.tipoTramite === "PROCESO_B_ENROLAMIENTO_COORDINADOR"
+                                      ? "Anexo B · Enrolamiento Coordinador"
+                                      : row.tipoTramite === "PROCESO_C_CAMBIO_COORDINADOR"
+                                      ? "Anexo C · Cambio de Coordinador"
+                                      : row.tituloTramite || "Otro trámite";
+
+                                  const procesoShort =
+                                    row.tipoTramite === "PROCESO_A_REGISTRO_INSTITUCION"
+                                      ? "Anexo A"
+                                      : row.tipoTramite === "PROCESO_B_ENROLAMIENTO_COORDINADOR"
+                                      ? "Anexo B"
+                                      : row.tipoTramite === "PROCESO_C_CAMBIO_COORDINADOR"
+                                      ? "Anexo C"
+                                      : "Trámite";
+
+                                  const subtitulo =
+                                    row.tipoTramite === "PROCESO_A_REGISTRO_INSTITUCION"
+                                      ? "Registro Institución"
+                                      : row.tipoTramite === "PROCESO_B_ENROLAMIENTO_COORDINADOR"
+                                      ? "Enrolamiento Coordinador"
+                                      : row.tipoTramite === "PROCESO_C_CAMBIO_COORDINADOR"
+                                      ? "Cambio de Coordinador"
+                                      : row.tituloTramite || "General";
+
+                                  return (
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <div className="flex flex-col min-w-0 group/proc cursor-pointer">
+                                          <span className="font-semibold text-foreground text-xs leading-snug truncate" title={procesoLabel}>
+                                            {procesoLabel}
+                                          </span>
+                                          <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                                            <span className="truncate">{procesoShort}</span>
+                                            <span className="text-[9px] px-1 rounded bg-muted/60 text-muted-foreground font-sans font-semibold group-hover/proc:bg-primary/10 group-hover/proc:text-primary transition-colors shrink-0">
+                                              +
+                                            </span>
+                                          </div>
+                                        </div>
+                                      </TooltipTrigger>
+                                      <TooltipContent side="top" variant="surface" className="p-2.5 max-w-xs flex-col items-start gap-0.5">
+                                        <p className="font-bold text-xs text-foreground">{procesoLabel}</p>
+                                        <p className="text-[11px] text-muted-foreground">{subtitulo}</p>
+                                        {row.codigoDocumental && (
+                                          <p className="font-mono text-[10px] text-primary mt-1 border-t border-border/60 pt-1">
+                                            Código: {row.codigoDocumental}
+                                          </p>
+                                        )}
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  );
+                                })()}
                               </TableCell>
 
                               {/* Solicitante */}
@@ -2258,92 +2626,163 @@ export default function GestionIngresosPage() {
                               </TableCell>
 
                               {/* Institución */}
-                              <TableCell className="px-2 text-muted-foreground text-xs font-medium overflow-hidden">
-                                <span className="truncate block" title={row.institucion}>
-                                  {row.institucion}
-                                </span>
+                              <TableCell className="px-2 overflow-hidden">
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <div className="flex flex-col min-w-0 group/inst cursor-pointer">
+                                      <span className="truncate block text-foreground text-xs font-semibold leading-snug">
+                                        {row.institucion}
+                                      </span>
+                                      <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                                        <span className="truncate font-mono">{row.anexoA?.rucEntidad || "1768000000001"}</span>
+                                        <span className="text-[9px] px-1 rounded bg-muted/60 text-muted-foreground font-sans font-semibold group-hover/inst:bg-primary/10 group-hover/inst:text-primary transition-colors shrink-0">
+                                          +
+                                        </span>
+                                      </div>
+                                    </div>
+                                  </TooltipTrigger>
+                                  <TooltipContent side="top" variant="surface" className="p-2.5 max-w-xs flex-col items-start gap-1">
+                                    <p className="font-bold text-xs text-foreground leading-snug">{row.institucion}</p>
+                                    <p className="font-mono text-[11px] text-muted-foreground">
+                                      RUC: {row.anexoA?.rucEntidad || "1768000000001"}
+                                    </p>
+                                    {row.anexoA?.direccionEntidad && (
+                                      <p className="text-[10px] text-muted-foreground border-t border-border/60 pt-1 mt-0.5">
+                                        {row.anexoA.direccionEntidad}
+                                      </p>
+                                    )}
+                                  </TooltipContent>
+                                </Tooltip>
                               </TableCell>
 
                               {/* Fecha */}
                               <TableCell className="px-2 text-muted-foreground font-mono text-xs overflow-hidden">
-                                <span className="block truncate">{row.fechaSolicitud}</span>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <span className="block truncate cursor-pointer hover:text-foreground transition-colors">
+                                      {row.fechaSolicitud}
+                                    </span>
+                                  </TooltipTrigger>
+                                  <TooltipContent side="top" variant="surface" className="p-2.5 max-w-xs flex flex-col items-start gap-0.5">
+                                    <p className="font-bold text-xs text-foreground font-sans">Fecha y hora de registro</p>
+                                    <p className="font-mono text-xs text-muted-foreground">{row.fechaSolicitud}</p>
+                                  </TooltipContent>
+                                </Tooltip>
                               </TableCell>
 
                               {/* Estado */}
-                              <TableCell className="px-2 whitespace-nowrap">
-                                {renderEstadoBadge(row.estado)}
+                              <TableCell className="px-2 overflow-hidden">
+                                <div className="flex items-center min-w-0">
+                                  {renderEstadoBadge(row.estado, row.revisionIniciada)}
+                                </div>
                               </TableCell>
 
                               {/* Asignado */}
                               <TableCell className="px-2 text-xs overflow-hidden">
-                                {revisorAsignado ? (
-                                  <Badge tone="neutral" appearance="soft" className="border border-border text-[11px] font-medium text-foreground truncate max-w-full">
-                                    <User className="size-3 mr-1 text-primary shrink-0" />
-                                    <span className="truncate">{revisorAsignado}</span>
-                                  </Badge>
-                                ) : (
-                                  <span className="text-[11px] text-muted-foreground italic font-mono truncate block">Sin asignar</span>
-                                )}
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <div className="flex items-center min-w-0 cursor-pointer">
+                                      {revisorAsignado ? (
+                                        <Badge tone="neutral" appearance="soft" className="border border-border text-[11px] font-medium text-foreground truncate max-w-full hover:bg-surface/80 transition-colors">
+                                          <User className="size-3 mr-1 text-primary shrink-0" />
+                                          <span className="truncate">{revisorAsignado}</span>
+                                        </Badge>
+                                      ) : (
+                                        <span className="text-[11px] text-muted-foreground italic font-mono truncate block hover:text-foreground transition-colors">
+                                          Sin asignar
+                                        </span>
+                                      )}
+                                    </div>
+                                  </TooltipTrigger>
+                                  <TooltipContent side="top" variant="surface" className="p-2.5 max-w-xs flex flex-col items-start gap-0.5">
+                                    <p className="font-bold text-xs text-foreground font-sans">
+                                      {revisorAsignado ? "Revisor asignado" : "Estado de asignación"}
+                                    </p>
+                                    <p className="text-[11px] text-muted-foreground">
+                                      {revisorAsignado ? revisorAsignado : "Trámite pendiente de asignar a un revisor"}
+                                    </p>
+                                  </TooltipContent>
+                                </Tooltip>
                               </TableCell>
 
                               {/* Acciones */}
                               <TableCell className="px-2 text-right" onClick={(e) => e.stopPropagation()}>
                                 <div className="flex items-center justify-end gap-1">
-                                  {isAssignable ? (
-                                    <Tooltip>
-                                      <TooltipTrigger asChild>
-                                        <Button
-                                          type="button"
-                                          variant={esReasignacion ? "neutral" : "primary"}
-                                          size="icon-sm"
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            handleOpenAssign(row);
-                                          }}
-                                          className={cn(
-                                            "size-7 rounded-lg shadow-2xs",
-                                            esReasignacion && "border border-border text-foreground hover:bg-muted"
-                                          )}
-                                          aria-label={esReasignacion ? `Reasignar revisor a trámite ${row.id}` : `Asignar revisor a trámite ${row.id}`}
-                                        >
-                                          {esReasignacion ? <RotateCcw className="size-3.5 text-primary" /> : <UserPlus className="size-3.5" />}
-                                        </Button>
-                                      </TooltipTrigger>
-                                      <TooltipContent side="top">
-                                        {esReasignacion ? `Reasignar revisor (trámite aún no iniciado por ${revisorAsignado})` : "Asignar revisor"}
-                                      </TooltipContent>
-                                    </Tooltip>
-                                  ) : motivoBloqueo && revisorAsignado && !["Aprobada", "APROBADO_FINAL", "Rechazada", "Cancelada"].includes(row.estado) ? (
-                                    <Tooltip>
-                                      <TooltipTrigger asChild>
-                                        <div className="size-7 rounded-lg flex items-center justify-center text-muted-foreground/40 cursor-not-allowed border border-dashed border-border/50">
-                                          <Lock className="size-3.5" />
-                                        </div>
-                                      </TooltipTrigger>
-                                      <TooltipContent side="top" className="max-w-xs text-xs">
-                                        {motivoBloqueo}
-                                      </TooltipContent>
-                                    </Tooltip>
-                                  ) : null}
+                                  {/* Si es Personal de Normatividad (EQ_NORMATIVA), acción principal directa: 'Gestionar resolución' */}
+                                  {currentUser.role === "EQ_NORMATIVA" ? (
+                                    <Button
+                                      type="button"
+                                      variant="primary"
+                                      size="sm"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleSelectSolicitud(row);
+                                      }}
+                                      className="h-7 px-2.5 text-xs font-semibold rounded-lg shadow-2xs gap-1.5 whitespace-nowrap"
+                                      aria-label={`Gestionar resolución para trámite ${row.id}`}
+                                    >
+                                      <FileSignature className="size-3.5" />
+                                      <span>Gestionar resolución</span>
+                                    </Button>
+                                  ) : (
+                                    <>
+                                      {isAssignable ? (
+                                        <Tooltip>
+                                          <TooltipTrigger asChild>
+                                            <Button
+                                              type="button"
+                                              variant={esReasignacion ? "neutral" : "primary"}
+                                              size="icon-sm"
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleOpenAssign(row);
+                                              }}
+                                              className={cn(
+                                                "size-7 rounded-lg shadow-2xs",
+                                                esReasignacion && "border border-border text-foreground hover:bg-muted"
+                                              )}
+                                              aria-label={esReasignacion ? `Reasignar revisor a trámite ${row.id}` : `Asignar revisor a trámite ${row.id}`}
+                                            >
+                                              {esReasignacion ? <RotateCcw className="size-3.5 text-primary" /> : <UserPlus className="size-3.5" />}
+                                            </Button>
+                                          </TooltipTrigger>
+                                          <TooltipContent side="top">
+                                            {esReasignacion ? `Reasignar revisor (trámite aún no iniciado por ${revisorAsignado})` : "Asignar"}
+                                          </TooltipContent>
+                                        </Tooltip>
+                                      ) : motivoBloqueo && revisorAsignado && !["Aprobada", "APROBADO_FINAL", "Finalizado", "Rechazada", "Cancelada", "Cerrada"].includes(row.estado) ? (
+                                        <Tooltip>
+                                          <TooltipTrigger asChild>
+                                            <div className="size-7 rounded-lg flex items-center justify-center text-muted-foreground/40 cursor-not-allowed border border-dashed border-border/50">
+                                              <Lock className="size-3.5" />
+                                            </div>
+                                          </TooltipTrigger>
+                                          <TooltipContent side="top" className="max-w-xs text-xs">
+                                            {motivoBloqueo}
+                                          </TooltipContent>
+                                        </Tooltip>
+                                      ) : null}
 
-                                  <Tooltip>
-                                    <TooltipTrigger asChild>
-                                      <Button
-                                        type="button"
-                                        variant="outline"
-                                        size="icon-sm"
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          handleSelectSolicitud(row);
-                                        }}
-                                        className="size-7 rounded-lg border-border/80 text-foreground hover:bg-muted shadow-2xs"
-                                        aria-label={`Ver detalle de trámite ${row.id}`}
-                                      >
-                                        <Eye className="size-3.5" />
-                                      </Button>
-                                    </TooltipTrigger>
-                                    <TooltipContent side="top">Ver detalle</TooltipContent>
-                                  </Tooltip>
+                                      <Tooltip>
+                                        <TooltipTrigger asChild>
+                                          <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="icon-sm"
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              handleSelectSolicitud(row);
+                                            }}
+                                            className="size-7 rounded-lg border-border/80 text-foreground hover:bg-muted shadow-2xs"
+                                            aria-label={`Ver detalle de trámite ${row.id}`}
+                                          >
+                                            <Eye className="size-3.5" />
+                                          </Button>
+                                        </TooltipTrigger>
+                                        <TooltipContent side="top">Ver detalle</TooltipContent>
+                                      </Tooltip>
+                                    </>
+                                  )}
                                 </div>
                               </TableCell>
                             </TableRow>
@@ -2352,14 +2791,191 @@ export default function GestionIngresosPage() {
                       )}
                     </TableBody>
                   </Table>
+                </div>
 
-                  {/* Barra Flotante Contextual para Asignación Masiva */}
-                  {selectedIds.length > 0 && (
-                    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-foreground text-background dark:bg-card dark:text-card-foreground px-6 py-3.5 rounded-2xl shadow-xl border border-border flex items-center gap-5 animate-slide-up">
-                      <div className="flex items-center gap-2 text-xs font-bold">
-                        <CheckCircle2 className="size-4 text-primary shrink-0" />
-                        <span>{selectedIds.length} {selectedIds.length === 1 ? "solicitud seleccionada" : "solicitudes seleccionadas"}</span>
+                {/* Vista Mobile Card Row (Responsive) para Pantallas Estrechas */}
+                <div className="block md:hidden">
+                  {paginatedData.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center p-8 bg-surface border border-border rounded-xl text-center space-y-2">
+                      <div className="size-12 rounded-full bg-muted/60 flex items-center justify-center text-muted-foreground mb-1">
+                        <SearchIcon className="size-6" />
                       </div>
+                      <h3 className="font-heading font-bold text-base text-foreground">
+                        No hay trámites registrados
+                      </h3>
+                      <p className="text-xs text-muted-foreground leading-relaxed">
+                        No se encontraron trámites que coincidan con los filtros seleccionados.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                      {paginatedData.map((row) => {
+                        const { puedeReasignar, esReasignacion } = puedeReasignarSolicitud(row, currentUser.role);
+                        const isAssignable = puedeReasignar;
+                        const isSelected = selectedIds.includes(row.id);
+                        const revisorAsignado =
+                          currentUser.role === "DIR_NORMATIVA" || currentUser.role === "EQ_NORMATIVA"
+                            ? (row.revisorNormatividad || row.revisor)
+                            : (row.revisorGestion || row.revisor);
+
+                        const procesoLabel =
+                          row.tipoTramite === "PROCESO_A_REGISTRO_INSTITUCION"
+                            ? "Anexo A · Registro Institución"
+                            : row.tipoTramite === "PROCESO_B_ENROLAMIENTO_COORDINADOR"
+                            ? "Anexo B · Enrolamiento Coordinador"
+                            : row.tipoTramite === "PROCESO_C_CAMBIO_COORDINADOR"
+                            ? "Anexo C · Cambio de Coordinador"
+                            : row.tituloTramite || "Otro trámite";
+
+                        return (
+                          <div
+                            key={row.id}
+                            onClick={() => handleSelectSolicitud(row)}
+                            className={cn(
+                              "p-4 rounded-xl border border-border bg-surface space-y-3 text-left transition-all duration-200 hover:border-primary/40 hover:shadow-xs cursor-pointer",
+                              isSelected && "ring-2 ring-primary/40 bg-primary/5 border-primary/30"
+                            )}
+                          >
+                            {/* Cabecera: Checkbox + ID + Código + Badge de Estado */}
+                            <div className="flex items-center justify-between gap-2 pb-2 border-b border-border/50 min-w-0">
+                              <div className="flex items-center gap-2.5 min-w-0 shrink-0" onClick={(e) => e.stopPropagation()}>
+                                <Checkbox
+                                  disabled={!isAssignable}
+                                  checked={isSelected}
+                                  onCheckedChange={() => toggleSelectRow(row.id)}
+                                  aria-label={`Seleccionar trámite ${row.id}`}
+                                />
+                                <div className="flex flex-col min-w-0">
+                                  <span className="font-bold text-xs font-mono text-primary whitespace-nowrap">{row.id}</span>
+                                  {row.codigoDocumental && (
+                                    <span className="text-[10px] text-muted-foreground font-mono whitespace-nowrap">{row.codigoDocumental}</span>
+                                  )}
+                                </div>
+                              </div>
+                              <div className="min-w-0 flex justify-end shrink">
+                                {renderEstadoBadge(row.estado, row.revisionIniciada)}
+                              </div>
+                            </div>
+
+                            {/* Cuerpo: Proceso + Institución con RUC + Solicitante con Cédula y Correo */}
+                            <div className="space-y-2 py-0.5">
+                              <div>
+                                <p className="font-bold text-sm text-foreground leading-snug">{procesoLabel}</p>
+                              </div>
+
+                              <div className="space-y-1.5 text-xs">
+                                {/* Institución */}
+                                <div className="flex items-start gap-2 text-foreground font-medium">
+                                  <Building2 className="size-3.5 text-primary shrink-0 mt-0.5" />
+                                  <div className="flex flex-col min-w-0">
+                                    <span className="break-words leading-tight">{row.institucion}</span>
+                                    <span className="text-[10px] font-mono text-muted-foreground">
+                                      RUC: {row.anexoA?.rucEntidad || "1768000000001"}
+                                    </span>
+                                  </div>
+                                </div>
+
+                                {/* Solicitante */}
+                                <div className="flex items-start gap-2 text-muted-foreground">
+                                  <User className="size-3.5 text-muted-foreground shrink-0 mt-0.5" />
+                                  <div className="flex flex-col min-w-0">
+                                    <span className="text-foreground font-medium break-words leading-tight">{row.nombreCompleto}</span>
+                                    <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[10px] text-muted-foreground font-mono mt-0.5">
+                                      <span>C.I. {row.cedula}</span>
+                                      <span>·</span>
+                                      <span className="font-sans text-primary break-all">{row.correo}</span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Pie: Fecha + Asignación + Acciones */}
+                            <div className="flex items-center justify-between pt-2.5 border-t border-border/60 gap-2 flex-wrap sm:flex-nowrap">
+                              <div className="flex flex-col min-w-0">
+                                <span className="text-[10px] text-muted-foreground">Fecha ingreso:</span>
+                                <span className="font-mono text-xs text-foreground font-medium whitespace-nowrap">{row.fechaSolicitud}</span>
+                              </div>
+
+                              <div className="flex items-center gap-2 shrink-0 ml-auto" onClick={(e) => e.stopPropagation()}>
+                                {revisorAsignado ? (
+                                  <Badge tone="neutral" appearance="soft" size="sm" className="text-[10px] border border-border px-2 py-0.5">
+                                    <User className="size-2.5 mr-1 text-primary shrink-0" />
+                                    <span className="whitespace-nowrap">{revisorAsignado}</span>
+                                  </Badge>
+                                ) : (
+                                  <span className="text-[11px] text-muted-foreground italic font-sans whitespace-nowrap">Sin asignar</span>
+                                )}
+
+                                {currentUser.role === "EQ_NORMATIVA" ? (
+                                  <Button
+                                    type="button"
+                                    variant="primary"
+                                    size="sm"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleSelectSolicitud(row);
+                                    }}
+                                    className="h-7 px-2.5 text-xs font-semibold rounded-lg shadow-2xs gap-1.5"
+                                    aria-label={`Gestionar resolución para trámite ${row.id}`}
+                                  >
+                                    <FileSignature className="size-3" />
+                                    <span>Gestionar resolución</span>
+                                  </Button>
+                                ) : (
+                                  <>
+                                    {isAssignable && (
+                                      <Button
+                                        type="button"
+                                        variant={esReasignacion ? "neutral" : "primary"}
+                                        size="sm"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleOpenAssign(row);
+                                        }}
+                                        className={cn(
+                                          "h-7 px-2 text-xs font-semibold rounded-lg shadow-2xs gap-1",
+                                          esReasignacion && "border border-border text-foreground hover:bg-muted"
+                                        )}
+                                        aria-label={esReasignacion ? "Reasignar revisor" : "Asignar revisor"}
+                                      >
+                                        {esReasignacion ? <RotateCcw className="size-3" /> : <UserPlus className="size-3" />}
+                                        <span>{esReasignacion ? "Reasignar" : "Asignar"}</span>
+                                      </Button>
+                                    )}
+
+                                    <Button
+                                      type="button"
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleSelectSolicitud(row);
+                                      }}
+                                      className="h-7 px-2 text-xs font-semibold rounded-lg border-border/80 text-foreground hover:bg-muted shadow-2xs gap-1"
+                                      aria-label={`Ver detalle de trámite ${row.id}`}
+                                    >
+                                      <Eye className="size-3" />
+                                      <span>Detalle</span>
+                                    </Button>
+                                  </>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+
+                {/* Barra Flotante Contextual para Asignación Masiva */}
+                {selectedIds.length > 0 && (
+                  <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-foreground text-background dark:bg-card dark:text-card-foreground px-4 sm:px-6 py-3 sm:py-3.5 rounded-2xl shadow-xl border border-border flex items-center justify-between gap-3 sm:gap-5 w-[calc(100%-2rem)] max-w-md sm:w-auto animate-slide-up">
+                    <div className="flex items-center gap-2 text-xs font-bold">
+                      <CheckCircle2 className="size-4 text-primary shrink-0" />
+                      <span>{selectedIds.length} {selectedIds.length === 1 ? "solicitud seleccionada" : "solicitudes seleccionadas"}</span>
+                    </div>
                       <div className="flex items-center gap-2">
                         <Button
                           type="button"
@@ -2392,30 +3008,29 @@ export default function GestionIngresosPage() {
             })()}
 
             {/* ── 6. Paginación y Contador de filas ── */}
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-3 border-t border-border/60 w-full">
-              {/* Texto explicativo de resultados a la izquierda */}
-              <p className="text-xs text-muted-foreground font-medium whitespace-nowrap mr-auto sm:mr-0">
-                Mostrando{" "}
-                <span className="font-bold text-foreground">
-                  {filteredData.length === 0
-                    ? 0
-                    : (currentPage - 1) * itemsPerPage + 1}{" "}
-                  - {Math.min(currentPage * itemsPerPage, filteredData.length)}
-                </span>{" "}
-                de{" "}
-                <span className="font-bold text-foreground">
-                  {filteredData.length}
-                </span>{" "}
-                trámites
-              </p>
+            <div className="flex flex-col md:flex-row items-center justify-center md:justify-between gap-3 sm:gap-4 pt-4 pb-2 w-full border-t border-border/50">
+              {/* Información y Selector de filas */}
+              <div className="flex flex-col sm:flex-row items-center justify-center md:justify-start gap-2.5 sm:gap-4 w-full md:w-auto text-center md:text-left">
+                <p className="text-xs text-muted-foreground font-medium text-center md:text-left">
+                  Mostrando{" "}
+                  <span className="font-bold text-foreground">
+                    {filteredData.length === 0
+                      ? 0
+                      : (currentPage - 1) * itemsPerPage + 1}{" "}
+                    - {Math.min(currentPage * itemsPerPage, filteredData.length)}
+                  </span>{" "}
+                  de{" "}
+                  <span className="font-bold text-foreground">
+                    {filteredData.length}
+                  </span>{" "}
+                  trámites
+                </p>
 
-              {/* Controles de paginación y filas a la derecha */}
-              <div className="flex flex-wrap items-center justify-end gap-4 sm:gap-6 ml-auto">
                 {/* Selector de filas por página */}
-                <div className="flex items-center gap-2 text-xs text-muted-foreground whitespace-nowrap">
+                <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
                   <span>Filas:</span>
                   <div className="inline-flex rounded-full border border-border/80 p-0.5 bg-surface shadow-2xs">
-                    {[5, 10, 20].map((size) => (
+                    {[5, 10, 20, 50].map((size) => (
                       <button
                         key={size}
                         type="button"
@@ -2435,88 +3050,90 @@ export default function GestionIngresosPage() {
                     ))}
                   </div>
                 </div>
+              </div>
 
-                {/* Paginación UI Kit con botones circulares completos (« < 1 2 > ») */}
-                <Pagination className="mx-0 w-auto justify-end">
-                <PaginationContent className="gap-1.5">
-                  <PaginationItem>
-                    <PaginationFirst
-                      href="#"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        if (currentPage > 1) setCurrentPage(1);
-                      }}
-                      className={cn(
-                        "size-8 rounded-full border border-border/70 hover:bg-muted/30 transition-colors",
-                        currentPage <= 1 ? "pointer-events-none opacity-40 cursor-not-allowed" : ""
-                      )}
-                    />
-                  </PaginationItem>
-
-                  <PaginationItem>
-                    <PaginationPrevious
-                      href="#"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        if (currentPage > 1) setCurrentPage(currentPage - 1);
-                      }}
-                      className={cn(
-                        "size-8 rounded-full border border-border/70 hover:bg-muted/30 transition-colors",
-                        currentPage <= 1 ? "pointer-events-none opacity-40 cursor-not-allowed" : ""
-                      )}
-                    />
-                  </PaginationItem>
-
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                    <PaginationItem key={page}>
-                      <PaginationLink
+              {/* Controles de paginación */}
+              <div className="w-full md:w-auto flex items-center justify-center md:justify-end overflow-x-auto py-1">
+                <Pagination className="mx-auto md:mx-0 w-auto justify-center">
+                  <PaginationContent className="gap-1 sm:gap-1.5 flex-nowrap justify-center">
+                    <PaginationItem className="hidden sm:inline-flex">
+                      <PaginationFirst
                         href="#"
-                        isActive={page === currentPage}
                         onClick={(e) => {
                           e.preventDefault();
-                          setCurrentPage(page);
+                          if (currentPage > 1) setCurrentPage(1);
                         }}
                         className={cn(
-                          "size-8 rounded-full font-semibold text-xs transition-all",
-                          page === currentPage
-                            ? "bg-primary text-white font-bold shadow-2xs"
-                            : "border border-border/70 hover:bg-muted/30 text-foreground"
+                          "size-8 rounded-full border border-border/70 hover:bg-muted/30 transition-colors",
+                          currentPage <= 1 ? "pointer-events-none opacity-40 cursor-not-allowed" : ""
                         )}
-                      >
-                        {page}
-                      </PaginationLink>
+                      />
                     </PaginationItem>
-                  ))}
 
-                  <PaginationItem>
-                    <PaginationNext
-                      href="#"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        if (currentPage < totalPages) setCurrentPage(currentPage + 1);
-                      }}
-                      className={cn(
-                        "size-8 rounded-full border border-border/70 hover:bg-muted/30 transition-colors",
-                        currentPage >= totalPages ? "pointer-events-none opacity-40 cursor-not-allowed" : ""
-                      )}
-                    />
-                  </PaginationItem>
+                    <PaginationItem>
+                      <PaginationPrevious
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          if (currentPage > 1) setCurrentPage(currentPage - 1);
+                        }}
+                        className={cn(
+                          "size-8 rounded-full border border-border/70 hover:bg-muted/30 transition-colors",
+                          currentPage <= 1 ? "pointer-events-none opacity-40 cursor-not-allowed" : ""
+                        )}
+                      />
+                    </PaginationItem>
 
-                  <PaginationItem>
-                    <PaginationLast
-                      href="#"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        if (currentPage < totalPages) setCurrentPage(totalPages);
-                      }}
-                      className={cn(
-                        "size-8 rounded-full border border-border/70 hover:bg-muted/30 transition-colors",
-                        currentPage >= totalPages ? "pointer-events-none opacity-40 cursor-not-allowed" : ""
-                      )}
-                    />
-                  </PaginationItem>
-                </PaginationContent>
-              </Pagination>
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                      <PaginationItem key={page}>
+                        <PaginationLink
+                          href="#"
+                          isActive={page === currentPage}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            setCurrentPage(page);
+                          }}
+                          className={cn(
+                            "size-8 rounded-full font-semibold text-xs transition-all",
+                            page === currentPage
+                              ? "bg-primary text-white font-bold shadow-2xs"
+                              : "border border-border/70 hover:bg-muted/30 text-foreground"
+                          )}
+                        >
+                          {page}
+                        </PaginationLink>
+                      </PaginationItem>
+                    ))}
+
+                    <PaginationItem>
+                      <PaginationNext
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          if (currentPage < totalPages) setCurrentPage(currentPage + 1);
+                        }}
+                        className={cn(
+                          "size-8 rounded-full border border-border/70 hover:bg-muted/30 transition-colors",
+                          currentPage >= totalPages ? "pointer-events-none opacity-40 cursor-not-allowed" : ""
+                        )}
+                      />
+                    </PaginationItem>
+
+                    <PaginationItem className="hidden sm:inline-flex">
+                      <PaginationLast
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          if (currentPage < totalPages) setCurrentPage(totalPages);
+                        }}
+                        className={cn(
+                          "size-8 rounded-full border border-border/70 hover:bg-muted/30 transition-colors",
+                          currentPage >= totalPages ? "pointer-events-none opacity-40 cursor-not-allowed" : ""
+                        )}
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
               </div>
             </div>
           </Card>
@@ -2616,7 +3233,13 @@ export default function GestionIngresosPage() {
               setSolicitudesMasivas([]);
             }
           }}
-          tipoArea={currentUser.role === "DIR_NORMATIVA" ? "NORMATIVIDAD" : "GESTION"}
+          tipoArea={
+            currentUser.role === "DIR_NORMATIVA" ||
+            solicitudToAssign?.estado === "PENDIENTE_ASIGNACION_NORMATIVIDAD" ||
+            solicitudToAssign?.estado === "EN_REVISION_NORMATIVIDAD"
+              ? "NORMATIVIDAD"
+              : "GESTION"
+          }
           directorNombre={currentUser.name}
           allSolicitudes={solicitudes}
           onConfirmAsignacion={handleConfirmAsignacion}

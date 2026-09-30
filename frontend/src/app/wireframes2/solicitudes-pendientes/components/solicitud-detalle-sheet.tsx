@@ -47,10 +47,17 @@ export function SolicitudDetalleSheet({
 }: SolicitudDetalleSheetProps) {
   if (!solicitud) return null;
 
-  const isPendiente = solicitud.estado === "Pendiente" || solicitud.estado === "PENDIENTE_ASIGNACION_GESTION" || solicitud.estado === "PENDIENTE_ASIGNACION_NORMATIVIDAD";
-  const isAprobada = solicitud.estado === "Aprobada" || solicitud.estado === "APROBADO_FINAL";
-  const isRechazada = solicitud.estado === "Rechazada";
-  const badgeProps = getEstadoBadgeProps(solicitud.estado);
+  const isEnRevision = solicitud.estado === "EN_REVISION_GESTION" || solicitud.estado === "EN_REVISION_NORMATIVIDAD";
+  const isPendiente = (solicitud.estado === "Pendiente" || solicitud.estado === "PENDIENTE_ASIGNACION_GESTION" || solicitud.estado === "PENDIENTE_ASIGNACION_NORMATIVIDAD") && !isEnRevision;
+  const isAprobada = solicitud.estado === "Aprobada" || solicitud.estado === "APROBADO_FINAL" || solicitud.estado === "APROBADO_GESTION";
+  const isRechazada = solicitud.estado === "Rechazada" || solicitud.estado === "Cancelada";
+  const canAct = isEnRevision || isPendiente;
+  const badgeProps = getEstadoBadgeProps(
+    solicitud.estado,
+    solicitud.revisionIniciada,
+    "REVISOR",
+    solicitud.rechazadoPor
+  );
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -69,9 +76,9 @@ export function SolicitudDetalleSheet({
               appearance="soft"
               size="sm"
               dot
-              className="font-semibold text-xs"
+              className="font-semibold text-[11px] normal-case tracking-normal whitespace-nowrap px-2.5 py-0.5 inline-flex shrink-0 shadow-2xs"
             >
-              {badgeProps.label}
+              <span>{badgeProps.label}</span>
             </Badge>
           </div>
 
@@ -85,7 +92,38 @@ export function SolicitudDetalleSheet({
 
         {/* Cuerpo Scrollable */}
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
-          {/* Bloque Estado Dinámico (Aprobada / Rechazada / Pendiente) */}
+          {/* Bloque Estado Dinámico (En revisión / Aprobada / Rechazada / Pendiente) */}
+          {isEnRevision && (
+            <div className="p-4 rounded-2xl bg-primary/5 border border-primary/20 text-foreground space-y-2">
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 font-bold text-sm text-foreground">
+                  <UserCheck className="size-4 shrink-0 text-primary" />
+                  <span>Estás revisando esta solicitud</span>
+                </div>
+                <Badge tone="primary" appearance="soft" size="sm" className="font-bold text-[10px]">
+                  EN REVISIÓN
+                </Badge>
+              </div>
+              <p className="text-xs leading-relaxed text-muted-foreground">
+                La revisión está en curso. Verifica la información, documentos y soportes antes de aprobar o rechazar la solicitud.
+              </p>
+              <div className="pt-2 border-t border-primary/10 flex flex-wrap items-center justify-between gap-2 text-[11px]">
+                <div>
+                  <span className="text-muted-foreground">Tipo de solicitud: </span>
+                  <strong className="text-foreground">
+                    {solicitud.tipoTramite === "PROCESO_A_REGISTRO_INSTITUCION"
+                      ? "Anexo A — Solicitud de Registro de Institución"
+                      : solicitud.tipoTramite === "PROCESO_B_ENROLAMIENTO_COORDINADOR"
+                      ? "Anexo B — Solicitud de Registro de Coordinador"
+                      : solicitud.tipoTramite === "PROCESO_C_CAMBIO_COORDINADOR"
+                      ? "Anexo C — Solicitud de Cambio de Coordinador"
+                      : "Solicitud de Ingreso"}
+                  </strong>
+                </div>
+              </div>
+            </div>
+          )}
+
           {isAprobada && (
             <div className="p-4 rounded-2xl bg-muted/40 border border-border text-foreground space-y-2">
               <div className="flex items-center gap-2 font-bold text-sm text-foreground">
@@ -322,18 +360,18 @@ export function SolicitudDetalleSheet({
           </div>
         </div>
 
-        {/* Footer con Acciones (si está Pendiente) */}
-        {isPendiente ? (
+        {/* Footer con Acciones (si está En Revisión o Pendiente) */}
+        {canAct ? (
           <div className="p-4 border-t border-border/70 bg-surface shrink-0 flex items-center justify-end gap-2.5">
             <Button
               type="button"
               variant="outline"
               size="sm"
               onClick={() => onRejectClick(solicitud)}
-              className="text-xs font-semibold border-border text-foreground hover:bg-muted gap-1.5"
+              className="text-xs font-semibold border-danger/30 text-danger hover:bg-danger/10 gap-1.5"
             >
               <XCircle className="size-3.5" />
-              <span>Rechazar</span>
+              <span>Rechazar solicitud</span>
             </Button>
 
             <Button
@@ -344,7 +382,7 @@ export function SolicitudDetalleSheet({
               className="text-xs font-semibold gap-1.5 shadow-xs"
             >
               <CheckCircle2 className="size-3.5" />
-              <span>Aprobar acceso</span>
+              <span>Aprobar solicitud</span>
             </Button>
           </div>
         ) : (

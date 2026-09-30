@@ -14,9 +14,6 @@ import { AvatarShowcase } from "./avatar-showcase";
 import { StepperShowcase } from "./stepper-showcase";
 import { UserMenuShowcase } from "./user-menu-showcase";
 import { NotificationsMenuShowcase } from "./notifications-menu-showcase";
-import { FooterShowcase } from "./footer-showcase";
-import { Footer } from "@/components/layout/footer";
-import { PanelBottom } from "lucide-react";
 
 import { SubSection } from "./sub-section";
 
@@ -104,16 +101,6 @@ export function NavigationShowcase({ registerSection }: { registerSection?: (id:
           description="Muestra avisos, alertas y actualizaciones relevantes para que el usuario pueda identificar rápidamente información que requiere su atención."
         >
           <NotificationsMenuShowcase registerSection={registerSection} />
-        </SubSection>
-
-        <SubSection
-          icon={PanelBottom} id="footer"
-          registerSection={registerSection}
-          title="Pie de página (Footer)"
-          description="Contiene información institucional, enlaces importantes, redes sociales y contacto. Provee navegación complementaria en la parte inferior de la página."
-          isEditable={true}
-        >
-          <FooterShowcase />
         </SubSection>
 
     </div>

@@ -7,42 +7,67 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
   DropdownMenuItem,
-  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
-  User,
-  ShieldCheck,
-  FolderKanban,
-  Settings,
   LogOut,
   ChevronDown,
   ChevronLeft,
-  HelpCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 
-export function UserMenu() {
+import { useAuthStore } from "@/app/wireframes2/acceso-seguridad/data/auth-store";
+
+export interface UserMenuProps {
+  user?: {
+    name?: string;
+    role?: string;
+    roleTitle?: string;
+    email?: string;
+    institution?: string;
+    avatar?: string;
+    initials?: string;
+  };
+  onRoleChange?: (role: any) => void;
+  onLogout?: () => void;
+}
+
+export function UserMenu({ user: userProp, onRoleChange, onLogout }: UserMenuProps = {}) {
   const router = useRouter();
   const pathname = usePathname();
   const isMobile = useIsMobile();
   const [open, setOpen] = useState(false);
 
+  // Read auth store if available for dynamic login session
+  const { activeUser, logout: authLogout } = useAuthStore();
+  const effectiveUser = userProp || activeUser;
+
+  const isWireframe2 = pathname.startsWith("/wireframes2");
   const isWireframe = pathname.startsWith("/wireframes");
 
-  const navigateTo = (path: string) => {
-    setOpen(false);
-    router.push(path);
-  };
+  const name = effectiveUser?.name || "Carlos Mendoza";
+  const initials = effectiveUser?.avatar && effectiveUser.avatar.length <= 3
+    ? effectiveUser.avatar
+    : (effectiveUser?.name ? effectiveUser.name.split(" ").map((w: string) => w[0]).slice(0, 2).join("").toUpperCase() : "CM");
+  const institution = effectiveUser?.institution || "DINARP";
+  const roleName = effectiveUser?.roleTitle || (effectiveUser?.role ? effectiveUser.role.replace(/_/g, " ") : "Admin TIC");
+  const subtitle = `${institution} · ${roleName}`;
+  const email = effectiveUser?.email || "carlos.mendoza@mintel.gob.ec";
 
-  const logoutPath = isWireframe ? "/wireframes/login" : "/login";
-  const profilePath = isWireframe ? "/wireframes/usuarios/USR-001" : "/construccion";
-  const proyectosPath = isWireframe ? "/wireframes/solicitudes" : "/construccion";
-  const rolesPath = isWireframe ? "/wireframes/roles" : "/construccion";
-  const settingsPath = isWireframe ? "/wireframes/construccion" : "/construccion";
+  const handleLogout = () => {
+    setOpen(false);
+    try {
+      authLogout();
+    } catch {}
+    if (onLogout) {
+      onLogout();
+    }
+    const target = isWireframe2 ? "/wireframes2/login" : (isWireframe ? "/wireframes/login" : "/login");
+    router.push(target);
+  };
 
   const TriggerButton = (
     <button
@@ -51,15 +76,15 @@ export function UserMenu() {
     >
       <Avatar className="size-8 cursor-pointer transition-all duration-200 border border-border group-hover:border-primary/30 group-hover:ring-2 group-hover:ring-primary/10">
         <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold font-heading">
-          CM
+          {initials}
         </AvatarFallback>
       </Avatar>
       <div className="hidden sm:flex items-center gap-1.5 transition-colors">
-        <div className="flex flex-col items-start leading-tight">
-          <span className="text-xs font-bold text-foreground">Carlos Mendoza</span>
-          <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+        <div className="flex flex-col items-start leading-tight text-left">
+          <span className="text-xs font-bold text-foreground truncate max-w-[130px]">{name}</span>
+          <span className="text-[10px] text-muted-foreground flex items-center gap-1 truncate max-w-[140px]">
             <span className="size-1.5 rounded-full bg-primary shrink-0" />
-            MINTEL · Admin
+            <span className="truncate">{subtitle}</span>
           </span>
         </div>
         <ChevronDown
@@ -107,56 +132,28 @@ export function UserMenu() {
               <div className="absolute -right-8 -top-8 size-32 bg-primary/10 rounded-full blur-2xl pointer-events-none" />
               <Avatar className="size-14 shrink-0 border-2 border-background shadow-sm ring-1 ring-primary/20 relative z-10">
                 <AvatarFallback className="bg-gradient-to-br from-primary to-primary-600 text-primary-foreground text-lg font-bold font-heading">
-                  CM
+                  {initials}
                 </AvatarFallback>
               </Avatar>
               <div className="flex flex-col min-w-0 relative z-10">
                 <span className="text-sm font-bold font-heading text-foreground truncate">
-                  Ing. Carlos Mendoza
+                  {name}
                 </span>
                 <span className="text-xs font-medium text-foreground/80 mt-0.5 truncate">
-                  Director de Tecnologías · MINTEL
+                  {subtitle}
                 </span>
                 <span className="text-[11px] text-muted-foreground/80 mt-0.5 truncate font-mono">
-                  carlos.mendoza@mintel.gob.ec
+                  {email}
                 </span>
               </div>
             </div>
 
-            <div className="flex flex-col gap-1">
-              <MobileMenuItem
-                icon={User}
-                label="Mi perfil institucional"
-                onClick={() => navigateTo(profilePath)}
-              />
-              <MobileMenuItem
-                icon={FolderKanban}
-                label="Proyectos de interoperabilidad"
-                onClick={() => navigateTo(proyectosPath)}
-              />
-              <MobileMenuItem
-                icon={ShieldCheck}
-                label="Roles y permisos asignados"
-                onClick={() => navigateTo(rolesPath)}
-              />
-              <MobileMenuItem
-                icon={Settings}
-                label="Configuración de la entidad"
-                onClick={() => navigateTo(settingsPath)}
-              />
-
-              <div className="h-px bg-border my-2" />
-
-              <MobileMenuItem
-                icon={HelpCircle}
-                label="Mesa de ayuda y guías"
-                onClick={() => navigateTo("/wireframes/construccion")}
-              />
+            <div className="flex flex-col gap-1 pt-1">
               <MobileMenuItem
                 icon={LogOut}
                 label="Cerrar sesión"
                 isWarning
-                onClick={() => navigateTo(logoutPath)}
+                onClick={handleLogout}
               />
             </div>
           </div>
@@ -189,57 +186,29 @@ export function UserMenu() {
           <div className="flex items-center gap-3 relative z-10">
             <Avatar className="size-11 shrink-0 border-2 border-background shadow-sm ring-1 ring-primary/20">
               <AvatarFallback className="bg-gradient-to-br from-primary to-primary-600 text-primary-foreground text-sm font-bold font-heading">
-                CM
+                {initials}
               </AvatarFallback>
             </Avatar>
             <div className="flex flex-col min-w-0">
               <span className="text-sm font-bold font-heading text-foreground truncate">
-                Carlos Mendoza
+                {name}
               </span>
               <span className="text-xs font-medium text-foreground/80 truncate">
-                MINTEL · Admin TIC
+                {subtitle}
               </span>
               <span className="text-[10px] text-muted-foreground/80 font-mono truncate mt-0.5">
-                carlos.mendoza@mintel.gob.ec
+                {email}
               </span>
             </div>
           </div>
         </div>
 
-        <div className="flex flex-col gap-0.5">
-          <DesktopMenuItem
-            icon={User}
-            label="Mi perfil"
-            onClick={() => navigateTo(profilePath)}
-          />
-          <DesktopMenuItem
-            icon={FolderKanban}
-            label="Proyectos de interoperabilidad"
-            onClick={() => navigateTo(proyectosPath)}
-          />
-          <DesktopMenuItem
-            icon={ShieldCheck}
-            label="Roles y permisos"
-            onClick={() => navigateTo(rolesPath)}
-          />
-          <DesktopMenuItem
-            icon={Settings}
-            label="Configuración"
-            onClick={() => navigateTo(settingsPath)}
-          />
-
-          <DropdownMenuSeparator className="my-1 bg-border/60" />
-
-          <DesktopMenuItem
-            icon={HelpCircle}
-            label="Ayuda y documentación"
-            onClick={() => navigateTo("/wireframes/construccion")}
-          />
+        <div className="flex flex-col gap-0.5 pt-0.5">
           <DesktopMenuItem
             icon={LogOut}
             label="Cerrar sesión"
             isWarning
-            onClick={() => navigateTo(logoutPath)}
+            onClick={handleLogout}
           />
         </div>
       </DropdownMenuContent>
@@ -273,14 +242,14 @@ function MobileMenuItem({
         isActive
           ? "bg-muted text-foreground"
           : isWarning
-            ? "text-foreground hover:bg-muted/60"
+            ? "text-danger hover:bg-danger/10 hover:text-danger"
             : "text-foreground hover:bg-muted/50"
       )}
     >
       <Icon
         className={cn(
           "size-4 shrink-0 transition-colors",
-          isActive ? "text-foreground" : "text-muted-foreground group-hover:text-foreground"
+          isActive ? "text-foreground" : isWarning ? "text-danger" : "text-muted-foreground group-hover:text-foreground"
         )}
         strokeWidth={1.75}
       />
@@ -312,14 +281,14 @@ function DesktopMenuItem({
         isActive
           ? "bg-muted text-foreground font-semibold"
           : isWarning
-            ? "text-foreground focus:bg-muted/60 focus:text-foreground"
+            ? "text-danger hover:bg-danger/10 hover:text-danger focus:bg-danger/10 focus:text-danger"
             : "text-foreground focus:bg-muted/50 focus:text-foreground"
       )}
     >
       <Icon
         className={cn(
           "size-4 shrink-0 transition-colors",
-          isActive ? "text-foreground" : "text-muted-foreground group-focus:text-foreground"
+          isActive ? "text-foreground" : isWarning ? "text-danger" : "text-muted-foreground group-focus:text-foreground"
         )}
       />
 

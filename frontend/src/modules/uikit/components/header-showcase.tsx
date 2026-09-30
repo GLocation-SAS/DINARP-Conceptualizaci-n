@@ -44,7 +44,7 @@ export function HeaderShowcase() {
   const [viewportWidth, setViewportWidth] = React.useState(1280);
   const [maxWidth, setMaxWidth] = React.useState(1280);
   const [isDragging, setIsDragging] = React.useState(false);
-  const [headerVariant, setHeaderVariant] = React.useState<"full" | "navigation" | "user-actions">("full");
+  const [headerVariant, setHeaderVariant] = React.useState<"full" | "navigation" | "user-actions">("user-actions");
 
   const [navItemsState, setNavItemsState] = React.useState<NavItem[]>(defaultNavItems);
   const [hiddenItems, setHiddenItems] = React.useState<number[]>([]);
@@ -181,8 +181,6 @@ export function HeaderShowcase() {
             >
               <TabsList className="flex items-center gap-1 p-1 rounded-xl bg-muted/40 border border-border h-auto">
                 {[
-                  { value: "full", label: "Completo", icon: Layers },
-                  { value: "navigation", label: "Navegación", icon: Menu },
                   { value: "user-actions", label: "Usuario", icon: User },
                 ].map((item) => (
                   <TabsTrigger
@@ -287,20 +285,6 @@ export function HeaderShowcase() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              <tr>
-                <td className="px-6 py-4 font-semibold text-primary">Full (Completo)</td>
-                <td className="px-6 py-4 text-center text-success font-bold">Sí</td>
-                <td className="px-6 py-4 text-center text-success font-bold">Sí</td>
-                <td className="px-6 py-4 text-center text-success font-bold">Sí</td>
-                <td className="px-6 py-4 text-center text-success font-bold">Sí</td>
-              </tr>
-              <tr>
-                <td className="px-6 py-4 font-semibold text-primary">Navigation (Navegación)</td>
-                <td className="px-6 py-4 text-center text-success font-bold">Sí</td>
-                <td className="px-6 py-4 text-center text-success font-bold">Sí</td>
-                <td className="px-6 py-4 text-center text-muted-foreground font-bold">No</td>
-                <td className="px-6 py-4 text-center text-muted-foreground font-bold">No</td>
-              </tr>
               <tr>
                 <td className="px-6 py-4 font-semibold text-primary">User Actions (Usuario)</td>
                 <td className="px-6 py-4 text-center text-muted-foreground font-bold">No</td>

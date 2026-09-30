@@ -1,26 +1,18 @@
 "use client";
 
 import React, { useState } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import {
-  User,
-  ShieldCheck,
-  Building2,
-  CheckCircle2,
   ChevronDown,
-  Info,
   LogOut,
-  Sparkles
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { type MockUser, type UserRole, ROLES_CONFIG } from "../catalogo-interoperabilidad/data/catalogo-data";
@@ -32,6 +24,12 @@ interface WireframeUserMenuProps {
 
 export function WireframeUserMenu({ user, onRoleChange }: WireframeUserMenuProps) {
   const [open, setOpen] = useState(false);
+  const router = useRouter();
+
+  const handleLogout = () => {
+    setOpen(false);
+    router.push("/wireframes2/login");
+  };
 
   const getEmail = (name: string, inst: string) => {
     const slug = name.toLowerCase().replace(/á/g, "a").replace(/é/g, "e").replace(/í/g, "i").replace(/ó/g, "o").replace(/ú/g, "u").replace(/\s+/g, ".");
@@ -110,59 +108,15 @@ export function WireframeUserMenu({ user, onRoleChange }: WireframeUserMenuProps
           </div>
         </div>
 
-        {/* Nota de Demostración Wireframe */}
-        <div className="p-2.5 my-1 bg-surface border border-border rounded-md text-[10px] text-muted-foreground leading-relaxed flex items-start gap-2">
-          <Info className="size-3.5 text-muted-foreground mt-0.5 shrink-0" />
-          <div>
-            <strong className="text-foreground font-semibold">Modo prototipo · Vista por rol:</strong> En producción el rol será asignado al usuario autenticado.
-          </div>
+        <div className="pt-0.5">
+          <DropdownMenuItem
+            onClick={handleLogout}
+            className="flex items-center gap-2.5 px-2.5 py-2 text-xs font-medium text-danger hover:bg-danger/10 hover:text-danger focus:bg-danger/10 focus:text-danger rounded-lg cursor-pointer transition-colors"
+          >
+            <LogOut className="size-4 shrink-0 text-danger" />
+            <span>Cerrar sesión</span>
+          </DropdownMenuItem>
         </div>
-
-        {/* Conmutador de Roles en Prototipo */}
-        <div className="p-2 space-y-1.5 border-t border-border/60">
-          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider px-1 block">
-            Simular Rol en Wireframe:
-          </span>
-          <div className="flex flex-col gap-0.5">
-            {(["DIR_GESTION", "EQ_GESTION", "DIR_NORMATIVA", "EQ_NORMATIVA", "DGR", "COORDINADOR_SINARP", "APROBADOR"] as UserRole[]).map((r) => {
-              const isCurrent = user.role === r;
-              return (
-                <button
-                  key={r}
-                  type="button"
-                  onClick={() => {
-                    try {
-                      sessionStorage.setItem("dinarp_simulated_role", r);
-                    } catch { }
-                    window.dispatchEvent(
-                      new CustomEvent("simulatedRoleChanged", { detail: { role: r } })
-                    );
-                    if (onRoleChange) onRoleChange(r);
-                    setOpen(false);
-                  }}
-                  className={cn(
-                    "w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs transition-colors text-left",
-                    isCurrent
-                      ? "bg-foreground text-background font-semibold"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
-                  )}
-                >
-                  <span className="truncate pr-2">{ROLES_CONFIG[r]?.name || r}</span>
-                  {isCurrent && <CheckCircle2 className="size-3.5 shrink-0" />}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        <DropdownMenuSeparator className="bg-border/60" />
-
-        <DropdownMenuItem asChild className="text-xs cursor-pointer">
-          <Link href="/wireframes2" className="flex items-center gap-2">
-            <Building2 className="size-3.5 text-muted-foreground" />
-            <span>Hub Principal de Módulos</span>
-          </Link>
-        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );

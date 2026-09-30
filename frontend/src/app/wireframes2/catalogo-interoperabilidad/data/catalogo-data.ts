@@ -1,4 +1,5 @@
 export type UserRole =
+  | "ADMIN"
   | "COORDINADOR_SINARP"
   | "DGR"
   | "DTD"
@@ -20,6 +21,19 @@ export interface RoleInfo {
 }
 
 export const ROLES_CONFIG: Record<UserRole, RoleInfo> = {
+  ADMIN: {
+    id: "ADMIN",
+    name: "Administrador del Sistema",
+    shortName: "Administrador",
+    badgeTone: "neutral",
+    description: "Administra cuentas internas DINARP, roles, ámbitos institucionales, credenciales y trazabilidad de accesos.",
+    responsibilities: [
+      "Crear cuentas de usuarios internos DINARP",
+      "Asignar y actualizar roles y ámbitos institucionales",
+      "Gestionar ciclo de vida de cuentas: activación, suspensión, reactivación y baja lógica",
+      "Auditar eventos de identidad, acceso y trazabilidad de seguridad"
+    ]
+  },
   COORDINADOR_SINARP: {
     id: "COORDINADOR_SINARP",
     name: "Coordinador SINARP",
@@ -142,16 +156,29 @@ export interface MockUser {
   initials?: string;
   email?: string;
   avatar?: string;
+  cedula?: string;
 }
 
 export const MOCK_USERS_BY_ROLE: Record<UserRole, MockUser> = {
+  ADMIN: {
+    id: "U-ADMIN01",
+    name: "Administrador DINARP",
+    role: "ADMIN",
+    email: "admin.portal@dinarp.gob.ec",
+    avatar: "AD",
+    institution: "DINARP",
+    cedula: "1799999999",
+    initials: "AD",
+    roleTitle: "Administrador General del Sistema"
+  },
   DIR_GESTION: {
     id: "U-DIRGEST",
     name: "Director Gestión",
     role: "DIR_GESTION",
     email: "gestion.director@gmail.com",
     avatar: "DG",
-    institution: "DINARP"
+    institution: "DINARP",
+    cedula: "1711223344"
   },
   EQ_GESTION: {
     id: "U-EQGEST",
@@ -159,23 +186,26 @@ export const MOCK_USERS_BY_ROLE: Record<UserRole, MockUser> = {
     role: "EQ_GESTION",
     email: "gestion.revisor@gmail.com",
     avatar: "RG",
-    institution: "DINARP"
+    institution: "DINARP",
+    cedula: "1111111111"
   },
   DIR_NORMATIVA: {
     id: "U-DIRNORM",
-    name: "Director Normatividad",
+    name: "Director de Normatividad",
     role: "DIR_NORMATIVA",
     email: "normativa.director@gmail.com",
     avatar: "DN",
-    institution: "DINARP"
+    institution: "DINARP",
+    cedula: "2222222222"
   },
   EQ_NORMATIVA: {
     id: "U-EQNORM",
-    name: "Revisor Normatividad",
+    name: "Personal facultado de Normatividad",
     role: "EQ_NORMATIVA",
     email: "normativa.revisor@gmail.com",
-    avatar: "RN",
-    institution: "DINARP"
+    avatar: "PN",
+    institution: "DINARP",
+    cedula: "3333333333"
   },
   COORDINADOR_SINARP: {
     id: "USR-001",

@@ -68,13 +68,10 @@ export function RechazarSolicitudDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent variant={step === "CONFIRM" ? "warning" : "standard"} className={step === "MOTIVO" ? "max-w-md p-6" : "max-w-md"}>
+      <DialogContent variant="warning" className="max-w-md max-h-[90vh] overflow-y-auto">
         {step === "MOTIVO" ? (
           <>
             <DialogHeader className="space-y-2">
-              <div className="size-10 rounded-full bg-danger/15 border border-danger/30 text-danger-foreground flex items-center justify-center mb-1">
-                <XCircle className="size-5" />
-              </div>
               <DialogTitle className="text-base font-bold text-foreground">
                 Rechazar solicitud
               </DialogTitle>
@@ -83,7 +80,7 @@ export function RechazarSolicitudDialog({
               </DialogDescription>
             </DialogHeader>
 
-            <div className="space-y-1.5 pt-1">
+            <div className="space-y-1.5 pt-1 w-full text-left">
               <div className="flex items-center justify-between">
                 <Label htmlFor="motivo-rechazo" className="text-xs font-semibold text-foreground">
                   Motivo del rechazo <span className="text-danger">*</span>
@@ -119,20 +116,20 @@ export function RechazarSolicitudDialog({
               </p>
             </div>
 
-            <DialogFooter className="gap-3 pt-3 sm:flex-row sm:justify-end sm:[&>*]:flex-none sm:[&>*]:w-auto">
+            <DialogFooter className="mt-4 flex flex-row w-full gap-3 sm:gap-3 [&>*]:flex-1">
               <Button
                 type="button"
                 variant="neutral"
                 onClick={() => onOpenChange(false)}
-                className="h-10 px-5 text-xs font-semibold rounded-xl"
+                className="w-full"
               >
                 Cancelar
               </Button>
               <Button
                 type="button"
-                variant="primary"
+                variant="warning"
                 onClick={handleContinue}
-                className="h-10 px-6 text-xs font-semibold rounded-full shadow-sm"
+                className="w-full"
               >
                 Continuar
               </Button>

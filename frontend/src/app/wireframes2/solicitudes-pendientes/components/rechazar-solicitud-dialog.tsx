@@ -68,13 +68,10 @@ export function RechazarSolicitudDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent variant={step === "CONFIRM" ? "warning" : "standard"} className={step === "MOTIVO" ? "max-w-md p-6" : "max-w-md"}>
+      <DialogContent variant="warning" className="max-w-md max-h-[90vh] overflow-y-auto">
         {step === "MOTIVO" ? (
           <>
             <DialogHeader className="space-y-2">
-              <div className="size-10 rounded-full bg-danger/15 border border-danger/30 text-danger-foreground flex items-center justify-center mb-1">
-                <XCircle className="size-5" />
-              </div>
               <DialogTitle className="text-base font-bold text-foreground">
                 Rechazar solicitud
               </DialogTitle>
@@ -83,7 +80,7 @@ export function RechazarSolicitudDialog({
               </DialogDescription>
             </DialogHeader>
 
-            <div className="space-y-1.5 pt-1">
+            <div className="space-y-1.5 pt-1 w-full text-left">
               <div className="flex items-center justify-between">
                 <Label htmlFor="motivo-rechazo" className="text-xs font-semibold text-foreground">
                   Motivo del rechazo <span className="text-danger">*</span>
@@ -119,7 +116,15 @@ export function RechazarSolicitudDialog({
               </p>
             </div>
 
-            <DialogFooter className="mt-4 flex flex-row w-full gap-3 sm:gap-3 [&>*]:flex-1">
+            <DialogFooter stacked className="mt-4 flex flex-col w-full gap-2.5 sm:flex-col [&>*]:w-full">
+              <Button
+                type="button"
+                variant="warning"
+                onClick={handleContinue}
+                className="w-full"
+              >
+                Continuar
+              </Button>
               <Button
                 type="button"
                 variant="neutral"
@@ -127,14 +132,6 @@ export function RechazarSolicitudDialog({
                 className="w-full"
               >
                 Cancelar
-              </Button>
-              <Button
-                type="button"
-                variant="primary"
-                onClick={handleContinue}
-                className="w-full"
-              >
-                Continuar
               </Button>
             </DialogFooter>
           </>
@@ -145,20 +142,11 @@ export function RechazarSolicitudDialog({
                 ¿Confirmar rechazo?
               </DialogTitle>
               <DialogDescription>
-                Estás a punto de rechazar esta solicitud y la acción no se puede deshacer. Se notificará a la institución con el motivo registrado: <br/> <span className="italic block mt-1">"{motivo}"</span>
+                Estás a punto de rechazar esta solicitud y la acción no se puede deshacer. Se notificará a la institución con el motivo registrado: <br/> <span className="italic block mt-1">&quot;{motivo}&quot;</span>
               </DialogDescription>
             </DialogHeader>
 
-            <DialogFooter className="mt-4 flex flex-row w-full gap-3 sm:gap-3 [&>*]:flex-1">
-              <Button
-                type="button"
-                variant="neutral"
-                disabled={isSubmitting}
-                onClick={() => setStep("MOTIVO")}
-                className="w-full"
-              >
-                Cerrar
-              </Button>
+            <DialogFooter stacked className="mt-4 flex flex-col w-full gap-2.5 sm:flex-col [&>*]:w-full">
               <Button
                 type="button"
                 variant="warning"
@@ -169,8 +157,17 @@ export function RechazarSolicitudDialog({
                 {isSubmitting ? (
                   <Loader2 className="size-4 animate-spin" />
                 ) : (
-                  "Confirmar"
+                  "Confirmar rechazo"
                 )}
+              </Button>
+              <Button
+                type="button"
+                variant="neutral"
+                disabled={isSubmitting}
+                onClick={() => setStep("MOTIVO")}
+                className="w-full"
+              >
+                Cerrar
               </Button>
             </DialogFooter>
           </>

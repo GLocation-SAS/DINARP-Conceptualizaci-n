@@ -50,7 +50,7 @@ export function SolicitudDetalleSheet({
   const isPendiente = solicitud.estado === "Pendiente" || solicitud.estado === "PENDIENTE_ASIGNACION_GESTION" || solicitud.estado === "PENDIENTE_ASIGNACION_NORMATIVIDAD";
   const isAprobada = solicitud.estado === "Aprobada" || solicitud.estado === "APROBADO_FINAL";
   const isRechazada = solicitud.estado === "Rechazada";
-  const badgeProps = getEstadoBadgeProps(solicitud.estado);
+  const badgeProps = getEstadoBadgeProps(solicitud.estado, solicitud.revisionIniciada);
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -69,9 +69,9 @@ export function SolicitudDetalleSheet({
               appearance="soft"
               size="sm"
               dot
-              className="font-semibold text-xs"
+              className="font-semibold text-[11px] normal-case tracking-normal whitespace-nowrap px-2.5 py-0.5 inline-flex shrink-0 shadow-2xs"
             >
-              {badgeProps.label}
+              <span>{badgeProps.label}</span>
             </Badge>
           </div>
 
@@ -135,6 +135,40 @@ export function SolicitudDetalleSheet({
                   <p className="font-semibold text-foreground">{solicitud.revisor || "Dirección de Gestión y Registro"}</p>
                 </div>
               </div>
+            </div>
+          )}
+
+          {solicitud.estado === "INSTITUCION_ACTIVA" && (
+            <div className="p-3.5 rounded-2xl bg-success/10 border border-success/30 text-xs space-y-2">
+              <div className="flex items-center gap-2 font-bold text-success">
+                <CheckCircle2 className="size-4 shrink-0" />
+                <span>Institución Activa (INS-07 Concluido)</span>
+              </div>
+              <p className="text-[11px] text-muted-foreground leading-relaxed">
+                Resolución firmada en FirmaEC por la Máxima Autoridad. Institución habilitada plenamente e invitaciones independientes emitidas a los coordinadores (PAR-05).
+              </p>
+              <div className="pt-1.5 border-t border-success/20 grid grid-cols-2 gap-2 text-[11px]">
+                <div>
+                  <span className="text-muted-foreground block text-[10px]">Resolución:</span>
+                  <span className="font-mono font-bold text-foreground">{solicitud.resolucion || "RES-DINARP-2026-0042"}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground block text-[10px]">Invitaciones B:</span>
+                  <span className="text-primary font-medium">2 invitaciones vigentes</span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {solicitud.estado === "PENDIENTE_DE_FIRMA" && (
+            <div className="p-3.5 rounded-2xl bg-warning/10 border border-warning/30 text-xs space-y-1.5">
+              <div className="flex items-center gap-2 font-bold text-foreground">
+                <Clock className="size-4 text-warning shrink-0" />
+                <span>INS-07: Pendiente de Firma por Máxima Autoridad</span>
+              </div>
+              <p className="text-[11px] text-muted-foreground leading-relaxed">
+                Resolución institucional generada. Esperando suscripción externa oficial mediante FirmaEC.
+              </p>
             </div>
           )}
 

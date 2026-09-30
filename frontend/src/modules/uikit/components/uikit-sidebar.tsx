@@ -21,6 +21,13 @@ import {
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { cn, getAssetPath } from "@/lib/utils";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuLabel,
+} from "@/components/ui/dropdown-menu";
 import { applyTheme, getStoredTheme, type Theme } from "@/lib/theme";
 import {
   MousePointerClick,
@@ -65,14 +72,14 @@ export const UIKIT_SECTIONS: UIKitSection[] = [
   {
     id: "foundations",
     label: "Fundamentos",
-    description: "Bases visuales y funcionales del Design System UI reutilizable de MINEDEC. Aquí se definen color, tipografía, espaciado, iconografía y reglas esenciales para mantener consistencia en toda la plataforma.",
+    description: "Bases visuales y funcionales del Design System UI reutilizable de MINEDEC. AquÃ­ se definen color, tipografÃ­a, espaciado, iconografÃ­a y reglas esenciales para mantener consistencia en toda la plataforma.",
     icon: Palette,
     group: "brand",
     subItems: [
       { id: "foundations-logos", label: "Logos y Marcas Oficiales" },
-      { id: "foundations-colors", label: "Colores Semánticos" },
+      { id: "foundations-colors", label: "Colores SemÃ¡nticos" },
       { id: "foundations-scales", label: "Escalas Primitivas" },
-      { id: "foundations-typography", label: "Tipografía" },
+      { id: "foundations-typography", label: "TipografÃ­a" },
       { id: "foundations-shadows", label: "Sombras" },
       { id: "foundations-radius", label: "Radios y Bordes" },
     ]
@@ -81,8 +88,8 @@ export const UIKIT_SECTIONS: UIKitSection[] = [
   // Navigation
   {
     id: "navigation",
-    label: "Navegación",
-    description: "Componentes que ayudan al usuario a ubicarse, desplazarse entre módulos y acceder a las principales áreas y funciones de la plataforma.",
+    label: "NavegaciÃ³n",
+    description: "Componentes que ayudan al usuario a ubicarse, desplazarse entre mÃ³dulos y acceder a las principales Ã¡reas y funciones de la plataforma.",
     icon: Layout,
     group: "navigation",
     subItems: [
@@ -114,7 +121,7 @@ export const UIKIT_SECTIONS: UIKitSection[] = [
   {
     id: "forms",
     label: "Formularios y Filtros",
-    description: "Componentes utilizados para ingresar, seleccionar, buscar y filtrar información dentro de formularios, consultas y procesos del sistema.",
+    description: "Componentes utilizados para ingresar, seleccionar, buscar y filtrar informaciÃ³n dentro de formularios, consultas y procesos del sistema.",
     icon: TextCursorInput,
     group: "forms",
     subItems: [
@@ -140,7 +147,7 @@ export const UIKIT_SECTIONS: UIKitSection[] = [
   // Data Display
   {
     id: "data",
-    label: "Tarjetas y Visualización",
+    label: "Tarjetas y VisualizaciÃ³n",
     icon: Layout,
     group: "data",
     subItems: [
@@ -159,7 +166,7 @@ export const UIKIT_SECTIONS: UIKitSection[] = [
     ]
   },
 
-  // Secciones Principales de Módulos
+  // Secciones Principales de MÃ³dulos
   {
     id: "tables-category",
     label: "Tablas",
@@ -174,7 +181,7 @@ export const UIKIT_SECTIONS: UIKitSection[] = [
   },
   {
     id: "feedback-states",
-    label: "Retroalimentación y Estados",
+    label: "RetroalimentaciÃ³n y Estados",
     icon: Bell,
     group: "feedback",
     subItems: [
@@ -199,7 +206,7 @@ export const UIKIT_SECTIONS: UIKitSection[] = [
   },
   {
     id: "data-management-category",
-    label: "Gestión de Datos y Carga (Data Management & Upload)",
+    label: "GestiÃ³n de Datos y Carga (Data Management & Upload)",
     icon: Layout,
     group: "forms",
     subItems: [
@@ -209,21 +216,21 @@ export const UIKIT_SECTIONS: UIKitSection[] = [
   },
   {
     id: "system-pages-category",
-    label: "Páginas del sistema",
+    label: "PÃ¡ginas del sistema",
     icon: Layout,
     group: "use-cases",
     subItems: [
       { id: "login-uikit", label: "Pantalla de Login UI Kit" },
-      { id: "404-page", label: "Página 404 (Not Found)" },
-      { id: "under-construction-page", label: "Página en construcción" }
+      { id: "404-page", label: "PÃ¡gina 404 (Not Found)" },
+      { id: "under-construction-page", label: "PÃ¡gina en construcciÃ³n" }
     ]
   },
 
-  // Módulos Especializados 11-15
+  // MÃ³dulos Especializados 11-15
 
   {
     id: "reports-export-category",
-    label: "Reportes y Exportación (Reports and Export)",
+    label: "Reportes y ExportaciÃ³n (Reports and Export)",
     icon: FileText,
     group: "data",
     subItems: [
@@ -238,11 +245,11 @@ export const UIKIT_SECTIONS: UIKitSection[] = [
 
 const GROUP_LABELS: Record<UIKitSection["group"], string> = {
   brand: "Fundamentos",
-  navigation: "Navegación",
+  navigation: "NavegaciÃ³n",
   actions: "Acciones",
   forms: "Formularios y Carga",
-  data: "Datos y Cartografía",
-  feedback: "Retroalimentación",
+  data: "Datos y CartografÃ­a",
+  feedback: "RetroalimentaciÃ³n",
   overlay: "Modales y Superposiciones",
   "use-cases": "Casos de Uso",
 };
@@ -256,7 +263,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 
 export function UIKitSidebar({ activeSection, onNavigate }: UIKitSidebarProps) {
-  const { setOpenMobile } = useSidebar();
+  const { state, setOpenMobile } = useSidebar();
   const router = useRouter();
   const { logout } = useAuth();
 
@@ -317,7 +324,7 @@ export function UIKitSidebar({ activeSection, onNavigate }: UIKitSidebarProps) {
 
   return (
     <Sidebar variant="floating" collapsible="icon">
-      {/* ── Header: Logo + Trigger toggle ── */}
+      {/* â”€â”€ Header: Logo + Trigger toggle â”€â”€ */}
       <SidebarHeader className="relative px-3 pt-4 pb-3">
         <div className="flex items-center justify-between gap-2 overflow-hidden">
           {/* Logo */}
@@ -339,21 +346,13 @@ export function UIKitSidebar({ activeSection, onNavigate }: UIKitSidebarProps) {
               className="h-[35px] w-auto group-data-[state=collapsed]:hidden animate-in fade-in duration-300 object-contain hidden dark:block"
             />
 
-            {/* Collapsed Icon - Light Mode */}
+            {/* Collapsed Icon - Escudo Color */}
             <Image
-              src={getAssetPath("/favicon-light.svg")}
-              alt="Logo DINARP"
-              width={27}
-              height={27}
-              className="h-[27px] w-auto group-data-[state=expanded]:hidden animate-in zoom-in-75 duration-300 object-contain dark:hidden"
-            />
-            {/* Collapsed Icon - Dark Mode */}
-            <Image
-              src={getAssetPath("/favicon-dark.svg")}
-              alt="Logo DINARP"
-              width={27}
-              height={27}
-              className="h-[27px] w-auto group-data-[state=expanded]:hidden animate-in zoom-in-75 duration-300 object-contain hidden dark:block"
+              src={getAssetPath("/escudo-light.svg")}
+              alt="Escudo DINARP"
+              width={30}
+              height={30}
+              className="h-7 w-auto group-data-[state=expanded]:hidden animate-in zoom-in-75 duration-300 object-contain"
             />
           </div>
         </div>
@@ -361,7 +360,7 @@ export function UIKitSidebar({ activeSection, onNavigate }: UIKitSidebarProps) {
 
       <SidebarSeparator />
 
-      {/* ── Navigation ── */}
+      {/* â”€â”€ Navigation â”€â”€ */}
       <SidebarContent>
         {Array.from(groupedSections.entries()).map(([group, sections]) => (
           <SidebarGroup key={group}>
@@ -370,9 +369,39 @@ export function UIKitSidebar({ activeSection, onNavigate }: UIKitSidebarProps) {
             </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                {sections.map((section) => {
+                                {sections.map((section) => {
                   const Icon = section.icon;
                   const isActive = activeSection === section.id;
+
+                  if (state === "collapsed" && section.subItems) {
+                    return (
+                      <SidebarMenuItem key={section.id}>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <SidebarMenuButton isActive={isActive}>
+                              <Icon className="shrink-0" />
+                              <span className="font-bold">{section.label}</span>
+                            </SidebarMenuButton>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent side="right" align="start" sideOffset={16} className="w-56 border-border shadow-lg rounded-xl bg-popover p-2">
+                            <DropdownMenuLabel className="font-heading text-foreground font-semibold px-2">{section.label}</DropdownMenuLabel>
+                            <div className="mt-1 space-y-1">
+                              {section.subItems.map((sub) => {
+                                const childActive = activeSection === sub.id;
+                                return (
+                                  <DropdownMenuItem key={sub.id} asChild className={cn("flex items-center gap-2 cursor-pointer py-2 px-3 rounded-lg text-sm font-medium transition-colors", childActive ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-primary hover:bg-primary/5")}>
+                                    <button type="button" onClick={() => handleClick(sub.id)} className="w-full justify-start text-left outline-none border-none ring-0">
+                                      <span>{sub.label}</span>
+                                    </button>
+                                  </DropdownMenuItem>
+                                );
+                              })}
+                            </div>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </SidebarMenuItem>
+                    );
+                  }
 
                   return (
                     <SidebarMenuItem key={section.id}>
@@ -419,7 +448,7 @@ export function UIKitSidebar({ activeSection, onNavigate }: UIKitSidebarProps) {
         ))}
       </SidebarContent>
 
-      {/* ── Footer: User info + Theme toggle + Logout ── */}
+      {/* â”€â”€ Footer: User info + Theme toggle + Logout â”€â”€ */}
       <SidebarFooter className="px-3 py-3">
         <SidebarSeparator className="mb-3" />
 
@@ -501,7 +530,7 @@ export function UIKitSidebar({ activeSection, onNavigate }: UIKitSidebarProps) {
               </span>
             </div>
             <Button
-              aria-label="Cerrar sesión"
+              aria-label="Cerrar sesiÃ³n"
               variant="ghost"
               onClick={handleLogout}
               className="flex size-8 shrink-0 items-center justify-center rounded-lg text-muted-foreground hover:text-danger hover:bg-danger/10 hover:border-transparent transition-colors duration-200 border-0 p-0"
@@ -514,4 +543,6 @@ export function UIKitSidebar({ activeSection, onNavigate }: UIKitSidebarProps) {
     </Sidebar>
   );
 }
+
+
 

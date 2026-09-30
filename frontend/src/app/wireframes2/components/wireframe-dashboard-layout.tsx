@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Home,
   FileText,
@@ -28,13 +28,20 @@ import {
   Layers,
   Search,
   PanelLeftClose,
-  PanelLeftOpen
+  PanelLeftOpen,
+  PanelLeft,
+  HelpCircle,
+  Bell,
+  FolderCheck,
+  UserCheck,
+  FileSignature
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 import { cn, getAssetPath } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { WireframeUserMenu } from "./wireframe-user-menu";
+import { UserMenu } from "@/components/shared/user-menu";
+import { GeoportalHeader } from "@/components/layout/geoportal-header";
 import { NotificationsMenu } from "@/components/shared/notifications-menu";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { applyTheme, getStoredTheme, type Theme } from "@/lib/theme";
@@ -55,6 +62,7 @@ import {
   SidebarMenuSubButton,
   SidebarInset,
   SidebarTrigger,
+  useSidebar,
 } from "@/components/ui/sidebar";
 
 interface WireframeDashboardLayoutProps {
@@ -84,15 +92,13 @@ interface NavItem {
   allowedRoles?: UserRole[];
 }
 
-import { Bell, FolderCheck, FileSignature } from "lucide-react";
-
 const navItems: NavItem[] = [
   {
     id: "inicio",
     label: "Inicio",
     icon: Home,
     href: "#",
-    allowedRoles: ["DIR_GESTION", "EQ_GESTION", "DIR_NORMATIVA", "EQ_NORMATIVA"]
+    allowedRoles: ["EQ_GESTION", "DIR_NORMATIVA", "EQ_NORMATIVA"]
   },
   {
     id: "catalogo-interoperabilidad-group",
@@ -142,7 +148,7 @@ const navItems: NavItem[] = [
   {
     id: "asignacion-solicitudes",
     label: "Asignación de solicitudes",
-    icon: FolderCheck,
+    icon: UserCheck,
     href: "/wireframes2/asignacion-solicitudes",
     allowedRoles: ["DIR_GESTION"]
   },
@@ -156,7 +162,7 @@ const navItems: NavItem[] = [
   {
     id: "asignacion-normativa",
     label: "Asignación normativa",
-    icon: FolderCheck,
+    icon: UserCheck,
     href: "/wireframes2/asignacion-solicitudes",
     allowedRoles: ["DIR_NORMATIVA"]
   },
@@ -175,13 +181,80 @@ const navItems: NavItem[] = [
     allowedRoles: ["EQ_NORMATIVA"]
   },
   {
-    id: "notificaciones",
-    label: "Notificaciones",
-    icon: Bell,
-    href: "#",
-    allowedRoles: ["DIR_GESTION", "EQ_GESTION", "DIR_NORMATIVA", "EQ_NORMATIVA"]
+    id: "administracion-group",
+    label: "Administración",
+    icon: Users,
+    pathPrefix: "/wireframes2/usuarios",
+    children: [
+      {
+        id: "administracion-usuarios",
+        label: "Usuarios",
+        href: "/wireframes2/usuarios",
+        exact: false
+      }
+    ],
+    allowedRoles: ["ADMIN"]
   },
 ];
+
+function SidebarCollapseItem() {
+  const { toggleSidebar, state } = useSidebar();
+  const isExpanded = state === "expanded";
+
+  return (
+    <SidebarMenuButton
+      tooltip={isExpanded ? "Contraer sidebar" : "Expandir sidebar"}
+      onClick={toggleSidebar}
+    >
+      <PanelLeft className="size-4.5 shrink-0 text-primary dark:text-primary" />
+      <span className="truncate group-data-[collapsible=icon]:hidden text-primary dark:text-primary font-medium">
+        Contraer sidebar
+      </span>
+    </SidebarMenuButton>
+  );
+}
+
+function MobileSidebarCloseButton() {
+  const { setOpenMobile, isMobile } = useSidebar();
+  if (!isMobile) return null;
+  return (
+    <Button
+      type="button"
+      variant="ghost"
+      size="icon-xs"
+      onClick={() => setOpenMobile(false)}
+      className="md:hidden flex size-8 rounded-lg text-muted-foreground hover:text-foreground shrink-0"
+      aria-label="Cerrar menú lateral"
+    >
+      <X className="size-4.5" />
+    </Button>
+  );
+}
+
+function SidebarNavigationItemLink({
+  href,
+  children,
+  className,
+  onClick,
+  ...props
+}: React.ComponentProps<typeof Link>) {
+  const { isMobile, setOpenMobile } = useSidebar();
+  return (
+    <Link
+      href={href}
+      className={className}
+      onClick={(e) => {
+        onClick?.(e);
+        if (isMobile) {
+          setOpenMobile(false);
+        }
+      }}
+      {...props}
+    >
+      {children}
+    </Link>
+  );
+}
 
 export function WireframeDashboardLayout({
   activeMenu,
@@ -200,9 +273,11 @@ export function WireframeDashboardLayout({
     "catalogo-interoperabilidad-group": true,
     "acceso-interoperabilidad-group": true,
     "acceso-seguridad-group": true,
+    "administracion-group": true,
   });
 
-  const { activeUser } = useAuthStore();
+  const router = useRouter();
+  const { activeUser, logout } = useAuthStore();
   const resolvedUser: MockUser = currentUser || activeUser || MOCK_USERS_BY_ROLE.COORDINADOR_SINARP;
 
   const isAprobador = (currentRole || resolvedUser?.role) === "APROBADOR";
@@ -261,38 +336,48 @@ export function WireframeDashboardLayout({
 
   return (
     <TooltipProvider delayDuration={0}>
-      <SidebarProvider defaultOpen={true}>
-      <Sidebar collapsible="icon" className="border-r border-border bg-surface">
-        {/* Brand Header */}
-        <SidebarHeader className="h-16 px-4 flex items-center justify-center border-b border-border/40 shrink-0">
-          <Link href="/wireframes2" className="flex items-center justify-center min-w-0 w-full">
-            {/* Expanded Full Logo */}
-            <img
-              src={getAssetPath("/logo-horizontal.svg")}
-              alt="Logo DINARP - Gobierno del Ecuador"
-              className="dark:hidden h-10 w-auto max-w-[180px] object-contain group-data-[collapsible=icon]:hidden"
-            />
-            <img
-              src={getAssetPath("/logo-horizontal-blanco.svg")}
-              alt="Logo DINARP - Gobierno del Ecuador"
-              className="hidden dark:block h-10 w-auto max-w-[180px] object-contain group-data-[collapsible=icon]:hidden"
-            />
-            {/* Collapsed Compact Logo */}
-            <img
-              src={getAssetPath("/logo-horizontal.svg")}
-              alt="Logo DINARP"
-              className="dark:hidden h-7 w-auto object-contain hidden group-data-[collapsible=icon]:block mx-auto"
-            />
-            <img
-              src={getAssetPath("/logo-horizontal-blanco.svg")}
-              alt="Logo DINARP"
-              className="hidden dark:block h-7 w-auto object-contain hidden group-data-[collapsible=icon]:block mx-auto"
-            />
-          </Link>
+      <SidebarProvider defaultOpen={true} className="h-svh max-h-svh overflow-hidden flex">
+      <Sidebar variant="floating" collapsible="icon">
+        {/* Top institutional header */}
+        <SidebarHeader className="p-0 shrink-0">
+          {/* Institutional accent bar */}
+          <div className="bg-primary w-full h-1.5 shrink-0" />
+
+          {/* Logo oficial */}
+          <div className="flex h-16 items-center justify-between px-3.5 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:justify-center border-b border-sidebar-border shrink-0">
+            <SidebarNavigationItemLink
+              href="/wireframes2"
+              className="flex items-center -translate-y-1 gap-2.5 shrink-0 group focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none rounded-md min-w-0 justify-start group-data-[collapsible=icon]:translate-y-0 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:gap-0"
+            >
+              {/* Expanded Logo */}
+              <img
+                src={getAssetPath("/logo-horizontal.svg")}
+                alt="Logo DINARP GEOportal"
+                className="h-10 sm:h-10.5 w-auto max-w-[170px] sm:max-w-[200px] object-contain dark:hidden group-data-[collapsible=icon]:hidden"
+              />
+              <img
+                src={getAssetPath("/logo-horizontal-blanco.svg")}
+                alt="Logo DINARP GEOportal"
+                className="h-10 sm:h-10.5 w-auto max-w-[170px] sm:max-w-[200px] object-contain hidden dark:block group-data-[collapsible=icon]:hidden"
+              />
+              {/* Collapsed Compact Escudo */}
+              <img
+                src={getAssetPath("/escudo-light.svg")}
+                alt="Escudo DINARP"
+                className="h-8.5 w-auto object-contain hidden group-data-[collapsible=icon]:block mx-auto"
+              />
+            </SidebarNavigationItemLink>
+            <MobileSidebarCloseButton />
+          </div>
         </SidebarHeader>
 
         {/* Sidebar Content */}
-        <SidebarContent className="flex-1 overflow-y-auto py-4 px-2 space-y-1">
+        <SidebarContent className="flex-1 overflow-y-auto py-3 px-2 group-data-[collapsible=icon]:px-2 space-y-1">
+          <div className="px-2 pb-1.5 group-data-[collapsible=icon]:hidden">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/70 dark:text-white/50 px-2">
+              Principal
+            </p>
+          </div>
           <SidebarMenu>
             {(() => {
               const activeUserRole = currentRole || resolvedUser?.role;
@@ -316,11 +401,11 @@ export function WireframeDashboardLayout({
                         tooltip={item.label}
                       >
                         <Icon className="size-4.5 shrink-0" />
-                        <span className="flex-1 text-left font-medium leading-snug">{item.label}</span>
+                        <span className="flex-1 text-left font-medium leading-snug group-data-[collapsible=icon]:hidden">{item.label}</span>
                         {isGroupOpen ? (
-                          <ChevronDown className="size-3.5 text-muted-foreground shrink-0" />
+                          <ChevronDown className="size-3.5 text-muted-foreground shrink-0 group-data-[collapsible=icon]:hidden" />
                         ) : (
-                          <ChevronRight className="size-3.5 text-muted-foreground shrink-0" />
+                          <ChevronRight className="size-3.5 text-muted-foreground shrink-0 group-data-[collapsible=icon]:hidden" />
                         )}
                       </SidebarMenuButton>
 
@@ -335,9 +420,9 @@ export function WireframeDashboardLayout({
                             return (
                               <SidebarMenuSubItem key={sub.id}>
                                 <SidebarMenuSubButton asChild isActive={isSubActive}>
-                                  <Link href={sub.href}>
+                                  <SidebarNavigationItemLink href={sub.href}>
                                     <span className="truncate">{subLabel}</span>
-                                  </Link>
+                                  </SidebarNavigationItemLink>
                                 </SidebarMenuSubButton>
                               </SidebarMenuSubItem>
                             );
@@ -348,15 +433,15 @@ export function WireframeDashboardLayout({
                   );
                 }
 
-                const isDirectActive = item.href && pathname ? pathname.startsWith(item.href) : false;
+                const isDirectActive = (activeMenu && activeMenu === item.id) || (item.href && pathname ? (item.href === "/wireframes2" ? pathname === item.href : pathname.startsWith(item.href)) : false);
 
                 return (
                   <SidebarMenuItem key={item.id}>
                     <SidebarMenuButton asChild isActive={isDirectActive} tooltip={item.label}>
-                      <Link href={item.href || "#"}>
+                      <SidebarNavigationItemLink href={item.href || "#"} className="flex items-center gap-2.5 group-data-[collapsible=icon]:justify-center">
                         <Icon className="size-4.5 shrink-0" />
-                        <span>{item.label}</span>
-                      </Link>
+                        <span className="truncate group-data-[collapsible=icon]:hidden">{item.label}</span>
+                      </SidebarNavigationItemLink>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 );
@@ -365,84 +450,147 @@ export function WireframeDashboardLayout({
           </SidebarMenu>
         </SidebarContent>
 
-        {/* Theme Toggle Footer */}
-        <SidebarFooter className="p-3 border-t border-border/40 shrink-0">
-          <div className="flex items-center bg-muted/40 p-1 rounded-2xl border border-border/60 group-data-[collapsible=icon]:hidden">
-            <Button
-              type="button"
-              variant={themeMode === "claro" ? "neutral" : "ghost"}
-              size="sm"
-              onClick={() => handleThemeChange("claro")}
-              className={cn(
-                "flex-1 h-8 rounded-xl text-xs font-medium gap-1.5",
-                themeMode === "claro" && "bg-surface shadow-xs text-foreground font-semibold"
-              )}
-            >
-              <Sun className="size-3.5" />
-              <span>Claro</span>
-            </Button>
-            <div className="h-4 w-px bg-border/60 mx-1" />
-            <Button
-              type="button"
-              variant={themeMode === "oscuro" ? "neutral" : "ghost"}
-              size="sm"
-              onClick={() => handleThemeChange("oscuro")}
-              className={cn(
-                "flex-1 h-8 rounded-xl text-xs font-medium gap-1.5",
-                themeMode === "oscuro" && "bg-surface shadow-xs text-foreground font-semibold"
-              )}
-            >
-              <Moon className="size-3.5" />
-              <span>Oscuro</span>
-            </Button>
+        {/* General & Theme Footer */}
+        <SidebarFooter className="p-2 group-data-[collapsible=icon]:px-2 border-t border-sidebar-border shrink-0 space-y-1 group-data-[collapsible=icon]:space-y-1.5">
+          <div className="px-2 pt-1 pb-0.5 group-data-[collapsible=icon]:hidden">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/70 dark:text-white/50 px-2">
+              General
+            </p>
+          </div>
+          <ul className="space-y-0.5 mb-1 group-data-[collapsible=icon]:space-y-1.5 group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:items-center">
+            <li className="w-full group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:justify-center">
+              <SidebarMenuButton
+                tooltip="Notificaciones"
+                asChild
+                isActive={pathname?.startsWith("/wireframes2/notificaciones")}
+              >
+                <SidebarNavigationItemLink href="/wireframes2/notificaciones" className="flex items-center gap-2.5 group-data-[collapsible=icon]:justify-center">
+                  <Bell className="size-4 shrink-0" />
+                  <span className="truncate group-data-[collapsible=icon]:hidden">Notificaciones</span>
+                </SidebarNavigationItemLink>
+              </SidebarMenuButton>
+            </li>
+            <li className="w-full group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:justify-center">
+              <SidebarMenuButton
+                tooltip="Configuración"
+                asChild
+                isActive={pathname?.startsWith("/wireframes2/construccion")}
+              >
+                <SidebarNavigationItemLink href="/wireframes2/construccion" className="flex items-center gap-2.5 group-data-[collapsible=icon]:justify-center">
+                  <Settings className="size-4 shrink-0" />
+                  <span className="truncate group-data-[collapsible=icon]:hidden">Configuración</span>
+                </SidebarNavigationItemLink>
+              </SidebarMenuButton>
+            </li>
+            <li className="w-full group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:justify-center pt-0.5">
+              <SidebarCollapseItem />
+            </li>
+          </ul>
+
+          <div className="border-t border-border/40 my-1 group-data-[collapsible=icon]:hidden" />
+
+          {/* Theme switcher */}
+          <div className="px-1 py-1 group-data-[collapsible=icon]:hidden">
+            <div className="relative flex w-full items-center p-1 rounded-xl border bg-muted/60 dark:bg-white/10 border-border/60 dark:border-white/15">
+              <div
+                className={cn(
+                  "absolute inset-y-1 left-1 w-[calc(50%-4px)] rounded-lg shadow-xs transition-transform duration-300 bg-surface dark:bg-white/20",
+                  themeMode === "oscuro" && "translate-x-full"
+                )}
+              />
+              <button
+                type="button"
+                onClick={() => handleThemeChange("claro")}
+                className={cn(
+                  "relative z-10 flex flex-1 items-center justify-center gap-1.5 py-1.5 text-xs font-semibold rounded-lg transition-colors duration-200 cursor-pointer",
+                  themeMode === "claro" ? "text-primary dark:text-white font-bold" : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                <Sun className="size-3.5" />
+                <span>Claro</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => handleThemeChange("oscuro")}
+                className={cn(
+                  "relative z-10 flex flex-1 items-center justify-center gap-1.5 py-1.5 text-xs font-semibold rounded-lg transition-colors duration-200 cursor-pointer",
+                  themeMode === "oscuro" ? "text-primary dark:text-white font-bold" : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                <Moon className="size-3.5" />
+                <span>Oscuro</span>
+              </button>
+            </div>
+          </div>
+          <div className="hidden group-data-[collapsible=icon]:flex justify-center py-1">
+            <ThemeToggle />
           </div>
         </SidebarFooter>
       </Sidebar>
 
-      <SidebarInset className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
+      <SidebarInset className="flex-1 flex flex-col min-w-0 h-svh max-h-svh overflow-hidden">
         {/* Top Header */}
-        <header className="h-16 px-4 sm:px-8 flex items-center justify-between border-b border-border/40 bg-surface/80 backdrop-blur-md shrink-0 z-10 gap-4">
-          <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-            <SidebarTrigger className="flex shrink-0 text-muted-foreground hover:text-foreground hover:bg-muted" />
-
-            {(breadcrumbs && breadcrumbs.length > 0) || headerSlot ? (
-              <div className="flex items-center flex-wrap gap-2 sm:gap-4 min-w-0 flex-1 pl-1">
-                {breadcrumbs && breadcrumbs.length > 0 && (
-                  <div className="hidden sm:block truncate">
-                    <WireframeBreadcrumbs segments={breadcrumbs} className="text-xs" />
-                  </div>
-                )}
+        <div className="shrink-0 pt-3 pr-3 pl-2 pb-1.5 z-30">
+          <GeoportalHeader
+            variant="user-actions"
+            isStatic={true}
+            showAccentBar={true}
+            className="w-full"
+            innerClassName="shadow-none rounded-lg border border-border bg-surface overflow-hidden"
+            leftSlot={
+              <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1 overflow-hidden">
+                <SidebarTrigger
+                  className="md:hidden flex size-8.5 sm:size-9 items-center justify-center -ml-1 rounded-lg text-foreground hover:bg-muted/70 transition-colors shrink-0"
+                  aria-label="Abrir menú lateral"
+                >
+                  <Menu className="size-5 shrink-0" strokeWidth={2} />
+                </SidebarTrigger>
                 {headerSlot && (
                   <div className="flex shrink-0">
                     {headerSlot}
                   </div>
                 )}
+                {breadcrumbs && breadcrumbs.length > 0 ? (
+                  <div className="flex items-center min-w-0 flex-1 overflow-hidden">
+                    <WireframeBreadcrumbs segments={breadcrumbs} />
+                  </div>
+                ) : (
+                  <Link href="/wireframes2" className="flex items-center shrink-0">
+                    <img
+                      src={getAssetPath("/logo-horizontal.svg")}
+                      alt="Logo DINARP"
+                      className="dark:hidden h-7 w-auto max-w-[120px] object-contain"
+                    />
+                    <img
+                      src={getAssetPath("/logo-horizontal-blanco.svg")}
+                      alt="Logo DINARP"
+                      className="hidden dark:block h-7 w-auto max-w-[120px] object-contain"
+                    />
+                  </Link>
+                )}
               </div>
-            ) : null}
-
-            <Link href="/wireframes2" className="lg:hidden flex items-center shrink-0">
-              <img
-                src={getAssetPath("/logo-horizontal.svg")}
-                alt="Logo DINARP"
-                className="dark:hidden h-8 w-auto max-w-[130px] object-contain"
-              />
-              <img
-                src={getAssetPath("/logo-horizontal-blanco.svg")}
-                alt="Logo DINARP"
-                className="hidden dark:block h-8 w-auto max-w-[130px] object-contain"
-              />
-            </Link>
-          </div>
-
-          <div className="flex items-center gap-2 sm:gap-3.5 ml-auto shrink-0">
-            <NotificationsMenu />
-            <div className="h-4 w-px bg-border/60 mx-0.5 hidden sm:block" />
-            <WireframeUserMenu user={resolvedUser} onRoleChange={onRoleChange} />
-          </div>
-        </header>
+            }
+            userProps={resolvedUser ? {
+              name: resolvedUser.name,
+              role: resolvedUser.role,
+              roleTitle: resolvedUser.roleTitle || resolvedUser.role,
+              email: resolvedUser.email,
+              institution: resolvedUser.institution || "DINARP",
+              avatar: resolvedUser.avatar,
+            } : undefined}
+            onRoleChange={onRoleChange}
+            customConfig={{
+              showLogo: false,
+              showSearch: false,
+              showThemeToggle: false,
+              showNotifications: true,
+              showUserMenu: true,
+            }}
+          />
+        </div>
 
         {/* Dynamic Page Content Slot */}
-        <div className="flex-1 overflow-y-auto overflow-x-hidden">
+        <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden flex flex-col">
           {children}
         </div>
       </SidebarInset>

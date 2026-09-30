@@ -23,20 +23,20 @@ const Toaster = ({ ...props }: ToasterProps) => {
       offset={80}
       icons={{
         success: (
-          <div className="flex items-center justify-center shrink-0 size-8 rounded-full bg-success/15 text-success mr-2.5"><CircleCheckIcon className="size-4 stroke-[2.5px]" /></div>
+          <div className="flex items-center justify-center shrink-0 size-10 rounded-full bg-success/15 text-success mr-1.5 ml-1.5"><CircleCheckIcon className="size-[22px] stroke-[2.5px]" /></div>
         ),
         info: (
-          <div className="flex items-center justify-center shrink-0 size-8 rounded-full bg-info/15 text-info mr-2.5"><InfoIcon className="size-4 stroke-[2.5px]" /></div>
+          <div className="flex items-center justify-center shrink-0 size-10 rounded-full bg-info/15 text-info mr-1.5 ml-1.5"><InfoIcon className="size-[22px] stroke-[2.5px]" /></div>
         ),
         warning: (
-          <div className="flex items-center justify-center shrink-0 size-8 rounded-full bg-warning/15 text-warning mr-2.5"><TriangleAlertIcon className="size-4 stroke-[2.5px]" /></div>
+          <div className="flex items-center justify-center shrink-0 size-10 rounded-full bg-warning/15 text-warning mr-1.5 ml-1.5"><TriangleAlertIcon className="size-[22px] stroke-[2.5px]" /></div>
         ),
         error: (
-          <div className="flex items-center justify-center shrink-0 size-8 rounded-full bg-danger/15 text-danger mr-2.5"><OctagonXIcon className="size-4 stroke-[2.5px]" /></div>
+          <div className="flex items-center justify-center shrink-0 size-10 rounded-full bg-danger/15 text-danger mr-1.5 ml-1.5"><OctagonXIcon className="size-[22px] stroke-[2.5px]" /></div>
         ),
         loading: (
-          <div className="flex items-center justify-center shrink-0 size-8 rounded-full bg-primary/15 text-primary mr-2.5">
-            <Loader2Icon className="size-4 animate-spin stroke-[2.5px]" />
+          <div className="flex items-center justify-center shrink-0 size-10 rounded-full bg-primary/15 text-primary mr-1.5 ml-1.5">
+            <Loader2Icon className="size-[22px] animate-spin stroke-[2.5px]" />
           </div>
         ),
       }}
@@ -56,7 +56,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
             !flex-row
             !items-center
             !justify-start
-            !w-fit !min-w-fit
+            !w-auto !min-w-[320px] !max-w-[520px]
             font-sans
             !bg-background
             !border-border/30
@@ -83,7 +83,8 @@ const Toaster = ({ ...props }: ToasterProps) => {
               text-left
               w-full
               !m-0
-              !pl-1
+              break-words
+              whitespace-pre-line
               line-clamp-2
             `,
 

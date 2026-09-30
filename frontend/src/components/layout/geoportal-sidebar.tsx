@@ -55,6 +55,15 @@ import { useRouter, Link } from "@/routing";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme-toggle";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuLabel,
+  DropdownMenuSeparator
+} from "@/components/ui/dropdown-menu";
+import { PanelLeftClose, PanelLeftOpen, Settings, LifeBuoy } from "lucide-react";
 
 // ── Nav item definition ────────────────────────────────────────────────────
 interface NavItem {
@@ -143,7 +152,7 @@ export function GeoportalSidebar({
 }: {
   variant?: "full" | "navigation";
 }) {
-  const { setOpenMobile, isMobile } = useSidebar();
+  const { state, setOpenMobile, isMobile, toggleSidebar } = useSidebar();
   const { user, logout } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
@@ -220,34 +229,22 @@ export function GeoportalSidebar({
             </div>
 
             {/* Logo del GEOportal */}
-            <div className="flex items-center justify-between px-4 py-3 lg:px-4 lg:py-4 group-data-[collapsible=icon]:px-2 group-data-[collapsible=icon]:py-4 border-b-2 border-primary-300 lg:border-b-0 lg:border-none">
-              <Link href="/" className="flex items-center gap-3 shrink-0 group focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none rounded-md overflow-hidden w-full justify-start">
+            <div className="flex items-center justify-between px-4 py-3 lg:px-4 lg:py-4 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:py-4 group-data-[collapsible=icon]:justify-center border-b-2 border-primary-300 lg:border-b-0 lg:border-none">
+              <Link href="/" className="flex items-center gap-3 shrink-0 group focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none rounded-md w-full justify-start group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:gap-0 group-data-[collapsible=icon]:w-full">
                 {/* Expanded logo */}
                 <>
-<img
-                  src={getAssetPath("/logo-horizontal.svg")}
-                  alt="Logo DINARP GEOportal"
-                  className="dark:hidden h-9 lg:h-10 w-auto object-contain transition-transform group-hover:scale-105 group-data-[collapsible=icon]:hidden"
-                />
-<img
-                  src={getAssetPath("/logo-horizontal-blanco.svg")}
-                  alt="Logo DINARP GEOportal"
-                  className="hidden dark:block h-9 lg:h-10 w-auto object-contain transition-transform group-hover:scale-105 group-data-[collapsible=icon]:hidden"
-                />
-</>
+                  <img
+                    src={getAssetPath("/logo-horizontal-blanco.svg")}
+                    alt="Logo DINARP GEOportal"
+                    className="h-9 lg:h-10 w-auto object-contain transition-transform group-hover:scale-105 group-data-[collapsible=icon]:hidden"
+                  />
+                </>
                 {/* Collapsed logo */}
-                <>
-<img
-                  src={getAssetPath("/logo-horizontal.svg")}
-                  alt="Logo DINARP Símbolo"
-                  className="dark:hidden h-8 w-auto object-contain transition-transform group-hover:scale-105 hidden group-data-[collapsible=icon]:block mx-auto"
+                <img
+                  src={getAssetPath("/escudo-light.svg")}
+                  alt="Escudo DINARP"
+                  className="h-8 w-auto object-contain transition-transform group-hover:scale-105 hidden group-data-[collapsible=icon]:block mx-auto"
                 />
-<img
-                  src={getAssetPath("/logo-horizontal-blanco.svg")}
-                  alt="Logo DINARP Símbolo"
-                  className="hidden dark:block h-8 w-auto object-contain transition-transform group-hover:scale-105 hidden group-data-[collapsible=icon]:block mx-auto"
-                />
-</>
               </Link>
               {isMobile && (
                 <Button
@@ -313,9 +310,38 @@ export function GeoportalSidebar({
         )}
       </SidebarContent>
 
-      {/* ── Footer: Theme toggle + User info ── */}
-      <SidebarFooter className="px-3 py-3">
-        <SidebarSeparator className="mb-3" />
+      {/* ── Footer: Secondary Actions, Theme toggle + User info ── */}
+      <SidebarFooter className="px-3 py-3 gap-2">
+        <SidebarSeparator className="mb-2" />
+        
+        {/* Acciones Secundarias */}
+        <SidebarMenu className="px-1">
+          <SidebarMenuItem>
+            <SidebarMenuButton tooltip="Configuración" onClick={(e) => e.preventDefault()}>
+              <Settings className="shrink-0" />
+              <span className="truncate">Configuración</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton tooltip="Ayuda / Soporte" onClick={(e) => e.preventDefault()}>
+              <LifeBuoy className="shrink-0" />
+              <span className="truncate">Ayuda / Soporte</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          
+          {/* Botón Contraer / Expandir */}
+          <SidebarMenuItem className="hidden lg:block mt-2">
+            <SidebarMenuButton 
+              tooltip={state === "expanded" ? "Contraer sidebar" : "Expandir sidebar"} 
+              onClick={toggleSidebar}
+            >
+              {state === "expanded" ? <PanelLeftClose className="shrink-0" /> : <PanelLeftOpen className="shrink-0" />}
+              <span className="truncate">{state === "expanded" ? "Contraer sidebar" : "Expandir sidebar"}</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+
+        <SidebarSeparator className="my-2" />
 
         {/* Theme toggle */}
         <div className="flex flex-col gap-1 px-1 mb-3">
@@ -328,21 +354,21 @@ export function GeoportalSidebar({
                   variant="ghost"
                   onClick={() => handleTheme(theme === "dark" ? "light" : "dark")}
                   className={cn(
-                    "relative flex w-full h-auto items-center p-1 rounded-full border border-sidebar-border/50",
-                    "bg-sidebar-accent/50 hover:bg-sidebar-accent transition-colors duration-300"
+                    "relative flex w-full h-auto items-center p-1 rounded-full border border-transparent",
+                    "bg-sidebar-accent/50 dark:bg-white/10 hover:bg-sidebar-accent dark:hover:bg-white/20 border-sidebar-border/50 dark:border-white/10 transition-colors duration-300"
                   )}
                   aria-label="Alternar tema"
                 >
                   <div
                     className={cn(
                       "absolute inset-y-1 left-1 w-[calc(50%-4px)] rounded-full shadow-sm transition-transform duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]",
-                      theme === "dark" ? "bg-sidebar translate-x-full" : "bg-sidebar translate-x-0"
+                      theme === "dark" ? "bg-white translate-x-full" : "bg-white translate-x-0"
                     )}
                   />
                   <div
                     className={cn(
                       "relative z-10 flex flex-1 items-center justify-center gap-2 py-1.5 text-xs font-bold transition-colors duration-300",
-                      theme !== "dark" ? "text-sidebar-foreground" : "text-sidebar-foreground/50 hover:text-sidebar-foreground/80"
+                      theme !== "dark" ? "text-primary" : "text-white/85 hover:text-white"
                     )}
                   >
                     <Sun className="size-4" />
@@ -351,7 +377,7 @@ export function GeoportalSidebar({
                   <div
                     className={cn(
                       "relative z-10 flex flex-1 items-center justify-center gap-2 py-1.5 text-xs font-bold transition-colors duration-300",
-                      theme === "dark" ? "text-sidebar-foreground" : "text-sidebar-foreground/50 hover:text-sidebar-foreground/80"
+                      theme === "dark" ? "text-black font-bold" : "text-muted-foreground hover:text-foreground"
                     )}
                   >
                     <Moon className="size-4" />
@@ -368,46 +394,6 @@ export function GeoportalSidebar({
           )}
         </div>
 
-        {/* User section */}
-        {showUser && (
-          user ? (
-            <div className="flex items-center gap-3 px-1 group-data-[collapsible=icon]:w-full group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
-              {/* Avatar */}
-              <div className="relative shrink-0 group-data-[collapsible=icon]:mx-auto">
-                <div className="size-9 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-heading font-bold text-caption group-data-[collapsible=icon]:size-8 transition-all duration-200">
-                  {initials}
-                </div>
-                <div className="absolute bottom-0 right-0 size-2.5 rounded-full bg-success border-2 border-background group-data-[collapsible=icon]:size-2" />
-              </div>
-
-              <div className="flex flex-1 items-center justify-between gap-2 min-w-0 group-data-[collapsible=icon]:hidden animate-in fade-in slide-in-from-bottom-1 duration-300">
-                <div className="flex flex-col min-w-0">
-                  <span className="text-body-sm font-heading font-semibold text-sidebar-foreground truncate">
-                    {displayName}
-                  </span>
-                  <span className="text-caption text-sidebar-foreground/60 truncate">
-                    {displayEmail}
-                  </span>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="icon-xs"
-                  aria-label="Cerrar sesión"
-                  onClick={handleLogout}
-                  className="flex size-8 shrink-0 items-center justify-center rounded-lg text-muted-foreground hover:text-danger hover:bg-danger/10 transition-colors duration-200"
-                >
-                  <LogOut className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          ) : (
-            <div className="flex flex-col gap-2 px-1 group-data-[collapsible=icon]:hidden">
-              <Button asChild className="w-full text-caption h-8">
-                <Link href="/login">Iniciar Sesión</Link>
-              </Button>
-            </div>
-          )
-        )}
       </SidebarFooter>
     </Sidebar>
   );
@@ -427,26 +413,31 @@ function NavCollapsible({ item, isActive, onClick }: { item: NavItem, isActive: 
   if (state === "collapsed") {
     return (
       <SidebarMenuItem>
-        <SidebarMenuButton
-          isActive={isActive}
-          onClick={() => setOpen(!open)}
-          tooltip={{
-            children: (
-              <div className="flex flex-col gap-0.5 max-w-[200px]">
-                <span className="font-semibold">{item.label}</span>
-                {item.children && (
-                  <span className="text-[10px] text-muted-foreground leading-tight">
-                    {item.children.map(sub => sub.label).join(" - ")}
-                  </span>
-                )}
-              </div>
-            )
-          }}
-        >
-          <Icon className="shrink-0" />
-          <span className="flex-1 truncate">{item.label}</span>
-        </SidebarMenuButton>
-      </SidebarMenuItem>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <SidebarMenuButton isActive={isActive}>
+                  <Icon className="shrink-0" />
+                  <span className="flex-1 truncate">{item.label}</span>
+                </SidebarMenuButton>
+              </DropdownMenuTrigger>
+        <DropdownMenuContent side="right" align="start" sideOffset={16} className="w-56 border-border shadow-lg rounded-xl bg-popover p-2">
+          <DropdownMenuLabel className="font-heading text-foreground font-semibold px-2">{item.label}</DropdownMenuLabel>
+          
+          {item.children?.map((child) => {
+            const childActive = isChildActive(child.href);
+            const ChildIcon = child.icon;
+            return (
+              <DropdownMenuItem key={child.label} asChild>
+                <Link href={child.href} className={cn("flex items-center gap-2 cursor-pointer py-2 px-3 rounded-lg text-sm font-medium transition-colors", childActive ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-primary hover:bg-primary/5")}>
+                  <ChildIcon className="size-4 shrink-0" />
+                  <span>{child.label}</span>
+                </Link>
+              </DropdownMenuItem>
+            );
+          })}
+        </DropdownMenuContent>
+            </DropdownMenu>
+          </SidebarMenuItem>
     );
   }
 
@@ -480,3 +471,16 @@ function NavCollapsible({ item, isActive, onClick }: { item: NavItem, isActive: 
     </SidebarMenuItem>
   );
 }
+
+
+
+
+
+
+
+
+
+
+
+
+

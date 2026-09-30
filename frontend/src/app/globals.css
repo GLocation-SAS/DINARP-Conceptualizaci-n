@@ -885,7 +885,7 @@
 
   /* Main Actions (Primary and Secondary inherit from UI BRAND TOKENS) */
   --primary: var(--primitive-primary-400);
-  --primary-foreground: var(--primitive-neutral-950);
+  --primary-foreground: #ffffff;
   --secondary: var(--primitive-secondary-300);
   --secondary-foreground: var(--primitive-neutral-50);
 
@@ -938,13 +938,13 @@
     El fondo conserva transparencia moderada y los textos utilizan
     tonos claros para mantener contraste sobre mapas oscuros.
   */
-  --sidebar: rgba(18, 20, 22, 0.88);
-  --sidebar-foreground: var(--primitive-neutral-200);
-  --sidebar-primary: var(--primitive-primary-300);
-  --sidebar-primary-foreground: var(--primitive-neutral-50);
-  --sidebar-accent: rgba(87, 104, 153, 0.18);
-  --sidebar-accent-foreground: var(--primitive-primary-100);
-  --sidebar-border: var(--primitive-white-a08);
+  --sidebar: var(--surface);
+  --sidebar-foreground: var(--surface-foreground);
+  --sidebar-primary: var(--primitive-primary-400);
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: var(--primitive-neutral-800);
+  --sidebar-accent-foreground: var(--foreground);
+  --sidebar-border: var(--border);
   --sidebar-ring: var(--primitive-primary-400);
 
   /*
@@ -2067,6 +2067,44 @@ input:-webkit-autofill:active {
 .animate-gradient-border-flow {
   background-size: 300% 300%;
   animation: gradient-border-flow 3s ease infinite;
+}
+
+/* Onda de progreso suave de fondo para tarjetas de acción destacada */
+@keyframes card-progress-wave {
+  0% {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+.animate-progress-wave {
+  animation: card-progress-wave 3.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-progress-wave {
+    animation: none;
+    opacity: 0;
+  }
+}
+
+.card-wave-bg {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(in srgb, var(--primary) 18%, transparent) 50%,
+    transparent 100%
+  );
 }
 
 /* WIREFRAME MODE OVERRIDES */

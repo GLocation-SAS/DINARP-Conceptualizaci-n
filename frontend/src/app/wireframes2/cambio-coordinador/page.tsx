@@ -1163,8 +1163,14 @@ export default function CambioCoordinadorPage() {
                           </TableCell>
                           <TableCell className="text-xs text-muted-foreground whitespace-nowrap">{sol.fechaSolicitud}</TableCell>
                           <TableCell className="text-xs">
-                            <Badge tone={badge.tone} appearance="soft" size="sm">
-                              {badge.label}
+                            <Badge
+                              tone={badge.tone}
+                              appearance="soft"
+                              size="sm"
+                              dot
+                              className="font-semibold text-[11px] normal-case tracking-normal whitespace-nowrap px-2.5 py-0.5 inline-flex shrink-0 shadow-2xs"
+                            >
+                              <span>{badge.label}</span>
                             </Badge>
                           </TableCell>
                           <TableCell className="text-xs text-right">
@@ -1247,8 +1253,14 @@ export default function CambioCoordinadorPage() {
               <Badge tone="neutral" appearance="soft" size="sm" className="font-mono">
                 {detailModalSol?.id}
               </Badge>
-              <Badge tone={detailModalSol ? getEstadoBadgeProps(detailModalSol.estado).tone : "neutral"} appearance="soft" size="sm">
-                {detailModalSol ? getEstadoBadgeProps(detailModalSol.estado).label : ""}
+              <Badge
+                tone={detailModalSol ? getEstadoBadgeProps(detailModalSol.estado).tone : "neutral"}
+                appearance="soft"
+                size="sm"
+                dot
+                className="font-semibold text-[11px] normal-case tracking-normal whitespace-nowrap px-2.5 py-0.5 inline-flex shrink-0 shadow-2xs"
+              >
+                <span>{detailModalSol ? getEstadoBadgeProps(detailModalSol.estado).label : ""}</span>
               </Badge>
             </div>
             <DialogTitle className="text-lg font-bold font-heading text-foreground mt-1">
