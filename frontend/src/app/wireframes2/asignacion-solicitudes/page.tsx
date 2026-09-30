@@ -2555,7 +2555,7 @@ export default function GestionIngresosPage() {
                   {/* Vista de Tabla para Escritorio */}
                   <div className="hidden md:block">
                     <Table
-                      className="w-full min-w-[1080px] table-fixed"
+                      className={cn("w-full table-fixed", (currentUser.role === "DIR_NORMATIVA" || currentUser.role === "EQ_NORMATIVA") ? "min-w-[800px]" : "min-w-[1080px]")}
                       containerClassName="overflow-x-auto rounded-xl"
                     >
                     <TableHeader>

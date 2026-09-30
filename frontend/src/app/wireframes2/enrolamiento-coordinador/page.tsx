@@ -416,7 +416,8 @@ function EnrolamientoContent() {
       </header>
 
       {/* Contenido Principal */}
-      <main className="flex-1 max-w-7xl mx-auto w-full px-4 py-8">
+      <main className="flex-1 w-full pb-8">
+        <div className="layout-container py-8">
         {/* ========================================================= */}
         {/* EXPERIENCIA 1: COORDINADOR SINARP                          */}
         {/* ========================================================= */}
@@ -1881,6 +1882,7 @@ function EnrolamientoContent() {
             </Sheet>
           </div>
         )}
+      </div>
       </main>
 
       {/* ── MODAL APROBAR SOLICITUD (Categoría 4: Dialog) ── */}
