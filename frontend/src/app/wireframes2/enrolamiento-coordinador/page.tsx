@@ -417,12 +417,10 @@ function EnrolamientoContent() {
         {/* EXPERIENCIA 1: COORDINADOR SINARP                          */}
         {/* ========================================================= */}
         {simulatedRole === "COORDINADOR_SINARP" && (
-          <div className="space-y-6">
+          <div className="bg-surface border border-border rounded-2xl sm:rounded-3xl p-4 sm:p-5 lg:p-6 shadow-xs space-y-5 animate-in fade-in duration-300 w-full">
             {/* Migas de pan y Botón Volver */}
-            <div className="flex items-center justify-between gap-4 flex-wrap">
-              <div className="flex items-center gap-3 flex-wrap">
-
-                <nav aria-label="Breadcrumb" className="text-xs text-muted-foreground flex items-center gap-1.5 flex-wrap">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-border">
+              <nav aria-label="Breadcrumb" className="text-xs text-muted-foreground flex items-center gap-1.5 flex-wrap">
                   <Link href="/wireframes2/login" className="hover:text-foreground transition-colors flex items-center gap-1 shrink-0">
                     <Home className="size-3.5" />
                     <span>Portal de Acceso</span>
@@ -430,7 +428,6 @@ function EnrolamientoContent() {
                   <span>/</span>
                   <span className="text-foreground font-semibold truncate">Activación de Coordinador SINARP</span>
                 </nav>
-              </div>
 
               <div className="flex items-center gap-2">
                 <Badge tone="neutral" appearance="soft" size="sm" className="border border-border">
@@ -477,59 +474,53 @@ function EnrolamientoContent() {
             {/* ── PANTALLA 1: VALIDACIÓN DEL COORDINADOR (SI NO SE HA CARGADO O NO EXISTE SOLICITUD) ── */}
             {!preregistroCargado && (
               <div className="space-y-6 animate-in fade-in duration-300">
-                <div className="bg-surface border border-border rounded-2xl p-6 sm:p-8 space-y-6 shadow-xs max-w-4xl mx-auto">
-                  <div className="space-y-2 text-center sm:text-left">
-                    <div className="size-12 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary mb-3">
-                      <UserCheck className="size-6" />
-                    </div>
-                    <h1 className="text-xl sm:text-2xl font-bold font-heading text-foreground">
-                      Activación de Coordinador SINARP
-                    </h1>
-                    <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                      Ingresa tu número de cédula para continuar con el proceso de activación.
-                    </p>
-                  </div>
+                <div className="pt-3 pb-2 my-2 space-y-1 text-left">
+                  <h2 className="text-lg font-bold font-heading flex items-center gap-2 text-foreground">
+                    <UserCheck className="size-5 text-primary" />
+                    Activación de Coordinador SINARP
+                  </h2>
+                  <p className="text-sm text-muted-foreground">
+                    Ingresa tu número de cédula para continuar con el proceso de activación.
+                  </p>
+                </div>
 
                   <form
                     onSubmit={(e) => {
                       e.preventDefault();
                       ejecutarValidacionCedula(cedulaInput);
                     }}
-                    className="space-y-4 pt-2"
+                    className="space-y-6"
                   >
-                    <FormField label="Número de cédula de identidad" htmlFor="cedula-input" required>
-                      <InputGroup state={validationError ? "error" : "default"}>
-                        <InputGroupInput
-                          id="cedula-input"
-                          type="text"
-                          maxLength={10}
-                          placeholder="Ingresa tu cédula de 10 dígitos"
-                          value={cedulaInput}
-                          onChange={(e) => {
-                            setCedulaInput(e.target.value.replace(/\D/g, ""));
-                            setValidationError(null);
-                          }}
-                          className="text-sm font-mono tracking-wider"
-                          autoFocus
-                          required
-                        />
-                        <InputGroupButton
-                          type="submit"
-                          variant="primary"
-                          disabled={isSearching || cedulaInput.length !== 10}
-                          className="text-xs font-semibold px-6"
-                        >
-                          {isSearching ? (
-                            <div className="flex items-center gap-2">
-                              <LoadingSpinner size="sm" className="size-4" />
-                              <span>Validando...</span>
-                            </div>
-                          ) : (
-                            <span>Validar y continuar</span>
-                          )}
-                        </InputGroupButton>
-                      </InputGroup>
-                    </FormField>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="bg-surface border border-border rounded-2xl p-6 shadow-sm flex flex-col justify-between min-h-[148px]">
+                        <div>
+                          <Label htmlFor="cedula-input" className="text-xs font-semibold text-foreground">
+                            Número de cédula de identidad <span className="text-warning">*</span>
+                          </Label>
+                          <p className="text-[11px] text-muted-foreground mt-0.5 mb-3">
+                            Ingresa tu cédula de 10 dígitos.
+                          </p>
+                        </div>
+                        <div className="flex items-center min-h-[42px] pt-1">
+                          <InputGroup state={validationError ? "error" : "default"}>
+                            <InputGroupInput
+                              id="cedula-input"
+                              type="text"
+                              maxLength={10}
+                              placeholder="Ej: 1715489621"
+                              value={cedulaInput}
+                              onChange={(e) => {
+                                setCedulaInput(e.target.value.replace(/\D/g, ""));
+                                setValidationError(null);
+                              }}
+                              className="text-sm font-mono tracking-wider"
+                              autoFocus
+                              required
+                            />
+                          </InputGroup>
+                        </div>
+                      </div>
+                    </div>
 
                     {/* ESCENARIO DE ERROR: NO HABILITADO */}
                     {validationError && (
@@ -566,68 +557,42 @@ function EnrolamientoContent() {
                         </div>
                       </div>
                     )}
-                  </form>
 
-                    {/* Acciones de acceso rápido para pruebas / demostración */}
-                    <div className="pt-4 border-t border-border/60 space-y-2">
-                      <span className="text-[11px] text-muted-foreground font-semibold uppercase tracking-wider block">
-                        Cargar cédulas de prueba para simulación:
-                      </span>
-                      <div className="flex flex-col gap-2">
+                    <div className="flex flex-col sm:flex-row justify-between items-center gap-3 pt-4 border-t border-border/60">
+                      <Link href="/wireframes2/login" className="w-full sm:w-auto">
                         <Button
                           type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            setCedulaInput("1715489621");
-                            ejecutarValidacionCedula("1715489621");
-                          }}
-                          className="text-xs justify-start font-normal h-auto py-2 px-3"
+                          variant="neutral"
+                          size="default"
+                          className="text-xs font-semibold gap-1.5 w-full sm:w-auto"
                         >
-                          <UserCheck className="size-4 text-primary shrink-0 mr-2" />
-                          <div className="text-left">
-                            <span className="font-semibold block">1715489621 · Roberto Dávila (MSP)</span>
-                            <span className="text-[11px] text-muted-foreground">Prerregistrado habilitado en Anexo A</span>
-                          </div>
+                          <ArrowLeft className="size-4" />
+                          <span>Volver al acceso principal</span>
                         </Button>
-
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            setCedulaInput("1712345602");
-                            ejecutarValidacionCedula("1712345602");
-                          }}
-                          className="text-xs justify-start font-normal h-auto py-2 px-3"
-                        >
-                          <UserCheck className="size-4 text-primary shrink-0 mr-2" />
-                          <div className="text-left">
-                            <span className="font-semibold block">1712345602 · Paula Mendoza (DINARP)</span>
-                            <span className="text-[11px] text-muted-foreground">Prerregistrado habilitado en Anexo A</span>
+                      </Link>
+                      <Button
+                        type="submit"
+                        variant="primary"
+                        size="default"
+                        disabled={isSearching || cedulaInput.length !== 10}
+                        className="text-xs font-semibold px-6 w-full sm:w-auto"
+                      >
+                        {isSearching ? (
+                          <div className="flex items-center gap-2">
+                            <LoadingSpinner size="sm" className="size-4" />
+                            <span>Validando...</span>
                           </div>
-                        </Button>
-
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            setCedulaInput("1700000000");
-                            ejecutarValidacionCedula("1700000000");
-                          }}
-                          className="text-xs justify-start font-normal h-auto py-2 px-3 border-danger/30 text-danger hover:bg-danger/10"
-                        >
-                          <XCircle className="size-4 shrink-0 mr-2" />
-                          <div className="text-left">
-                            <span className="font-semibold block">1700000000 · Cédula No Prerregistrada</span>
-                            <span className="text-[11px] text-danger/80">Probar rechazo por falta de Anexo A</span>
+                        ) : (
+                          <div className="flex items-center gap-2">
+                            <span>Validar información</span>
+                            <ArrowRight className="size-4" />
                           </div>
-                        </Button>
-                      </div>
+                        )}
+                      </Button>
                     </div>
-                </div>
+                  </form>
               </div>
+
             )}
 
             {/* ── SI EL COORDINADOR YA TIENE UNA SOLICITUD EN EL STORE ── */}
@@ -2110,50 +2075,66 @@ function EnrolamientoContent() {
 
     
           {/* Floating Demo Toolbar */}
-          <div className="fixed bottom-4 sm:bottom-6 right-4 sm:right-6 z-50 transition-all duration-300">
-            {showDemoToolbar ? (
-              <div className="flex flex-col gap-2 bg-surface/95 backdrop-blur-md p-2 rounded-2xl border border-border shadow-xl w-[280px] animate-in fade-in slide-in-from-bottom-2 duration-200">
-                <div className="flex items-center justify-between px-2 pb-1 border-b border-border/50">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Opciones de Simulación</span>
-                  <Button type="button" variant="ghost" size="icon" onClick={() => setShowDemoToolbar(false)} className="size-6 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground" title="Minimizar">
-                    <ChevronDown className="size-3" />
+          <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 flex flex-col items-end gap-2 sm:gap-3 max-w-[calc(100vw-2rem)]">
+              {showDemoToolbar ? (
+                <div className="flex flex-wrap items-center justify-end gap-1.5 sm:gap-2 bg-surface/95 backdrop-blur-md p-2 rounded-2xl border border-border shadow-xl max-w-full animate-in fade-in slide-in-from-bottom-2 duration-200">
+                  <div className="hidden sm:flex items-center gap-1.5 px-2 text-[11px] font-semibold text-muted-foreground border-r border-border/60 mr-1">
+                    <Sparkles className="size-3 text-primary shrink-0" />
+                    <span>Demo</span>
+                  </div>
+                  
+                  {!preregistroCargado && (
+                    <>
+                      <Button type="button" variant="outline" size="default" onClick={() => { setCedulaInput("1715489621"); ejecutarValidacionCedula("1715489621"); }} className="rounded-full px-3 sm:px-4 flex items-center gap-1.5 text-xs h-8 sm:h-9">
+                        <UserCheck className="size-3.5 text-primary" /> Titular Habilitado
+                      </Button>
+                      <Button type="button" variant="outline" size="default" onClick={() => { setCedulaInput("1712345602"); ejecutarValidacionCedula("1712345602"); }} className="rounded-full px-3 sm:px-4 flex items-center gap-1.5 text-xs h-8 sm:h-9">
+                        <UserCheck className="size-3.5 text-primary" /> Suplente Habilitado
+                      </Button>
+                    </>
+                  )}
+
+                  {preregistroCargado && !isSubmittedSuccess && step > 1 && (
+                    <Button type="button" variant="outline" size="default" onClick={handleSimulateFillAnexoB} className="rounded-full px-3 sm:px-4 flex items-center gap-1.5 text-xs h-8 sm:h-9 bg-amber-500/10 text-amber-600 hover:bg-amber-500/20 border-amber-500/20">
+                      <Sparkles className="size-3.5" /> Autocompletar Anexo B
+                    </Button>
+                  )}
+
+                  {step === 4 && !isSigned && (
+                    <Button type="button" variant="success" size="default" onClick={handleFirmaElectronica} className="rounded-full px-3 sm:px-4 flex items-center gap-1.5 text-xs h-8 sm:h-9">
+                      <ShieldCheck className="size-3.5" /> Simular Firma Válida
+                    </Button>
+                  )}
+                  
+                  <Button type="button" variant="outline" size="default" onClick={handleIniciarNuevaSolicitud} className="rounded-full px-3 sm:px-4 flex items-center gap-1.5 text-xs h-8 sm:h-9">
+                    <ArrowLeft className="size-3.5" /> Reiniciar Flujo
+                  </Button>
+
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setShowDemoToolbar(false)}
+                    className="rounded-full size-8 shrink-0 hover:bg-muted text-muted-foreground hover:text-foreground ml-0.5"
+                    title="Ocultar opciones de simulación"
+                  >
+                    <ChevronDown className="size-4" />
                   </Button>
                 </div>
-                
-                {!preregistroCargado && (
-                  <div className="space-y-1.5">
-                    <Button type="button" variant="outline" size="sm" onClick={() => { setCedulaInput("1715489621"); ejecutarValidacionCedula("1715489621"); }} className="w-full text-xs justify-start h-8">
-                      <UserCheck className="size-3.5 mr-2 text-primary" /> Titular Habilitado
-                    </Button>
-                    <Button type="button" variant="outline" size="sm" onClick={() => { setCedulaInput("1712345602"); ejecutarValidacionCedula("1712345602"); }} className="w-full text-xs justify-start h-8">
-                      <UserCheck className="size-3.5 mr-2 text-primary" /> Suplente Habilitado
-                    </Button>
-                  </div>
-                )}
-
-                {preregistroCargado && !isSubmittedSuccess && step > 1 && (
-                  <Button type="button" variant="outline" size="sm" onClick={handleSimulateFillAnexoB} className="w-full text-xs justify-start h-8 bg-amber-500/10 text-amber-600 hover:bg-amber-500/20 border-amber-500/20">
-                    <Sparkles className="size-3.5 mr-2" /> Autocompletar Anexo B
-                  </Button>
-                )}
-
-                {step === 4 && !isSigned && (
-                  <Button type="button" variant="success" size="sm" onClick={handleFirmaElectronica} className="w-full text-xs justify-start h-8">
-                    <ShieldCheck className="size-3.5 mr-2" /> Simular Firma Válida
-                  </Button>
-                )}
-                
-                <Button type="button" variant="outline" size="sm" onClick={handleIniciarNuevaSolicitud} className="w-full text-xs justify-start h-8">
-                  <ArrowLeft className="size-3.5 mr-2" /> Reiniciar Flujo
+              ) : (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowDemoToolbar(true)}
+                  className="rounded-full px-3.5 py-1.5 shadow-lg flex items-center gap-2 text-xs bg-surface/95 backdrop-blur-md border border-border hover:bg-muted transition-all animate-in fade-in slide-in-from-bottom-2 duration-200"
+                  title="Desplegar opciones de simulación"
+                >
+                  <Sparkles className="size-3.5 text-primary" />
+                  <span className="font-semibold text-foreground">Opciones de prueba</span>
+                  <ChevronUp className="size-3.5 text-muted-foreground" />
                 </Button>
-              </div>
-            ) : (
-              <Button type="button" variant="outline" size="sm" onClick={() => setShowDemoToolbar(true)} className="rounded-full px-3.5 py-1.5 shadow-lg flex items-center gap-2 text-xs bg-surface/95 backdrop-blur-md border border-border hover:bg-muted transition-all animate-in fade-in slide-in-from-bottom-2 duration-200" title="Desplegar opciones">
-                <Sparkles className="size-3.5 text-primary" />
-                <span className="font-semibold text-foreground">Casos de Uso</span>
-                <ChevronUp className="size-3.5 text-muted-foreground" />
-              </Button>
-            )}
+              )}
           </div>
     </div>
   );
