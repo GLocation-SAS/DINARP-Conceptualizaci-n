@@ -737,9 +737,7 @@ export default function AccesoInteroperabilidadPage() {
                         <TableCell>{getEstadoBadge(s.estado)}</TableCell>
                         <TableCell className="text-center">
                           <div className="flex items-center justify-center gap-3">
-                            <TooltipProvider delayDuration={0}>
-                              
-                              )}
+                            <TooltipProvider delayDuration={0}></TooltipProvider>
                             </TooltipProvider>
                           </div>
                         </TableCell>

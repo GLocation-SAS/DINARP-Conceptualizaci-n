@@ -56,7 +56,7 @@ import { FileUpload as AdvancedFileUpload, type FileItemData } from "@/component
 import { WireframeDashboardLayout } from "../../../components/wireframe-dashboard-layout";
 import { useSimulatedRole } from "../../../catalogo-interoperabilidad/hooks/use-simulated-role";
 import { MOCK_USERS_BY_ROLE, type UserRole } from "../../../catalogo-interoperabilidad/data/catalogo-data";
-import { useSolicitudesStore, INITIAL_SOLICITUDES, SolicitudAcceso } from "../../data/solicitudes-store";
+import { useSolicitudesStore, INITIAL_SOLICITUDES, SolicitudAcceso } from "../../../acceso-interoperabilidad/data/solicitudes-store";
 
 import {
   Combobox,
@@ -373,7 +373,7 @@ export default function SolicitudDetailPage({ params, searchParams }: PageProps)
       }
     >
       {modoCorreccion && role === "COORDINADOR_SINARP" && isRechazada ? (
-        
+        <></>
       ) : (
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col gap-6">
           {/* Barra superior de navegación */}
