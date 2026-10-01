@@ -455,9 +455,9 @@ export function ProcesosTab({ activeRole, onStartTour }: ProcesosTabProps) {
                       key={exp.id}
                       className={isMyTask ? "bg-muted/30 dark:bg-muted/10 font-medium" : ""}
                     >
-                      <TableCell className="font-mono font-medium text-foreground">
+                      <TableCell className="text-center font-mono font-medium text-foreground">
                         <div className="flex items-center gap-2">
-                          <Layers className="size-4 text-muted-foreground" />
+                          <Layers   className="size-4" />
                           {exp.codigoExpediente}
                         </div>
                       </TableCell>
@@ -479,7 +479,7 @@ export function ProcesosTab({ activeRole, onStartTour }: ProcesosTabProps) {
                           {getEtapaNombreCorto(exp.etapaActual)}
                         </span>
                       </TableCell>
-                      <TableCell className="text-xs">
+                      <TableCell className="text-center text-xs">
                         <div className="flex items-center gap-1.5">
                           <Badge
                             tone={isMyTask ? "warning" : "neutral"}
@@ -505,14 +505,9 @@ export function ProcesosTab({ activeRole, onStartTour }: ProcesosTabProps) {
                           <TooltipProvider delayDuration={0}>
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <Button
-                                  variant={isMyTask ?"primary" :"ghost"}
-                                  size="icon-sm"
-                                  asChild
-                                  className={isMyTask ?"size-8 rounded-lg shadow-sm font-semibold" :"size-8 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted"}
-                                >
+                                <Button variant="ghost" size="icon-sm" asChild className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10">
                                   <Link href={`/wireframes2/catalogo-interoperabilidad/administracion/incorporaciones/${exp.id}`}>
-                                    {isMyTask ? <ArrowRight  /> : <Eye  />}
+                                    {isMyTask ? <ArrowRight   className="size-4" /> : <Eye   className="size-4" />}
                                   </Link>
                                 </Button>
                               </TooltipTrigger>

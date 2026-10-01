@@ -38,6 +38,29 @@ export function useAuthStore() {
 
   const login = useCallback((input: string) => {
     const cleanInput = input.trim().toLowerCase();
+    
+    // Usuario especial demo Mariana Almeida (MinEduc)
+    if (cleanInput === "1714443322" || cleanInput === "1714443376" || cleanInput === "m.almeida@educacion.gob.ec") {
+      const userMariana: MockUser = {
+        id: "USR-CRD-001",
+        name: "Mariana Almeida",
+        role: "COORDINADOR_SINARP",
+        roleTitle: "Coordinador Titular SINARP",
+        email: "m.almeida@educacion.gob.ec",
+        institution: "Ministerio de Educación",
+        cedula: "1714443322",
+        avatar: "MA",
+        initials: "MA",
+      };
+      setActiveUser(userMariana);
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(userMariana));
+      } catch (e) {
+        console.error("Error saving auth store", e);
+      }
+      return userMariana;
+    }
+
     const users = Object.values(MOCK_USERS_BY_ROLE);
     const user =
       users.find(

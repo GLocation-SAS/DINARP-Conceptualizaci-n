@@ -24,14 +24,9 @@ import {
   Check,
   Info,
   Users,
-  Landmark,
-  ChevronDown,
-  ChevronUp,
-  Sparkles,
-  ArrowLeft
+  Landmark
 } from "lucide-react";
 
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -40,18 +35,13 @@ import {
   InputGroupInput,
   InputGroupButton,
 } from "@/components/ui/input-group";
+import { FormField } from "@/components/ui/form-field";
 import { Badge } from "@/components/ui/badge";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 import {
   Card,
   CardTitle,
@@ -60,6 +50,44 @@ import {
 } from "@/components/ui/card";
 import { useSolicitudesIngresoStore } from "../acceso-seguridad/data/gestion-ingresos-store";
 import { useAuthStore } from "../acceso-seguridad/data/auth-store";
+import { MOCK_USERS_BY_ROLE } from "../catalogo-interoperabilidad/data/catalogo-data";
+
+function validarCedula(cedula: string) {
+  if (cedula.length !== 10) return false;
+  if (/\D/.test(cedula)) return false;
+  // Excepciones para testing del wireframe
+  if (["1714443322", "1714443376", "1799999999", "1715489621", "1712345602", "1788888888", "1724589632", "1718956234", "0999999999", "1234567890"].includes(cedula)) return true;
+
+  const digitoRegion = parseInt(cedula.substring(0, 2), 10);
+  if (digitoRegion < 1 || digitoRegion > 24) return false;
+  const ultimoDigito = parseInt(cedula.substring(9, 10), 10);
+  const pares = parseInt(cedula.substring(1, 2), 10) + parseInt(cedula.substring(3, 4), 10) + parseInt(cedula.substring(5, 6), 10) + parseInt(cedula.substring(7, 8), 10);
+  let impares = 0;
+  for (let i = 0; i < 9; i += 2) {
+    let num = parseInt(cedula.charAt(i), 10) * 2;
+    if (num > 9) num -= 9;
+    impares += num;
+  }
+  const sumaTotal = pares + impares;
+  const decenaInmediata = Math.ceil(sumaTotal / 10) * 10;
+  let digitoValidador = decenaInmediata - sumaTotal;
+  if (digitoValidador === 10) digitoValidador = 0;
+  return digitoValidador === ultimoDigito;
+}
+
+function isKnownEmail(val: string) {
+  const users = Object.values(MOCK_USERS_BY_ROLE);
+  return users.some(u => u.email === val || u.id === val);
+}
+
+function getCedulaErrorMessage(val: string) {
+  if (!val) return null;
+  if (isKnownEmail(val)) return null; // Permite correos de demo
+  if (/\D/.test(val)) return "Ingresa únicamente números (o un correo autorizado).";
+  if (val.length < 10) return "La cédula debe tener 10 dígitos.";
+  if (!validarCedula(val)) return "Ingresa un número de cédula válido.";
+  return null;
+}
 
 interface DinarpWireframe2LoginFlowProps {
   dashboardRoute?: string;
@@ -90,7 +118,6 @@ export function DinarpWireframe2LoginFlow({
   const [isSubmittingOtp, setIsSubmittingOtp] = useState(false);
   const [otpError, setOtpError] = useState("");
   const [resendCountdown, setResendCountdown] = useState(45);
-  const [showTestCases, setShowTestCases] = useState(false);
   const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   // Estado Verificación Enrolamiento (Proceso B)
@@ -119,32 +146,16 @@ export function DinarpWireframe2LoginFlow({
     e.preventDefault();
     setLoginError("");
 
-    const inputVal = cedula.trim();
-    const isCedula = /^\d{10}$/.test(inputVal);
-    const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(inputVal);
-
-    if (!isCedula && !isEmail) {
-      setLoginError("Ingresa un número de cédula válido (10 dígitos) o tu correo electrónico (ej. gestion.director@gmail.com).");
+    if (!cedula) {
+      setLoginError("Ingresa tu cédula.");
+      return;
+    }
+    if (!isKnownEmail(cedula) && !validarCedula(cedula)) {
+      setLoginError("La cédula no es válida o el usuario no está registrado.");
       return;
     }
     if (password.length < 4) {
       setLoginError("Ingresa tu contraseña.");
-      return;
-    }
-
-    // Verificar cuentas bloqueadas/suspendidas de prueba (según HU ID-03 e ID-04)
-    if (inputVal === "1719876543" || inputVal === "patricio.alarcon@dinarp.gob.ec") {
-      setLoginError("Acceso no autorizado: La cuenta institucional asociada se encuentra SUSPENDIDA. Contacta a Seguridad y Soporte DINARP.");
-      return;
-    }
-
-    if (inputVal === "1708765432" || inputVal === "elena.villacis@dinarp.gob.ec") {
-      setLoginError("Acceso no autorizado: La cuenta institucional ha sido RETIRADA del sistema (baja lógica). Contacta a la Dirección Administrativa.");
-      return;
-    }
-
-    if (inputVal === "1723456789" || inputVal === "sofia.morales@dinarp.gob.ec") {
-      setLoginError("Cuenta pendiente de activación: Revisa el enlace remitido a tu correo electrónico para establecer tus credenciales y vincular tu segundo factor TOTP.");
       return;
     }
 
@@ -154,15 +165,19 @@ export function DinarpWireframe2LoginFlow({
     setTimeout(() => {
       setIsSubmittingLogin(false);
 
-      // Si se prueba contraseña incorrecta para testing
-      if (password === "error" || password === "1234") {
-        setLoginError("Credenciales de acceso incorrectas. Verifica tu identificación y contraseña.");
+      if (cedula === "1714443322" || cedula === "1714443376" || cedula === "m.almeida@educacion.gob.ec") {
+        login(cedula);
+        toast.info("Contraseña temporal detectada", {
+          description: "Debes cambiar tu contraseña temporal antes de ingresar al portal.",
+        });
+        router.push("/wireframes2/cambiar-contrasena-temporal?cedula=1714443322");
         return;
       }
 
+      // Simular usuario conocido de demo o acceso general
       setIsOtpStep(true);
-      toast.info("Verificación requerida", {
-        description: "Abre Google Authenticator para ingresar el código de 6 dígitos.",
+      toast.info("Código de seguridad 2FA enviado", {
+        description: "Se remitió un código OTP a tu correo institucional registrado.",
       });
     }, 500);
   };
@@ -197,75 +212,15 @@ export function DinarpWireframe2LoginFlow({
     setOtpError("");
 
     setTimeout(() => {
-      // Contemplar casos de código incorrecto, vencido o ya utilizado
-      if (fullOtp === "000000") {
-        setIsSubmittingOtp(false);
-        setOtpError("Código incorrecto. Verifica el número actual en tu aplicación Google Authenticator.");
-        return;
-      }
-
-      if (fullOtp === "999999") {
-        setIsSubmittingOtp(false);
-        setOtpError("Código vencido o ya utilizado. Espera a que Google Authenticator genere uno nuevo.");
-        return;
-      }
-
-      const loggedUser = login(cedula.trim());
       setIsSubmittingOtp(false);
       toast.success("Autenticación exitosa", {
         description: "Bienvenido al portal institucional del SINARP.",
       });
-
-      const cleanInput = cedula.trim().toLowerCase();
-
-      // Redirigir según rol
-      if (
-        cleanInput === "1799999999" ||
-        cleanInput === "admin.portal@dinarp.gob.ec" ||
-        cleanInput.includes("admin") ||
-        loggedUser?.role === "ADMIN"
-      ) {
+      const loggedUser = login(cedula);
+      if (loggedUser?.role === "ADMIN") {
         router.push("/wireframes2/usuarios");
-      }
-      // Coordinador SINARP
-      else if (
-        cleanInput === "1712345678" ||
-        loggedUser?.role === "COORDINADOR_SINARP"
-      ) {
-        router.push("/wireframes2/acceso-interoperabilidad/solicitudes");
-      }
-      // Redirigir al equipo / revisor de gestión o normatividad a su bandeja de solicitudes
-      else if (
-        cleanInput === "1111111111" ||
-        cleanInput === "gestion.revisor@gmail.com" ||
-        cleanInput.includes("gestion.revisor") ||
-        loggedUser?.cedula === "1111111111" ||
-        loggedUser?.email?.toLowerCase() === "gestion.revisor@gmail.com" ||
-        loggedUser?.role === "EQ_GESTION"
-      ) {
-        router.push("/wireframes2/solicitudes-pendientes");
-      } 
-      // Si entra como Director de Gestión o Director de Normatividad, redirigir directo a asignación de solicitudes
-      else if (
-        cleanInput === "2222222222" ||
-        cleanInput === "normativa.director@gmail.com" ||
-        cleanInput.includes("normativa.director") ||
-        cleanInput === "3333333333" ||
-        cleanInput === "normativa.revisor@gmail.com" ||
-        cleanInput.includes("normativa.revisor") ||
-        cleanInput === "gestion.director@gmail.com" ||
-        cleanInput.includes("gestion.director") ||
-        loggedUser?.cedula === "2222222222" ||
-        loggedUser?.cedula === "3333333333" ||
-        loggedUser?.email?.toLowerCase() === "gestion.director@gmail.com" ||
-        loggedUser?.email?.toLowerCase() === "normativa.director@gmail.com" ||
-        loggedUser?.role === "DIR_GESTION" ||
-        loggedUser?.role === "DIR_NORMATIVA" ||
-        loggedUser?.role === "EQ_NORMATIVA"
-      ) {
-        router.push("/wireframes2/asignacion-solicitudes");
       } else {
-        router.push(dashboardRoute);
+        router.push("/wireframes2/catalogo-interoperabilidad");
       }
     }, 600);
   };
@@ -273,9 +228,10 @@ export function DinarpWireframe2LoginFlow({
   // Verificación de preregistro para enrolamiento (Proceso B)
   const handleBuscarPreregistro = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!/^\d{10}$/.test(cedulaEnrolar)) {
+    const errCedula = getCedulaErrorMessage(cedulaEnrolar);
+    if (errCedula || !cedulaEnrolar) {
       toast.error("Número de cédula inválido", {
-        description: "Debe ingresar los 10 dígitos de su cédula de identidad.",
+        description: errCedula || "Ingresa tu número de cédula.",
       });
       return;
     }
@@ -304,12 +260,15 @@ export function DinarpWireframe2LoginFlow({
   };
 
   return (
-    <div className="space-y-6">
-      {/* ── CASO 1: FORMULARIO PRINCIPAL DE ACCESO ── */}
+    <div className="space-y-4">
+      {/* ── Tabs de Navegación del Portal de Acceso ── */}
+
+
+      {/* ── CASO 1: LOGIN HABITUAL (USUARIOS ACTIVOS) ── */}
       {activeTab === "login" && !isOtpStep && (
         <form onSubmit={handleLoginSubmit} className="space-y-4">
           <div className="space-y-1">
-            <h1 className="text-lg sm:text-xl font-heading font-bold text-primary tracking-tight">
+            <h1 className="text-xl font-bold font-heading text-primary">
               Acceso al Portal de Interoperabilidad
             </h1>
           </div>
@@ -322,55 +281,56 @@ export function DinarpWireframe2LoginFlow({
           )}
 
           {/* Cédula */}
-          <div className="space-y-1.5">
-            <Label htmlFor="login-cedula" className="text-xs font-semibold text-foreground">
-              Cédula
-            </Label>
-            <InputGroup className="bg-background border-border hover:border-primary/50 focus-within:border-primary h-11">
-              <InputGroupInput
-                id="login-cedula"
-                type="text"
-                placeholder="Cédula (10 dígitos)"
-                value={cedula}
-                onChange={(e) => setCedula(e.target.value)}
-                className="text-xs sm:text-sm px-0"
-                required
-              />
-            </InputGroup>
-          </div>
+          <FormField
+            label="Número de cédula"
+            htmlFor="login-cedula"
+            error={getCedulaErrorMessage(cedula) || undefined}
+            className="space-y-2"
+          >
+            <Input
+              id="login-cedula"
+              type="text"
+              placeholder="Ingresa tu cédula de 10 dígitos"
+              value={cedula}
+              onChange={(e) => setCedula(e.target.value)}
+              className="text-xs font-mono h-11"
+
+              required
+            />
+          </FormField>
 
           {/* Contraseña */}
-          <div className="space-y-1.5">
-            <Label htmlFor="login-password" className="text-xs font-semibold text-foreground">
-              Contraseña
-            </Label>
-            <InputGroup className="bg-background border-border hover:border-primary/50 focus-within:border-primary h-11">
+          <FormField
+            label="Contraseña"
+            htmlFor="login-password"
+            className="space-y-2"
+          >
+            <InputGroup>
               <InputGroupInput
                 id="login-password"
                 type={showPassword ? "text" : "password"}
                 placeholder="Ingresa tu contraseña"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="text-xs sm:text-sm px-0"
+                className="text-xs [&::-ms-reveal]:hidden [&::-ms-clear]:hidden"
                 required
               />
-              <InputGroupButton
-                type="button"
-                variant="ghost"
-                size="icon-xs"
-                onClick={() => setShowPassword(!showPassword)}
-                aria-label={showPassword ? "Ocultar contraseña" : "Ver contraseña"}
-                className="text-muted-foreground hover:text-foreground"
-              >
-                {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-              </InputGroupButton>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <InputGroupButton
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                  >
+                    {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                  </InputGroupButton>
+                </TooltipTrigger>
+                <TooltipContent>
+                  {showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                </TooltipContent>
+              </Tooltip>
             </InputGroup>
-            <div className="flex justify-end pt-1">
-              <Link href="/wireframes2/recuperar-contrasena" className="text-[11px] font-semibold text-primary hover:underline">
-                ¿Olvidaste tu contraseña?
-              </Link>
-            </div>
-          </div>
+          </FormField>
 
           <Button
             type="submit"
@@ -382,35 +342,68 @@ export function DinarpWireframe2LoginFlow({
             {isSubmittingLogin ? (
               <>
                 <Loader2 className="size-4 animate-spin" />
-                <span>Validando...</span>
+                <span>Validando credenciales...</span>
               </>
             ) : (
               <>
                 <span>Ingresar al Sistema</span>
-                <ArrowRight className="size-3.5" />
+                <ArrowRight className="size-4" />
               </>
             )}
           </Button>
 
-          {/* ── Separador '¿Aún no tienes acceso?' ── */}
-          <div className="relative pt-3 pb-1 text-center">
-            <div className="absolute inset-0 flex items-center pt-2">
-              <div className="w-full border-t border-border/60" />
+          {/* Accesos rápidos de prueba para demo HU ID-08 a ID-12 */}
+          <div className="p-3 rounded-xl bg-muted/40 border border-border/60 space-y-2">
+            <p className="text-[11px] font-semibold text-muted-foreground">
+              Accesos rápidos para pruebas (HU ID-08 a ID-12):
+            </p>
+            <div className="flex flex-wrap gap-1.5">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setCedula("1799999999");
+                  setPassword("Admin2026*");
+                }}
+                className="text-[11px] h-7"
+              >
+                <ShieldCheck className="size-3 mr-1 text-primary" />
+                Admin DINARP (1799999999)
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setCedula("1714443322");
+                  setPassword("Temporal2026*");
+                }}
+                className="text-[11px] h-7"
+              >
+                <KeyRound className="size-3 mr-1 text-amber-600" />
+                Mariana Almeida (1714443322)
+              </Button>
             </div>
-            <span className="relative bg-surface px-3 text-[11px] text-muted-foreground font-medium">
-              ¿Aún no tienes acceso?
-            </span>
           </div>
 
-          {/* ── 2 CARDS DE ACCESO APROBADAS ── */}
-          <div className="pt-1">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {/* Separador y Opciones Adicionales */}
+          <div className="relative flex items-center py-2">
+            <div className="flex-grow border-t border-border/70"></div>
+            <span className="shrink-0 px-3 text-xs text-muted-foreground font-medium">
+              ¿Aún no tienes acceso?
+            </span>
+            <div className="flex-grow border-t border-border/70"></div>
+          </div>
+
+          <div>
+            <div className="grid grid-cols-2 gap-3">
               {/* Card 1: Enrolamiento Coordinador */}
               <div className="group relative flex flex-col overflow-hidden rounded-2xl bg-secondary/5 border border-secondary/20 transition-all duration-500 hover:-translate-y-1 hover:border-transparent !shadow-sm hover:!shadow-lg hover:shadow-secondary/20">
                 {/* Border Spin */}
                 <div className="absolute top-1/2 left-1/2 w-[200%] h-[200%] -translate-x-1/2 -translate-y-1/2 bg-[conic-gradient(from_0deg,var(--color-secondary)_0%,var(--color-secondary)_85%,white_100%)] opacity-0 group-hover:opacity-100 group-hover:animate-[spin_6s_linear_infinite] z-0 pointer-events-none blur-[1px] transition-opacity duration-500" />
-                
-                {/* Background Mask */}
+
+                {/* Background Mask (Solid to hide the inner part of the spinning border) */}
                 <div className="absolute inset-[1px] bg-background rounded-[calc(1rem-1px)] z-[1] pointer-events-none" />
 
                 {/* Hover Tint */}
@@ -433,26 +426,25 @@ export function DinarpWireframe2LoginFlow({
                       </CardDescription>
                     </div>
                   </div>
-                  <Link href="/wireframes2/enrolamiento-coordinador" className="w-full mt-1">
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      className="w-full text-xs h-9 px-3 relative z-20 shadow-xs justify-center"
-                    >
-                      <span className="font-semibold text-[11px]">Completar prerregistro</span>
-                      <ArrowRight className="size-4 ml-1 opacity-80" />
-                    </Button>
-                  </Link>
+                  <Button
+                    type="button"
+                    onClick={() => setActiveTab("enrolamiento")}
+                    variant="secondary"
+                    className="w-full mt-1 text-xs h-9 px-3 relative z-20 shadow-xs justify-center"
+                  >
+                    <span className="font-semibold">Completar prerregistro</span>
+                    <ArrowRight className="size-4 ml-2 opacity-80" />
+                  </Button>
                   <Users className="absolute -bottom-4 -right-3 size-24 text-secondary/5 opacity-50 group-hover:opacity-100 group-hover:scale-110 transition-all duration-500 -z-10 pointer-events-none" />
                 </div>
               </div>
 
-              {/* Card 2: Enrolamiento de Institución */}
+              {/* Card 2: Registro Institucional */}
               <div className="group relative flex flex-col overflow-hidden rounded-2xl bg-neutral-500/5 border border-neutral-500/20 transition-all duration-500 hover:-translate-y-1 hover:border-transparent !shadow-sm hover:!shadow-lg hover:shadow-neutral-500/20">
                 {/* Border Spin */}
-                <div className="absolute top-1/2 left-1/2 w-[200%] h-[200%] -translate-x-1/2 -translate-y-1/2 bg-[conic-gradient(from_0deg,var(--color-neutral-500)_0%,var(--color-neutral-500)_85%,white_100%)] opacity-0 group-hover:opacity-100 group-hover:animate-[spin_6s_linear_infinite] z-0 pointer-events-none blur-[1px] transition-opacity duration-500" />
-                
-                {/* Background Mask */}
+                <div className="absolute top-1/2 left-1/2 w-[200%] h-[200%] -translate-x-1/2 -translate-y-1/2 bg-[conic-gradient(from_0deg,#888_0%,#888_85%,white_100%)] opacity-0 group-hover:opacity-100 group-hover:animate-[spin_6s_linear_infinite] z-0 pointer-events-none blur-[1px] transition-opacity duration-500" />
+
+                {/* Background Mask (Solid to hide the inner part of the spinning border) */}
                 <div className="absolute inset-[1px] bg-background rounded-[calc(1rem-1px)] z-[1] pointer-events-none" />
 
                 {/* Hover Tint */}
@@ -467,11 +459,12 @@ export function DinarpWireframe2LoginFlow({
                       <Landmark className="size-5" />
                     </div>
                     <div className="space-y-1">
-                      <CardTitle className="text-xs sm:text-sm font-bold text-neutral-600 dark:text-neutral-300 leading-tight">
+                      <CardTitle className="text-xs sm:text-sm font-bold text-neutral-600 leading-tight">
                         Enrolamiento de Institución <br /> al SINARP
                       </CardTitle>
                       <CardDescription className="text-[11px] text-muted-foreground leading-snug font-normal">
-                        Solicita el registro para incorporar tu <br />
+                        Solicita el registro <br />
+                        para incorporar tu <br />
                         entidad al SINARP.
                       </CardDescription>
                     </div>
@@ -482,8 +475,8 @@ export function DinarpWireframe2LoginFlow({
                       variant="neutral"
                       className="w-full text-xs h-9 px-3 relative z-20 shadow-xs justify-center"
                     >
-                      <span className="font-semibold text-[11px]">Solicitar enrolamiento</span>
-                      <ArrowRight className="size-4 ml-1 opacity-80" />
+                      <span className="font-semibold text-[11px] text-white">Solicitar enrolamiento</span>
+                      <ArrowRight className="size-4 ml-1 opacity-80 text-white" />
                     </Button>
                   </Link>
                   <Landmark className="absolute -bottom-4 -right-3 size-24 text-neutral-500/5 opacity-50 group-hover:opacity-100 group-hover:scale-110 transition-all duration-500 -z-10 pointer-events-none" />
@@ -498,44 +491,45 @@ export function DinarpWireframe2LoginFlow({
       {activeTab === "enrolamiento" && !isOtpStep && (
         <div className="space-y-4">
           <div className="space-y-1">
-            <h1 className="text-lg font-bold font-heading text-foreground">
-              Completar Enrolamiento de Coordinador
+            <h1 className="text-xl font-bold font-heading text-primary">
+              Completar preregistro de coordinador
             </h1>
-            <p className="text-xs text-muted-foreground">
-              Ingresa la cédula del coordinador institucional para verificar el prerregistro aprobado y suscribir el Acuerdo de Confidencialidad (Anexo B).
+            <p className="text-sm text-muted-foreground">
+              Ingresa tu cédula para validar tu preregistro y continuar con el proceso de acceso a la plataforma. Luego podrás completar y suscribir el Acuerdo de Confidencialidad (Anexo B).
             </p>
           </div>
 
-          <form onSubmit={handleBuscarPreregistro} className="space-y-3">
-            <div className="space-y-1.5">
-              <Label htmlFor="enrolar-cedula" className="text-xs font-semibold text-foreground">
-                Cédula del Coordinador Designado
-              </Label>
+          <form onSubmit={handleBuscarPreregistro} className="space-y-4">
+            <FormField
+              label="Cédula del Coordinador Designado"
+              htmlFor="enrolar-cedula"
+              error={getCedulaErrorMessage(cedulaEnrolar) || undefined}
+              className="space-y-2"
+            >
               <div className="flex gap-2">
-                <InputGroup className="flex-1 bg-background border-border hover:border-primary/50 focus-within:border-primary h-11">
-                  <InputGroupInput
-                    id="enrolar-cedula"
-                    type="text"
-                    inputMode="numeric"
-                    maxLength={10}
-                    placeholder="Cédula de 10 dígitos"
-                    value={cedulaEnrolar}
-                    onChange={(e) => {
-                      setCedulaEnrolar(e.target.value.replace(/\D/g, ""));
-                      if (preregistroResultado.buscado) {
-                        setPreregistroResultado({ buscado: false, valido: false });
-                      }
-                    }}
-                    className="text-xs sm:text-sm font-mono px-0"
-                    required
-                  />
-                </InputGroup>
+                <Input
+                  id="enrolar-cedula"
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={10}
+                  placeholder="Cédula de 10 dígitos"
+                  value={cedulaEnrolar}
+                  onChange={(e) => {
+                    setCedulaEnrolar(e.target.value);
+                    if (preregistroResultado.buscado) {
+                      setPreregistroResultado({ buscado: false, valido: false });
+                    }
+                  }}
+                  className="text-xs font-mono h-11"
+                  aria-invalid={!!getCedulaErrorMessage(cedulaEnrolar)}
+                  required
+                />
                 <Button
                   type="submit"
-                  variant="outline"
+                  variant="primary"
                   size="default"
                   disabled={isSearchingPreregistro}
-                  className="shrink-0 h-11 px-4 text-xs font-semibold gap-1.5"
+                  className="shrink-0 text-xs font-semibold gap-1.5 h-11"
                 >
                   {isSearchingPreregistro ? (
                     <Loader2 className="size-3.5 animate-spin" />
@@ -545,10 +539,10 @@ export function DinarpWireframe2LoginFlow({
                   <span>Consultar</span>
                 </Button>
               </div>
-              <p className="text-[11px] text-muted-foreground">
-                Cédula de prueba designada: <code className="font-mono text-foreground font-semibold">4444444444</code> (GAD Cuenca · Titular). Invitación expirada: <code className="font-mono text-foreground font-semibold">9999999999</code>.
-              </p>
-            </div>
+            </FormField>
+            <p className="text-[11px] text-muted-foreground mt-1">
+              Cédulas de prueba precargadas: <code className="font-mono text-foreground font-semibold">1715489621</code> (Suplente MSP), <code className="font-mono text-foreground font-semibold">1712345602</code> (Titular DINARP).
+            </p>
           </form>
 
           {/* Resultado de Búsqueda */}
@@ -558,7 +552,7 @@ export function DinarpWireframe2LoginFlow({
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="size-4 text-foreground" />
                   <span className="text-xs font-bold text-foreground">
-                    Invitación B Vigente Verificada
+                    Prerregistro Verificado
                   </span>
                 </div>
                 <Badge tone="neutral" appearance="soft" size="sm" className="border border-border text-foreground">
@@ -568,7 +562,7 @@ export function DinarpWireframe2LoginFlow({
 
               <div className="space-y-1.5 text-xs">
                 <div>
-                  <span className="text-[11px] text-muted-foreground block">Coordinador Designado:</span>
+                  <span className="text-[11px] text-muted-foreground block">Funcionario:</span>
                   <span className="font-semibold text-foreground">{preregistroResultado.datos.nombreCompleto}</span>
                 </div>
                 <div>
@@ -598,17 +592,17 @@ export function DinarpWireframe2LoginFlow({
                   </Button>
                 </div>
               ) : (
-                <Button
-                  asChild
-                  variant="primary"
-                  size="default"
-                  className="w-full text-xs font-semibold gap-2 mt-2 shadow-xs"
-                >
-                  <Link href={`/wireframes2/enrolamiento-coordinador?cedula=${cedulaEnrolar}`}>
-                    <span>Completar Anexo B — Enrolamiento de Coordinador</span>
-                    <ArrowRight className="size-4" />
-                  </Link>
-                </Button>
+                <Link href={`/wireframes2/enrolamiento-coordinador?cedula=${cedulaEnrolar}`} className="w-full">
+                  <Button
+                    type="button"
+                    variant="neutral"
+                    size="default"
+                    className="w-full text-xs font-semibold gap-2 mt-2 shadow-xs"
+                  >
+                    <span className="text-white">Suscribir Acuerdo de Confidencialidad (Anexo B)</span>
+                    <ArrowRight className="size-4 text-white" />
+                  </Button>
+                </Link>
               )}
             </div>
           )}
@@ -617,30 +611,25 @@ export function DinarpWireframe2LoginFlow({
             <div className="p-4 rounded-xl border border-destructive/20 bg-destructive/10 text-destructive text-xs space-y-2 animate-in fade-in duration-200">
               <div className="flex items-center gap-2 font-bold">
                 <AlertCircle className="size-4 shrink-0" />
-                <span>Invitación no válida o vencida</span>
+                <span>Prerregistro no encontrado</span>
               </div>
               <p className="text-[11px] leading-relaxed text-destructive/90">
-                {preregistroResultado.mensaje || "No encontramos una invitación o designación activa asociada a esta cédula. La institución requirente debe haber completado el Anexo A previamente o generado la designación correspondiente."}
+                {preregistroResultado.mensaje}
               </p>
             </div>
           )}
         </div>
       )}
 
-      {/* ── PASO 2: VERIFICACIÓN DE IDENTIDAD CON GOOGLE AUTHENTICATOR ── */}
+      {/* ── CASO 3: SEGUNDO FACTOR DE AUTENTICACIÓN (OTP / 2FA) ── */}
       {isOtpStep && (
         <div className="space-y-4 animate-in fade-in duration-200">
           <div className="space-y-1">
-            <div className="flex items-center justify-between">
-              <h1 className="text-lg font-bold font-heading text-primary">
-                Verifica tu identidad
-              </h1>
-              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
-                Google Authenticator
-              </span>
-            </div>
-            <p className="text-xs text-muted-foreground leading-relaxed text-balance">
-              Abre Google Authenticator e ingresa el código de 6 dígitos que aparece asociado a tu cuenta.
+            <h1 className="text-xl font-bold font-heading text-primary">
+              Verificación de Seguridad en Dos Pasos
+            </h1>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              Hemos enviado un código temporal de 6 dígitos a tu correo institucional registrado. Ingrésalo para autorizar tu sesión.
             </p>
           </div>
 
@@ -651,7 +640,7 @@ export function DinarpWireframe2LoginFlow({
             </div>
           )}
 
-          <div className="flex justify-between gap-2 my-6 py-2">
+          <div className="flex justify-between gap-2 my-4">
             {otp.map((digit, index) => (
               <Input
                 key={index}
@@ -664,7 +653,7 @@ export function DinarpWireframe2LoginFlow({
                 value={digit}
                 onChange={(e) => handleOtpChange(index, e.target.value)}
                 onKeyDown={(e) => handleOtpKeyDown(index, e)}
-                className="size-11 sm:size-12 text-center text-lg font-bold font-mono p-0"
+                className="size-11 sm:size-12 text-center text-lg font-bold font-mono p-0 focus-visible:ring-0 focus-visible:border-input"
               />
             ))}
           </div>
@@ -680,147 +669,47 @@ export function DinarpWireframe2LoginFlow({
             {isSubmittingOtp ? (
               <>
                 <Loader2 className="size-4 animate-spin" />
-                <span>Verificando credenciales...</span>
+                <span>Verificando código...</span>
               </>
             ) : (
               <>
-                <span>Verificar y acceder</span>
+                <span>Confirmar y Entrar</span>
                 <Check className="size-4" />
               </>
             )}
           </Button>
 
-          <div className="flex flex-col sm:flex-row items-center gap-2 pt-1">
-            {otpError && (
-              <Button
-                type="button"
-                variant="secondary"
-                size="sm"
-                onClick={() => {
-                  setOtp(Array(6).fill(""));
-                  setOtpError("");
-                  otpRefs.current[0]?.focus();
-                }}
-                className="w-full sm:w-1/2 text-xs font-semibold gap-1.5"
-              >
-                <RefreshCw className="size-3.5" />
-                <span>Reintentar</span>
-              </Button>
-            )}
+          <div className="flex items-center justify-between pt-3 text-xs text-muted-foreground">
+            <Button
+              variant="ghost"
+              type="button"
+              disabled={resendCountdown > 0}
+              onClick={() => {
+                setResendCountdown(45);
+                toast.success("Código reenviado", {
+                  description: "Revisa tu bandeja de entrada o carpeta de spam.",
+                });
+              }}
+              className="h-auto p-0 text-foreground hover:underline font-medium disabled:opacity-50 disabled:pointer-events-none text-xs"
+            >
+              {resendCountdown > 0
+                ? `Reenviar código en ${resendCountdown}s`
+                : "Reenviar código de acceso"}
+            </Button>
 
             <Button
+              variant="secondary"
               type="button"
-              variant="neutral"
               size="sm"
               onClick={() => {
                 setIsOtpStep(false);
                 setOtp(Array(6).fill(""));
-                setOtpError("");
               }}
-              className={cn(
-                "text-xs font-semibold gap-1.5",
-                otpError ? "w-full sm:w-1/2" : "w-full"
-              )}
+              className="text-xs"
             >
-              <ArrowLeft className="size-3.5" />
-              <span>Volver al acceso principal</span>
+              Volver atrás
             </Button>
           </div>
-
-          {/* Ayuda discreta contextual mediante Accordion del UI Kit debajo de los botones */}
-          <Accordion type="single" collapsible className="w-full pt-1">
-            <AccordionItem value="ayuda-codigo" className="border border-border/70 rounded-xl px-3 py-0 bg-muted/15 data-[state=open]:bg-muted/25 data-[state=open]:border-primary/40 border-l-border/70 data-[state=open]:border-l-primary transition-all">
-              <AccordionTrigger className="py-2.5 px-0 text-xs font-semibold text-primary hover:no-underline">
-                <span className="flex items-center gap-2">
-                  <Info className="size-4 shrink-0 text-primary" />
-                  <span>¿Dónde encuentro mi código?</span>
-                </span>
-              </AccordionTrigger>
-              <AccordionContent className="pb-3 px-0 text-[11px] leading-relaxed text-muted-foreground border-t border-border/40 pt-2.5">
-                Debes abrir la aplicación <strong>Google Authenticator</strong> en el teléfono móvil o dispositivo donde vinculaste previamente tu cuenta institucional. Allí verás el código temporal de 6 dígitos asociado al portal.
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
-        </div>
-      )}
-
-      {/* Botón flotante inferior derecho para pruebas de 2FA (como en los otros módulos) */}
-      {isOtpStep && (
-        <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 flex flex-col items-end gap-2 sm:gap-3 max-w-[calc(100vw-2rem)]">
-          {showTestCases ? (
-            <div className="flex flex-wrap items-center justify-end gap-1.5 sm:gap-2 bg-surface/95 backdrop-blur-md p-2 rounded-2xl border border-border shadow-xl max-w-full animate-in fade-in slide-in-from-bottom-2 duration-200">
-              <div className="hidden sm:flex items-center gap-1.5 px-2 text-[11px] font-semibold text-muted-foreground border-r border-border/60 mr-1">
-                <Sparkles className="size-3 text-primary shrink-0" />
-                <span>Casos de prueba interactivos (HU)</span>
-              </div>
-
-              <Button
-                type="button"
-                variant="primary"
-                size="default"
-                onClick={() => {
-                  setOtp(["1", "2", "3", "4", "5", "6"]);
-                  setOtpError("");
-                  toast.success("Código TOTP válido simulado (123456)");
-                }}
-                className="rounded-full px-3 sm:px-4 flex items-center gap-1.5 text-xs h-8 sm:h-9 shadow-xs"
-              >
-                <Check className="size-3.5" /> Código válido (123456)
-              </Button>
-
-              <Button
-                type="button"
-                variant="outline"
-                size="default"
-                onClick={() => {
-                  setOtp(["0", "0", "0", "0", "0", "0"]);
-                  setOtpError("Código incorrecto. Verifica el número actual en tu aplicación Google Authenticator.");
-                  toast.error("Simulando código incorrecto");
-                }}
-                className="rounded-full px-3 sm:px-4 flex items-center gap-1.5 text-xs h-8 sm:h-9 border-destructive/30 text-destructive hover:bg-destructive/10"
-              >
-                <AlertCircle className="size-3.5 text-destructive" /> Código incorrecto
-              </Button>
-
-              <Button
-                type="button"
-                variant="outline"
-                size="default"
-                onClick={() => {
-                  setOtp(["9", "9", "9", "9", "9", "9"]);
-                  setOtpError("Código vencido o ya utilizado. Espera a que Google Authenticator genere uno nuevo.");
-                  toast.warning("Simulando código vencido o ya utilizado");
-                }}
-                className="rounded-full px-3 sm:px-4 flex items-center gap-1.5 text-xs h-8 sm:h-9 border-warning/30 text-warning-foreground hover:bg-warning/10"
-              >
-                <RefreshCw className="size-3.5 text-warning" /> Código vencido / utilizado
-              </Button>
-
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                onClick={() => setShowTestCases(false)}
-                className="rounded-full size-8 shrink-0 hover:bg-muted text-muted-foreground hover:text-foreground ml-0.5"
-                title="Contraer opciones de prueba"
-              >
-                <ChevronDown className="size-4" />
-              </Button>
-            </div>
-          ) : (
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => setShowTestCases(true)}
-              className="rounded-full px-3.5 py-1.5 shadow-lg flex items-center gap-2 text-xs bg-surface/95 backdrop-blur-md border border-border hover:bg-muted transition-all animate-in fade-in slide-in-from-bottom-2 duration-200"
-              title="Desplegar opciones de prueba (HU)"
-            >
-              <Sparkles className="size-3.5 text-primary" />
-              <span className="font-semibold text-foreground">Casos de prueba interactivos (HU)</span>
-              <ChevronUp className="size-3.5 text-muted-foreground" />
-            </Button>
-          )}
         </div>
       )}
     </div>

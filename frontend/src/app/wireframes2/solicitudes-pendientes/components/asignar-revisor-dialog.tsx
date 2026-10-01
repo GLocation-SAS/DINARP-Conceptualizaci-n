@@ -562,7 +562,7 @@ export function AsignarRevisorPanel({
                         )}
                       >
                         {/* Funcionario */}
-                        <TableCell className="py-2.5 px-4 h-auto">
+                        <TableCell className="text-center py-2.5 px-4 h-auto">
                           <div className="flex items-center gap-3">
                             <div
                               className={cn(

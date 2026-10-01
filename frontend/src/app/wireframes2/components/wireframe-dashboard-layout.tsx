@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
@@ -34,7 +34,8 @@ import {
   Bell,
   FolderCheck,
   UserCheck,
-  FileSignature
+  FileSignature,
+  KeyRound,
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -177,18 +178,24 @@ const navItems: NavItem[] = [
     allowedRoles: ["EQ_NORMATIVA"]
   },
   {
-    id: "administracion-group",
-    label: "Administración",
+    id: "administracion-usuarios",
+    label: "Usuarios",
     icon: Users,
-    pathPrefix: "/wireframes2/usuarios",
-    children: [
-      {
-        id: "administracion-usuarios",
-        label: "Gestión de cuentas internas",
-        href: "/wireframes2/usuarios",
-        exact: false
-      }
-    ],
+    href: "/wireframes2/usuarios",
+    allowedRoles: ["ADMIN"]
+  },
+  {
+    id: "recuperacion-acceso",
+    label: "Recuperación de acceso",
+    icon: KeyRound,
+    href: "/wireframes2/usuarios/recuperacion-acceso",
+    allowedRoles: ["ADMIN"]
+  },
+  {
+    id: "configuracion-acceso",
+    label: "Configuración",
+    icon: Settings,
+    href: "/wireframes2/configuracion/servicio-acceso",
     allowedRoles: ["ADMIN"]
   },
 ];

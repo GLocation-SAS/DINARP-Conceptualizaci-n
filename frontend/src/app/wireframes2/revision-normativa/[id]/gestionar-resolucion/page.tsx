@@ -48,21 +48,21 @@ export default function GestionarResolucionPage({ params }: PageProps) {
   const stepsList: StepperStep[] = [
     {
       id: "1",
-      title: "Informaci�n",
+      title: "Informaci—n",
       description: "Datos base",
       icon: FileText,
     },
     {
       id: "2",
       title: "Contenido",
-      description: "Cuerpo de resoluci�n",
+      description: "Cuerpo de resoluci—n",
       icon: FileSignature,
     },
-    { id: "3", title: "Borrador", description: "Revisi�n previa", icon: Eye },
+    { id: "3", title: "Borrador", description: "Revisi—n previa", icon: Eye },
     {
       id: "4",
-      title: "Generaci�n",
-      description: "Emisi�n formal",
+      title: "Generaci—n",
+      description: "Emisi—n formal",
       icon: ShieldCheck,
     },
   ];
@@ -77,10 +77,10 @@ export default function GestionarResolucionPage({ params }: PageProps) {
             label: activeSectionTitle,
             onClick: () => router.push("/wireframes2/revision-normativa"),
           },
-          { label: "Tr�mite no encontrado" },
+          { label: "Tr—mite no encontrado" },
         ]}
       >
-        <div className="p-8 text-center">Tr�mite no encontrado.</div>
+        <div className="p-8 text-center">Tr—mite no encontrado.</div>
       </WireframeDashboardLayout>
     );
   }
@@ -113,7 +113,7 @@ export default function GestionarResolucionPage({ params }: PageProps) {
       </p>
       <div className="mt-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-warning/10 text-warning-700 dark:text-warning text-xs font-semibold">
         <Clock className="size-3.5" />
-        Contenido pendiente de definici�n
+        Contenido pendiente de definici—n
       </div>
     </div>
   );
@@ -138,10 +138,10 @@ export default function GestionarResolucionPage({ params }: PageProps) {
       solicitud.id,
       currentUser.name,
       numResolucionSugerido,
-      "Resoluci�n institucional generada mediante flujo por pasos.",
+      "Resoluci—n institucional generada mediante flujo por pasos.",
     );
-    toast.success("Resoluci�n generada correctamente", {
-      description: `El tr�mite ${solicitud.id} avanz� a estado RESOLUCION_GENERADA.`,
+    toast.success("Resoluci—n generada correctamente", {
+      description: `El tr—mite ${solicitud.id} avanz— a estado RESOLUCION_GENERADA.`,
     });
     router.push(`/wireframes2/revision-normativa/${solicitud.id}`);
   };
@@ -163,7 +163,7 @@ export default function GestionarResolucionPage({ params }: PageProps) {
             router.push(`/wireframes2/revision-normativa/${solicitud.id}`);
           },
         },
-        { label: "Gestionar resoluci�n" },
+        { label: "Gestionar resoluci—n" },
       ]}
     >
       <main className="w-full max-w-[1200px] mx-auto px-2.5 sm:px-6 lg:px-8 py-4 sm:py-8 space-y-6">
@@ -182,22 +182,22 @@ export default function GestionarResolucionPage({ params }: PageProps) {
               className="h-8 px-3 text-xs font-semibold gap-1.5 rounded-full mb-3"
             >
               <ArrowLeft className="size-3.5" />
-              <span>Volver al tr�mite</span>
+              <span>Volver al tr—mite</span>
             </Button>
             <h1 className="font-heading font-extrabold text-xl sm:text-2xl text-foreground">
-              Gestionar Resoluci�n Institucional
+              Gestionar Resoluci—n Institucional
             </h1>
             <p className="text-xs text-muted-foreground mt-1">
-              Configura y emite la resoluci�n para aprobar la solicitud de
+              Configura y emite la resoluci—n para aprobar la solicitud de
               registro.
             </p>
           </div>
 
-          {/* Contexto del tr�mite minimalista */}
+          {/* Contexto del tr—mite minimalista */}
           <div className="p-3.5 bg-surface border border-border rounded-xl shadow-2xs min-w-[280px]">
             <div className="flex justify-between items-start gap-4 mb-2">
               <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-                Contexto del Tr�mite
+                Contexto del Tr—mite
               </span>
               <Badge
                 tone={tone}
@@ -211,13 +211,13 @@ export default function GestionarResolucionPage({ params }: PageProps) {
             </div>
             <div className="space-y-1">
               <div className="flex justify-between items-center text-xs">
-                <span className="text-muted-foreground">ID Tr�mite:</span>
+                <span className="text-muted-foreground">ID Tr—mite:</span>
                 <span className="font-mono font-bold text-foreground">
                   {solicitud.id}
                 </span>
               </div>
               <div className="flex justify-between items-center text-xs">
-                <span className="text-muted-foreground">Instituci�n:</span>
+                <span className="text-muted-foreground">Instituci—n:</span>
                 <span
                   className="font-semibold text-foreground max-w-[180px] truncate"
                   title={solicitud.institucion}
@@ -249,20 +249,20 @@ export default function GestionarResolucionPage({ params }: PageProps) {
         <div className="space-y-6">
           {step === 1 &&
             renderPlaceholder(
-              "Informaci�n de la resoluci�n",
-              "Los campos de esta secci�n se configurar�n de acuerdo con la plantilla oficial de resoluci�n definida por DINARP.",
+              "Informaci—n de la resoluci—n",
+              "Los campos de esta secci—n se configurar—n de acuerdo con la plantilla oficial de resoluci—n definida por DINARP.",
             )}
 
           {step === 2 &&
             renderPlaceholder(
-              "Contenido de la resoluci�n",
-              "Aqu� se definir� el cuerpo del documento jur�dico. Los campos espec�ficos se ajustar�n a la plantilla oficial de DINARP.",
+              "Contenido de la resoluci—n",
+              "Aqu— se definir— el cuerpo del documento jurídico. Los campos espec—ficos se ajustar—n a la plantilla oficial de DINARP.",
             )}
 
           {step === 3 &&
             renderPlaceholder(
-              "Revisi�n del borrador",
-              "Previsualizaci�n del documento generado para validaci�n final antes de la emisi�n formal.",
+              "Revisi—n del borrador",
+              "Previsualizaci—n del documento generado para validaci—n final antes de la emisi—n formal.",
             )}
 
           {step === 4 && (
@@ -272,19 +272,19 @@ export default function GestionarResolucionPage({ params }: PageProps) {
                   <ShieldCheck className="size-8" />
                 </div>
                 <h3 className="font-heading font-bold text-xl text-foreground">
-                  Generar Resoluci�n
+                  Generar Resoluci—n
                 </h3>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  Confirma la emisi�n de la resoluci�n institucional. Al
-                  generarla, el tr�mite avanzar� y quedar� a la espera de la
-                  firma electr�nica externa por parte de la M�xima Autoridad
+                  Confirma la emisi—n de la resoluci—n institucional. Al
+                  generarla, el tr—mite avanzar— y quedar— a la espera de la
+                  firma electrónica externa por parte de la M—xima Autoridad
                   mediante FirmaEC.
                 </p>
                 <div className="p-4 bg-muted/40 rounded-xl border border-border text-left mt-6">
                   <div className="space-y-2 text-xs">
                     <div className="flex justify-between border-b border-border/50 pb-2">
                       <span className="text-muted-foreground">
-                        Instituci�n a aprobar:
+                        Instituci—n a aprobar:
                       </span>
                       <span className="font-semibold text-foreground">
                         {solicitud.institucion}
@@ -292,7 +292,7 @@ export default function GestionarResolucionPage({ params }: PageProps) {
                     </div>
                     <div className="flex justify-between border-b border-border/50 pb-2">
                       <span className="text-muted-foreground">
-                        Tr�mite asociado:
+                        Tr—mite asociado:
                       </span>
                       <span className="font-mono text-foreground">
                         {solicitud.id}
@@ -329,7 +329,7 @@ export default function GestionarResolucionPage({ params }: PageProps) {
             }
             className="w-full sm:w-auto text-xs font-semibold rounded-full"
           >
-            {step === 1 ? "Cancelar" : "Atr�s"}
+            {step === 1 ? "Cancelar" : "Atr—s"}
           </Button>
 
           {step < 4 ? (
@@ -352,7 +352,7 @@ export default function GestionarResolucionPage({ params }: PageProps) {
               className="w-full sm:w-auto text-xs font-semibold gap-1.5 shadow-2xs rounded-full"
             >
               <CheckCircle2 className="size-4" />
-              <span>Confirmar y Generar Resoluci�n</span>
+              <span>Confirmar y Generar Resoluci—n</span>
             </Button>
           )}
         </div>

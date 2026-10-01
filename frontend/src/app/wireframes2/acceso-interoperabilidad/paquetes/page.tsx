@@ -171,14 +171,9 @@ export default function PaquetesConsumoPage() {
                         <TooltipProvider delayDuration={0}>
                           <Tooltip>
                             <TooltipTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="icon-sm"
-                                asChild
-                                
-                              >
+                              <Button variant="ghost" size="icon-sm" asChild className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10">
                                 <Link href={`/wireframes2/acceso-interoperabilidad/paquetes/${p.id}`}>
-                                  <Eye  />
+                                  <Eye   className="size-4" />
                                 </Link>
                               </Button>
                             </TooltipTrigger>
