@@ -154,12 +154,12 @@ const navItems: NavItem[] = [
     allowedRoles: ["DIR_GESTION"]
   },
   {
-      id: "solicitudes-asignadas-gestion",
-      label: "Solicitudes asignadas",
-      icon: FileSignature,
-      href: "/wireframes2/gestion/solicitudes-asignadas",
-      allowedRoles: ["EQ_GESTION"]
-    },
+    id: "solicitudes-asignadas-gestion",
+    label: "Solicitudes asignadas",
+    icon: FileSignature,
+    href: "/wireframes2/solicitudes-pendientes",
+    allowedRoles: ["EQ_GESTION"]
+  },
   {
     id: "asignacion-normativa",
     label: "Asignación normativa",

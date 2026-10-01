@@ -24,12 +24,14 @@ import {
   Check,
   Info,
   Users,
-  Landmark
+  Landmark,
+  Fingerprint,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 import {
   InputGroup,
   InputGroupInput,
@@ -51,17 +53,42 @@ import {
 import { useSolicitudesIngresoStore } from "../acceso-seguridad/data/gestion-ingresos-store";
 import { useAuthStore } from "../acceso-seguridad/data/auth-store";
 import { MOCK_USERS_BY_ROLE } from "../catalogo-interoperabilidad/data/catalogo-data";
+import { DinarpTestAccountsDrawer } from "./dinarp-test-accounts-drawer";
 
 function validarCedula(cedula: string) {
   if (cedula.length !== 10) return false;
   if (/\D/.test(cedula)) return false;
-  // Excepciones para testing del wireframe
-  if (["1714443322", "1714443376", "1799999999", "1715489621", "1712345602", "1788888888", "1724589632", "1718956234", "0999999999", "1234567890"].includes(cedula)) return true;
+  // Cédulas oficiales de prueba para roles del wireframe DINARP
+  if (
+    [
+      "1799999999",
+      "1711223344",
+      "1111111111",
+      "2222222222",
+      "3333333333",
+      "1712345678",
+      "1714443322",
+      "1714443376",
+      "1715489621",
+      "1712345602",
+      "1724589632",
+      "1718956234",
+      "0999999999",
+      "1788888888",
+      "1234567890",
+    ].includes(cedula)
+  ) {
+    return true;
+  }
 
   const digitoRegion = parseInt(cedula.substring(0, 2), 10);
   if (digitoRegion < 1 || digitoRegion > 24) return false;
   const ultimoDigito = parseInt(cedula.substring(9, 10), 10);
-  const pares = parseInt(cedula.substring(1, 2), 10) + parseInt(cedula.substring(3, 4), 10) + parseInt(cedula.substring(5, 6), 10) + parseInt(cedula.substring(7, 8), 10);
+  const pares =
+    parseInt(cedula.substring(1, 2), 10) +
+    parseInt(cedula.substring(3, 4), 10) +
+    parseInt(cedula.substring(5, 6), 10) +
+    parseInt(cedula.substring(7, 8), 10);
   let impares = 0;
   for (let i = 0; i < 9; i += 2) {
     let num = parseInt(cedula.charAt(i), 10) * 2;
@@ -75,17 +102,11 @@ function validarCedula(cedula: string) {
   return digitoValidador === ultimoDigito;
 }
 
-function isKnownEmail(val: string) {
-  const users = Object.values(MOCK_USERS_BY_ROLE);
-  return users.some(u => u.email === val || u.id === val);
-}
-
 function getCedulaErrorMessage(val: string) {
   if (!val) return null;
-  if (isKnownEmail(val)) return null; // Permite correos de demo
-  if (/\D/.test(val)) return "Ingresa únicamente números (o un correo autorizado).";
-  if (val.length < 10) return "La cédula debe tener 10 dígitos.";
-  if (!validarCedula(val)) return "Ingresa un número de cédula válido.";
+  if (/\D/.test(val)) return "Ingresa únicamente dígitos numéricos.";
+  if (val.length < 10) return "La cédula debe contener exactamente 10 dígitos numéricos.";
+  if (!validarCedula(val)) return "El número de cédula ingresado no es válido.";
   return null;
 }
 
@@ -117,7 +138,6 @@ export function DinarpWireframe2LoginFlow({
   const [otp, setOtp] = useState<string[]>(Array(6).fill(""));
   const [isSubmittingOtp, setIsSubmittingOtp] = useState(false);
   const [otpError, setOtpError] = useState("");
-  const [resendCountdown, setResendCountdown] = useState(45);
   const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   // Estado Verificación Enrolamiento (Proceso B)
@@ -130,28 +150,19 @@ export function DinarpWireframe2LoginFlow({
     mensaje?: string;
   }>({ buscado: false, valido: false });
 
-  // Countdown timer para 2FA
-  useEffect(() => {
-    let timer: NodeJS.Timeout;
-    if (resendCountdown > 0 && isOtpStep) {
-      timer = setTimeout(() => {
-        setResendCountdown((prev) => prev - 1);
-      }, 1000);
-    }
-    return () => clearTimeout(timer);
-  }, [resendCountdown, isOtpStep]);
-
   // Manejo de Login
   const handleLoginSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setLoginError("");
 
-    if (!cedula) {
-      setLoginError("Ingresa tu cédula.");
+    const cleanCedula = cedula.trim();
+
+    if (!cleanCedula) {
+      setLoginError("Ingresa tu número de cédula.");
       return;
     }
-    if (!isKnownEmail(cedula) && !validarCedula(cedula)) {
-      setLoginError("La cédula no es válida o el usuario no está registrado.");
+    if (!validarCedula(cleanCedula)) {
+      setLoginError("La cédula no es válida o no está registrada en el sistema.");
       return;
     }
     if (password.length < 4) {
@@ -165,8 +176,8 @@ export function DinarpWireframe2LoginFlow({
     setTimeout(() => {
       setIsSubmittingLogin(false);
 
-      if (cedula === "1714443322" || cedula === "1714443376" || cedula === "m.almeida@educacion.gob.ec") {
-        login(cedula);
+      if (cleanCedula === "1714443322" || cleanCedula === "1714443376") {
+        login(cleanCedula);
         toast.info("Contraseña temporal detectada", {
           description: "Debes cambiar tu contraseña temporal antes de ingresar al portal.",
         });
@@ -176,21 +187,34 @@ export function DinarpWireframe2LoginFlow({
 
       // Simular usuario conocido de demo o acceso general
       setIsOtpStep(true);
-      toast.info("Código de seguridad 2FA enviado", {
-        description: "Se remitió un código OTP a tu correo institucional registrado.",
+      toast.info("Verificación en dos pasos", {
+        description: "Ingresa el código que aparece en Google Authenticator.",
       });
     }, 500);
   };
 
   // Manejo de OTP
   const handleOtpChange = (index: number, value: string) => {
-    if (!/^\d*$/.test(value)) return;
+    const cleanDigits = value.replace(/\D/g, "");
+    if (!cleanDigits && value !== "") return;
+
+    if (cleanDigits.length > 1) {
+      const newOtp = [...otp];
+      const digits = cleanDigits.slice(0, 6).split("");
+      digits.forEach((d, i) => {
+        if (index + i < 6) newOtp[index + i] = d;
+      });
+      setOtp(newOtp);
+      const nextFocus = Math.min(index + digits.length, 5);
+      otpRefs.current[nextFocus]?.focus();
+      return;
+    }
 
     const newOtp = [...otp];
-    newOtp[index] = value.slice(-1);
+    newOtp[index] = cleanDigits;
     setOtp(newOtp);
 
-    if (value && index < 5) {
+    if (cleanDigits && index < 5) {
       otpRefs.current[index + 1]?.focus();
     }
   };
@@ -260,9 +284,14 @@ export function DinarpWireframe2LoginFlow({
   };
 
   return (
-    <div className="space-y-4">
-      {/* ── Tabs de Navegación del Portal de Acceso ── */}
-
+    <div className="space-y-4 relative">
+      {/* ── Flotante de Cuentas y Roles de Prueba (Desplegable / Ocultable en esquina derecha) ── */}
+      <DinarpTestAccountsDrawer
+        onSelectCedula={(c) => {
+          setCedula(c);
+          setPassword(c === "1714443322" ? "Temporal2026*" : "Admin2026*");
+        }}
+      />
 
       {/* ── CASO 1: LOGIN HABITUAL (USUARIOS ACTIVOS) ── */}
       {activeTab === "login" && !isOtpStep && (
@@ -282,21 +311,23 @@ export function DinarpWireframe2LoginFlow({
 
           {/* Cédula */}
           <FormField
-            label="Número de cédula"
+            label="Cédula de Identidad"
             htmlFor="login-cedula"
             error={getCedulaErrorMessage(cedula) || undefined}
             className="space-y-2"
           >
-            <Input
-              id="login-cedula"
-              type="text"
-              placeholder="Ingresa tu cédula de 10 dígitos"
-              value={cedula}
-              onChange={(e) => setCedula(e.target.value)}
-              className="text-xs font-mono h-11"
-
-              required
-            />
+            <InputGroup leftIcon={<Fingerprint className="size-4 text-muted-foreground" />}>
+              <InputGroupInput
+                id="login-cedula"
+                type="text"
+                maxLength={10}
+                placeholder="Ingresa tu cédula de 10 dígitos"
+                value={cedula}
+                onChange={(e) => setCedula(e.target.value.replace(/\D/g, ""))}
+                className="text-xs font-mono"
+                required
+              />
+            </InputGroup>
           </FormField>
 
           {/* Contraseña */}
@@ -351,41 +382,6 @@ export function DinarpWireframe2LoginFlow({
               </>
             )}
           </Button>
-
-          {/* Accesos rápidos de prueba para demo HU ID-08 a ID-12 */}
-          <div className="p-3 rounded-xl bg-muted/40 border border-border/60 space-y-2">
-            <p className="text-[11px] font-semibold text-muted-foreground">
-              Accesos rápidos para pruebas (HU ID-08 a ID-12):
-            </p>
-            <div className="flex flex-wrap gap-1.5">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  setCedula("1799999999");
-                  setPassword("Admin2026*");
-                }}
-                className="text-[11px] h-7"
-              >
-                <ShieldCheck className="size-3 mr-1 text-primary" />
-                Admin DINARP (1799999999)
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  setCedula("1714443322");
-                  setPassword("Temporal2026*");
-                }}
-                className="text-[11px] h-7"
-              >
-                <KeyRound className="size-3 mr-1 text-amber-600" />
-                Mariana Almeida (1714443322)
-              </Button>
-            </div>
-          </div>
 
           {/* Separador y Opciones Adicionales */}
           <div className="relative flex items-center py-2">
@@ -626,10 +622,10 @@ export function DinarpWireframe2LoginFlow({
         <div className="space-y-4 animate-in fade-in duration-200">
           <div className="space-y-1">
             <h1 className="text-xl font-bold font-heading text-primary">
-              Verificación de Seguridad en Dos Pasos
+              Verificación en dos pasos
             </h1>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              Hemos enviado un código temporal de 6 dígitos a tu correo institucional registrado. Ingrésalo para autorizar tu sesión.
+              Ingresa el código de 6 dígitos que aparece en Google Authenticator para acceder al portal.
             </p>
           </div>
 
@@ -640,72 +636,73 @@ export function DinarpWireframe2LoginFlow({
             </div>
           )}
 
-          <div className="flex justify-between gap-2 my-4">
+          {/* Campos de código redondos y separados con animación de barrido suave de color primary */}
+          <div className="flex justify-center items-center gap-3 sm:gap-4 my-8 sm:my-10 py-2">
             {otp.map((digit, index) => (
-              <Input
+              <div
                 key={index}
-                ref={(el) => {
-                  otpRefs.current[index] = el;
-                }}
-                type="text"
-                inputMode="numeric"
-                maxLength={1}
-                value={digit}
-                onChange={(e) => handleOtpChange(index, e.target.value)}
-                onKeyDown={(e) => handleOtpKeyDown(index, e)}
-                className="size-11 sm:size-12 text-center text-lg font-bold font-mono p-0 focus-visible:ring-0 focus-visible:border-input"
-              />
+                className={cn(
+                  "size-11 sm:size-12 shrink-0 aspect-square flex items-center justify-center relative overflow-hidden rounded-full border transition-all duration-300",
+                  digit
+                    ? "border-primary/60 bg-primary/5 shadow-xs ring-1 ring-primary/40"
+                    : "border-input bg-background focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20"
+                )}
+              >
+                <Input
+                  ref={(el) => {
+                    otpRefs.current[index] = el;
+                  }}
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={1}
+                  value={digit}
+                  onChange={(e) => handleOtpChange(index, e.target.value)}
+                  onKeyDown={(e) => handleOtpKeyDown(index, e)}
+                  className="w-full h-full text-center text-lg font-bold font-mono p-0 border-0 bg-transparent focus-visible:ring-0 focus-visible:border-transparent rounded-full"
+                />
+
+                {/* Animación de barrido suave del color primary al escribir cada número */}
+                {digit && (
+                  <div
+                    key={`sweep-${index}-${digit}`}
+                    className="pointer-events-none absolute inset-0 bg-gradient-to-r from-transparent via-primary/30 to-transparent animate-otp-sweep"
+                  />
+                )}
+              </div>
             ))}
           </div>
 
-          <Button
-            type="button"
-            variant="primary"
-            size="default"
-            disabled={isSubmittingOtp || otp.join("").length !== 6}
-            onClick={handleVerifyOtp}
-            className="w-full text-xs font-semibold gap-2 shadow-xs"
-          >
-            {isSubmittingOtp ? (
-              <>
-                <Loader2 className="size-4 animate-spin" />
-                <span>Verificando código...</span>
-              </>
-            ) : (
-              <>
-                <span>Confirmar y Entrar</span>
-                <Check className="size-4" />
-              </>
-            )}
-          </Button>
-
-          <div className="flex items-center justify-between pt-3 text-xs text-muted-foreground">
+          <div className="flex flex-col gap-4 sm:gap-5 pt-2">
             <Button
-              variant="ghost"
               type="button"
-              disabled={resendCountdown > 0}
-              onClick={() => {
-                setResendCountdown(45);
-                toast.success("Código reenviado", {
-                  description: "Revisa tu bandeja de entrada o carpeta de spam.",
-                });
-              }}
-              className="h-auto p-0 text-foreground hover:underline font-medium disabled:opacity-50 disabled:pointer-events-none text-xs"
+              variant="primary"
+              size="default"
+              disabled={isSubmittingOtp || otp.join("").length !== 6}
+              onClick={handleVerifyOtp}
+              className="w-full text-xs font-semibold gap-2 shadow-xs"
             >
-              {resendCountdown > 0
-                ? `Reenviar código en ${resendCountdown}s`
-                : "Reenviar código de acceso"}
+              {isSubmittingOtp ? (
+                <>
+                  <Loader2 className="size-4 animate-spin" />
+                  <span>Verificando e ingresando...</span>
+                </>
+              ) : (
+                <>
+                  <span>Verificar e ingresar</span>
+                  <Check className="size-4" />
+                </>
+              )}
             </Button>
 
             <Button
               variant="secondary"
               type="button"
-              size="sm"
+              size="default"
               onClick={() => {
                 setIsOtpStep(false);
                 setOtp(Array(6).fill(""));
               }}
-              className="text-xs"
+              className="w-full text-xs font-semibold gap-2 shadow-xs"
             >
               Volver atrás
             </Button>

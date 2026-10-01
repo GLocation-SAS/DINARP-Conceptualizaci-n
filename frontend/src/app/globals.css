@@ -2098,6 +2098,32 @@ input:-webkit-autofill:active {
   }
 }
 
+/* Barrido suave de color primary al ingresar dígito de verificación */
+@keyframes otp-sweep {
+  0% {
+    transform: translateX(-100%) skewX(-14deg);
+    opacity: 0;
+  }
+  30% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateX(160%) skewX(-14deg);
+    opacity: 0;
+  }
+}
+
+.animate-otp-sweep {
+  animation: otp-sweep 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-otp-sweep {
+    animation: none;
+    opacity: 0;
+  }
+}
+
 .card-wave-bg {
   background: linear-gradient(
     90deg,
