@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState } from "react";
 import {
@@ -101,7 +101,7 @@ export function DinarpTestAccountsDrawer({ onSelectCedula }: DinarpTestAccountsD
                   Roles y Cédulas de Prueba
                 </h4>
                 <p className="text-[10px] text-muted-foreground">
-                  Haz clic en cualquier fila para autocompletar o copiar
+                  Haz clic en cualquier fila para ingresar directamente
                 </p>
               </div>
             </div>
@@ -184,3 +184,4 @@ export function DinarpTestAccountsDrawer({ onSelectCedula }: DinarpTestAccountsD
     </div>
   );
 }
+

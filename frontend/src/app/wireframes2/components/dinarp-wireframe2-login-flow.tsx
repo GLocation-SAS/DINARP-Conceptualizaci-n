@@ -241,11 +241,7 @@ export function DinarpWireframe2LoginFlow({
         description: "Bienvenido al portal institucional del SINARP.",
       });
       const loggedUser = login(cedula);
-      if (loggedUser?.role === "ADMIN") {
-        router.push("/wireframes2/cuentas-internas");
-      } else {
-        router.push("/wireframes2/catalogo-interoperabilidad");
-      }
+      if (loggedUser?.role === "ADMIN") { router.push("/wireframes2/cuentas-internas"); } else if (loggedUser?.role === "DIR_GESTION" || loggedUser?.role === "DIR_NORMATIVA") { router.push("/wireframes2/asignacion-solicitudes"); } else if (loggedUser?.role === "EQ_GESTION") { router.push("/wireframes2/solicitudes-pendientes"); } else if (loggedUser?.role === "EQ_NORMATIVA") { router.push("/wireframes2/revision-normativa"); } else { router.push("/wireframes2/catalogo-interoperabilidad"); }
     }, 600);
   };
 
@@ -290,6 +286,13 @@ export function DinarpWireframe2LoginFlow({
         onSelectCedula={(c) => {
           setCedula(c);
           setPassword(c === "1714443322" ? "Temporal2026*" : "Admin2026*");
+          toast.success("Autenticación automática", { description: "Redirigiendo a tu bandeja..." });
+          const loggedUser = login(c);
+          if (loggedUser?.role === "ADMIN") { router.push("/wireframes2/cuentas-internas"); } 
+          else if (loggedUser?.role === "DIR_GESTION" || loggedUser?.role === "DIR_NORMATIVA") { router.push("/wireframes2/asignacion-solicitudes"); } 
+          else if (loggedUser?.role === "EQ_GESTION") { router.push("/wireframes2/solicitudes-pendientes"); } 
+          else if (loggedUser?.role === "EQ_NORMATIVA") { router.push("/wireframes2/revision-normativa"); } 
+          else { router.push("/wireframes2/catalogo-interoperabilidad"); }
         }}
       />
 
@@ -486,6 +489,25 @@ export function DinarpWireframe2LoginFlow({
                   </Link>
                   <Landmark className="absolute -bottom-4 -right-3 size-24 text-neutral-500/5 opacity-50 group-hover:opacity-100 group-hover:scale-110 transition-all duration-500 -z-10 pointer-events-none" />
                 </div>
+              </div>
+            </div>
+
+            {/* Accesos Directos Internos */}
+            <div className="mt-6 pt-4 border-t border-border/70 space-y-3">
+              <span className="px-1 text-[11px] text-muted-foreground font-semibold uppercase tracking-wider block text-center">Accesos rápidos (Bandejas Internas)</span>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                <Button type="button" variant="outline" onClick={() => { login("1111111111"); router.push("/wireframes2/solicitudes-pendientes"); }} className="h-auto flex-col p-3 items-center justify-center gap-1.5 border-border shadow-xs hover:border-primary/30 hover:bg-primary/5">
+                  <FileText className="size-5 text-primary" />
+                  <span className="text-[10px] font-bold text-foreground text-center">Bandeja<br/>Revisor Gestión</span>
+                </Button>
+                <Button type="button" variant="outline" onClick={() => { login("3333333333"); router.push("/wireframes2/revision-normativa"); }} className="h-auto flex-col p-3 items-center justify-center gap-1.5 border-border shadow-xs hover:border-primary/30 hover:bg-primary/5">
+                  <FileSignature className="size-5 text-primary" />
+                  <span className="text-[10px] font-bold text-foreground text-center">Bandeja<br/>Gestión Normatividad</span>
+                </Button>
+                <Button type="button" variant="outline" onClick={() => { login("2222222222"); router.push("/wireframes2/asignacion-solicitudes"); }} className="h-auto flex-col p-3 items-center justify-center gap-1.5 border-border shadow-xs hover:border-primary/30 hover:bg-primary/5">
+                  <UserCheck className="size-5 text-primary" />
+                  <span className="text-[10px] font-bold text-foreground text-center">Bandeja<br/>Dir. Normatividad</span>
+                </Button>
               </div>
             </div>
           </div>
@@ -721,5 +743,11 @@ export function DinarpWireframe2LoginFlow({
     </div>
   );
 }
+
+
+
+
+
+
 
 
