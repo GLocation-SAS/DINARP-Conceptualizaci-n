@@ -37,13 +37,14 @@ export interface TrazabilidadEvento {
 }
 
 export type SolicitudEstado =
-  | "Por revisar"
-  | "En revisión"
-  | "Pendiente de aprobación"
-  | "Reenviada"
-  | "Reenviada para aprobación"
-  | "Aprobada"
-  | "Rechazada"
+    | "Por asignar"
+    | "Por revisar"
+    | "En revisión"
+    | "Reenviada"
+    | "Aprobada"
+    | "Rechazada"
+    | "Observada"
+    | "Pago pendiente"
   | "Con observaciones"
   | "Pago pendiente"
   | "Pendiente de validación de pago"
