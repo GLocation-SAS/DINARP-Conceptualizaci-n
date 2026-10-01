@@ -760,7 +760,7 @@ export default function AccesoInteroperabilidadPage() {
                                   <TooltipTrigger asChild>
                                     <Button onClick={() => setModalCredenciales(s)} variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10">
                                       <KeyRound className="size-4" />
-                                      <span>Ver credenciales</span>
+                                      
                                     </Button>
                                   </TooltipTrigger>
                                   <TooltipContent side="top">
@@ -836,7 +836,7 @@ export default function AccesoInteroperabilidadPage() {
                                   <TooltipTrigger asChild>
                                     <Button onClick={() => setModalCredenciales(s)} variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10">
                                       <KeyRound className="size-4" />
-                                      <span>Ver credenciales</span>
+                                      
                                     </Button>
                                   </TooltipTrigger>
                                   <TooltipContent side="top">
@@ -886,7 +886,7 @@ export default function AccesoInteroperabilidadPage() {
                                   <TooltipTrigger asChild>
                                     <Button onClick={() => setModalCredenciales(s)} variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10">
                                       <KeyRound className="size-4" />
-                                      <span>Ver credenciales</span>
+                                      
                                     </Button>
                                   </TooltipTrigger>
                                   <TooltipContent side="top">

@@ -1075,7 +1075,7 @@ export default function CambioCoordinadorPage() {
                                 setSelectedRevisor(REVISORES_GESTION[0].nombre);
                               }} variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10">
                               <UserPlus className="size-4" />
-                              <span>Asignar revisor</span>
+                              
                             </Button>
                           </TableCell>
                         </TableRow>
@@ -1171,7 +1171,7 @@ export default function CambioCoordinadorPage() {
                           <TableCell className="text-xs text-center">
                             <Button onClick={() => setDetailModalSol(sol)} variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10">
                               <Eye className="size-4" />
-                              <span>Ver detalle</span>
+                              
                             </Button>
                           </TableCell>
                         </TableRow>
