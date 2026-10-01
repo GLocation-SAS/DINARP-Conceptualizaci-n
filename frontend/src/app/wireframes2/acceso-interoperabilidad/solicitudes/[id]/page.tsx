@@ -382,7 +382,7 @@ export default function SolicitudDetailPage({ params, searchParams }: PageProps)
             setModoCorreccion(false);
             setFeedbackMessage({
               tipo: "success",
-              texto: "Solicitud subsanada y reenviada exitosamente. Vuelve a estar en la bandeja del Aprobador."
+              texto: "Solicitud subsanada y reenviada exitosamente. Vuelve a estar en la bandeja del Director de Gestión."
             });
             toast.success("Solicitud corregida y reenviada para aprobación");
           }}
