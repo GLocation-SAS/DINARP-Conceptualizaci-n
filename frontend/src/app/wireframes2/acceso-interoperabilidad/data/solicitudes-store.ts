@@ -198,7 +198,7 @@ export const INITIAL_SOLICITUDES: SolicitudAcceso[] = [
     fecha: "2026-09-22 09:30",
     ultimaActualizacion: "2026-09-22 11:00",
     estado: "Por revisar",
-    responsable: "Aprobador",
+    responsable: "Director de Gestión",
     fuentesCount: 1,
     camposCount: 2,
     fuentePrincipal: "Registro Civil de Ciudadanos",
@@ -928,9 +928,9 @@ export function useSolicitudesStore() {
           },
           {
             fecha: now,
-            evento: "Por revisar",
-            actor: "Aprobador",
-            detalle: "La solicitud volvió al estado Por revisar y regresa a la bandeja del Aprobador."
+            evento: "Por asignar",
+            actor: "Director de Gestión",
+            detalle: "La solicitud subsanada volvió a la bandeja del Director de Gestión para una nueva asignación."
           }
         ];
         return {
@@ -940,8 +940,8 @@ export function useSolicitudesStore() {
           camposCount: nuevasFuentes
             ? nuevasFuentes.reduce((acc, f) => acc + (f.campos?.length || 0), 0)
             : s.camposCount,
-          estado: "Por revisar" as const,
-          responsable: "Aprobador",
+          estado: "Por asignar" as const,
+          responsable: "Director de Gestión",
           ultimaActualizacion: dateOnly,
           historial: nuevoHistorial
         };
