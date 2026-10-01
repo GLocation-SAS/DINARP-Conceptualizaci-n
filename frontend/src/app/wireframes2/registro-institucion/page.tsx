@@ -278,6 +278,28 @@ export default function RegistroInstitucionPage() {
                 El proceso de firma ha finalizado correctamente. La solicitud fue enviada al Área de Gestión para continuar con su revisión.
               </p>
             </div>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="default"
+                onClick={() => router.push("/wireframes2/login")}
+                className="text-xs font-semibold gap-1.5 w-full sm:w-auto"
+              >
+                <ArrowLeft className="size-4" />
+                <span>Volver al Login</span>
+              </Button>
+              <Button
+                type="button"
+                variant="primary"
+                size="default"
+                onClick={() => router.push("/wireframes2/solicitudes-pendientes")}
+                className="text-xs font-semibold gap-1.5 w-full sm:w-auto"
+              >
+                <span>Bandeja de Gestión</span>
+                <ArrowRight className="size-4" />
+              </Button>
+            </div>
           </div>
         )}
 
@@ -595,16 +617,62 @@ export default function RegistroInstitucionPage() {
                       />
                     </div>
 
-                    <div className="flex flex-col gap-2 sm:col-span-2 pt-2 border-t border-border/60">
-                      <h3 className="text-xs font-bold text-foreground">
-                        Máxima autoridad / delegado / representante legal o apoderado
-                      </h3>
-                    </div>
+                                          <div className="flex flex-col gap-2 sm:col-span-2 pt-2 border-t border-border/60">
+                        <h3 className="text-xs font-bold text-foreground">
+                          Máxima autoridad / delegado / representante legal o apoderado
+                        </h3>
+                      </div>
 
-                    <div className="flex flex-col gap-2">
-                      <Label htmlFor="repNombre" className="text-xs font-semibold text-foreground">
-                        Nombre de la máxima autoridad o apoderado <span className="text-warning">*</span>
-                      </Label>
+                      <div className="sm:col-span-2 space-y-1.5 pb-2">
+                        <Label className="text-xs font-semibold text-foreground block">¿Quién firmará el Anexo A?</Label>
+                        <div className="flex flex-col sm:flex-row gap-4 pt-1">
+                          <label className="flex items-center gap-2 text-xs font-medium text-foreground cursor-pointer">
+                            <input
+                              type="radio"
+                              name="esDelegadoRadio"
+                              checked={!formData.esDelegado}
+                              onChange={() => setFormData({ ...formData, esDelegado: false })}
+                              className="size-4 text-primary accent-primary"
+                            />
+                            <span>Máxima autoridad institucional</span>
+                          </label>
+                          <label className="flex items-center gap-2 text-xs font-medium text-foreground cursor-pointer">
+                            <input
+                              type="radio"
+                              name="esDelegadoRadio"
+                              checked={formData.esDelegado}
+                              onChange={() => setFormData({ ...formData, esDelegado: true })}
+                              className="size-4 text-primary accent-primary"
+                            />
+                            <span>Delegado de la máxima autoridad</span>
+                          </label>
+                        </div>
+                      </div>
+
+                      {formData.esDelegado && (
+                        <div className="sm:col-span-2 space-y-1.5 pb-2 animate-in slide-in-from-top-2 duration-300">
+                          <Label className="text-xs font-semibold text-foreground">
+                            Resolución o Acción de Personal de delegación <span className="text-warning">*</span>
+                          </Label>
+                          <div className="p-4 border border-dashed border-primary/40 bg-primary/5 rounded-xl text-center space-y-2">
+                            <div className="size-10 rounded-full bg-primary/10 text-primary mx-auto flex items-center justify-center">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="size-5"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"></path><path d="M12 12v9"></path><path d="m16 16-4-4-4 4"></path></svg>
+                            </div>
+                            <div>
+                              <p className="text-xs font-semibold text-foreground">Sube el documento habilitante</p>
+                              <p className="text-[10px] text-muted-foreground mt-0.5">PDF (Max. 5MB)</p>
+                            </div>
+                            <Button type="button" variant="outline" size="sm" className="text-xs h-7 pointer-events-none">
+                              Seleccionar archivo
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="flex flex-col gap-2">
+                        <Label htmlFor="repNombre" className="text-xs font-semibold text-foreground">
+                          Nombre de la máxima autoridad o apoderado <span className="text-warning">*</span>
+                        </Label>
                       <Input
                         id="repNombre"
                         value={formData.representanteLegalNombre}
@@ -1111,20 +1179,55 @@ export default function RegistroInstitucionPage() {
                     </div>
                   </div>
 
-                  {/* Resumen de Firmante */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                    <div className="p-3.5 rounded-xl border border-border bg-muted/20 space-y-1">
-                      <span className="text-[11px] text-muted-foreground block">Firmante Autorizado:</span>
-                      <span className="font-bold text-foreground text-sm block">{formData.representanteLegalNombre}</span>
-                      <span className="text-muted-foreground">{formData.representanteLegalCargo}</span>
-                    </div>
+                                      {/* Resumen de Firmante */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <Card
+                        variant="featured"
+                        disableHover={true}
+                        className="bg-secondary-100/30 dark:bg-secondary-900/20 border-0 shadow-none hover:shadow-none hover:translate-y-0 relative overflow-hidden"
+                      >
+                        <div className="bg-secondary/20 text-secondary text-[10px] uppercase font-bold tracking-wider px-2.5 py-1 border-0 flex items-center gap-1.5 w-fit rounded-full mb-2">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="size-3.5 text-secondary"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                          <span>Firmante Autorizado</span>
+                        </div>
 
-                    <div className="p-3.5 rounded-xl border border-border bg-muted/20 space-y-1">
-                      <span className="text-[11px] text-muted-foreground block">Lugar y Fecha:</span>
-                      <span className="font-bold text-foreground text-sm block">{formData.ciudadFirma}</span>
-                      <span className="text-muted-foreground">{formData.fechaFirma}</span>
+                        <div className="space-y-0.5 mt-2">
+                          <h3 className="text-base font-bold font-heading text-secondary break-words">
+                            {formData.representanteLegalNombre || "Ing. César Antonio Martín Moreno"}
+                          </h3>
+
+                          <p className="text-xs text-secondary-800/80 dark:text-secondary-200/80 font-medium">
+                            {formData.representanteLegalCargo || "Ministro de Telecomunicaciones"}
+                          </p>
+                          {formData.esDelegado && (
+                            <p className="text-[10px] font-bold text-secondary bg-secondary/10 px-2 py-0.5 rounded-full inline-block mt-1">
+                              Suscripción por Delegación
+                            </p>
+                          )}
+                        </div>
+                      </Card>
+
+                      <Card
+                        variant="featured"
+                        disableHover={true}
+                        className="bg-secondary-100/30 dark:bg-secondary-900/20 border-0 shadow-none hover:shadow-none hover:translate-y-0 relative overflow-hidden"
+                      >
+                        <div className="bg-secondary/20 text-secondary text-[10px] uppercase font-bold tracking-wider px-2.5 py-1 border-0 flex items-center gap-1.5 w-fit rounded-full mb-2">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="size-3.5 text-secondary"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"></rect><line x1="16" x2="16" y1="2" y2="6"></line><line x1="8" x2="8" y1="2" y2="6"></line><line x1="3" x2="21" y1="10" y2="10"></line></svg>
+                          <span>Lugar y Fecha</span>
+                        </div>
+
+                        <div className="space-y-0.5 mt-2">
+                          <h3 className="text-base font-bold font-heading text-secondary break-words">
+                            {formData.ciudadFirma || "Quito D.M., Ecuador"}
+                          </h3>
+
+                          <p className="text-xs text-secondary-800/80 dark:text-secondary-200/80 font-medium">
+                            {formData.fechaFirma || "24/09/2026"}
+                          </p>
+                        </div>
+                      </Card>
                     </div>
-                  </div>
 
                   {/* Certificación de Firma Electrónica */}
                   <div className="p-4 rounded-xl border border-border bg-muted/30 flex items-start gap-3">

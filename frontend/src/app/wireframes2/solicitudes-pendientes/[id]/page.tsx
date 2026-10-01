@@ -302,19 +302,16 @@ export default function SolicitudDetailPage({ params }: PageProps) {
                   >
                     <div className="flex items-center gap-2">
                       <CardBadge className="bg-primary/20 text-primary text-[10px] uppercase font-bold tracking-wider px-2.5 py-0.5 border-0">
-                        {solicitud.codigoDocumental || "FORMULARIO OFICIAL"}
+                        FORMULARIO OFICIAL ARP-R01
                       </CardBadge>
                     </div>
 
                     <CardTitle className="text-lg sm:text-xl font-bold font-heading text-primary">
-                      {nombreAnexo} — {solicitud.tituloTramite || "Solicitud de Acceso al SINARP"}
+                      Anexo A — Solicitud de Registro de Institución
                     </CardTitle>
 
                     <CardDescription className="text-xs text-primary-800/80 dark:text-primary-200/80 font-medium">
-                      {solicitud.tipoTramite === "PROCESO_A_REGISTRO_INSTITUCION" && "Proceso A · Enrolamiento institucional al SINARP"}
-                      {solicitud.tipoTramite === "PROCESO_B_ENROLAMIENTO_COORDINADOR" && "Proceso B · Enrolamiento de coordinador institucional"}
-                      {solicitud.tipoTramite === "PROCESO_C_CAMBIO_COORDINADOR" && "Proceso C · Cambio de coordinador institucional"}
-                      {!["PROCESO_A_REGISTRO_INSTITUCION", "PROCESO_B_ENROLAMIENTO_COORDINADOR", "PROCESO_C_CAMBIO_COORDINADOR"].includes(solicitud.tipoTramite) && "Trámite de acceso al SINARP"}
+                      Proceso A · Enrolamiento institucional al SINARP
                     </CardDescription>
 
                     <CardDecorativeIcon className="-bottom-10 -right-10 opacity-20 group-hover/card:scale-100">
@@ -328,7 +325,7 @@ export default function SolicitudDetailPage({ params }: PageProps) {
                   ) : (
                     <>
                       {/* Pestañas Cápsula UI Kit para navegar secciones (sin badges de estado) */}
-                      <div className="overflow-x-auto py-1">
+                      <div className="overflow-x-auto py-1 -mx-1 px-1">
                         <Tabs
                           defaultValue="tab-0"
                           value={`tab-${detailTab}`}
@@ -368,21 +365,39 @@ export default function SolicitudDetailPage({ params }: PageProps) {
                         </Tabs>
                       </div>
 
-                  {/* PASO 0: ENTIDAD Y AUTORIDAD */}
+                  {/* ── PASO 0: ENTIDAD Y AUTORIDAD COMPARECIENTE ── */}
                   {detailTab === 0 && (
                     <div className="bg-surface border border-border rounded-2xl p-4 sm:p-6 space-y-6 shadow-xs animate-in fade-in duration-200">
+                      {/* Naturaleza y Datos de la Entidad */}
                       <div className="bg-primary-100/20 dark:bg-black/35 border-b border-primary dark:border-primary/40 p-3.5 mb-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-t-lg">
                         <div>
                           <h2 className="text-sm font-bold font-heading text-primary dark:text-primary-300 flex items-center gap-2">
                             <Building2 className="size-4 text-primary dark:text-primary-300 shrink-0" />
-                            <span>Sección I — Cláusula Primera: 1.1 Del Solicitante</span>
+                            <span>Sección I — Datos de la Institución y Máxima Autoridad</span>
                           </h2>
                           <p className="text-xs text-muted-foreground mt-0.5">
-                            Información general de la entidad requirente y de su máxima autoridad o delegado.
+                            Información de identificación de la institución solicitante y de su máxima autoridad o delegado.
                           </p>
                         </div>
                         <Badge tone="primary" appearance="solid" size="sm" className="font-bold shrink-0 !text-white shadow-xs">
-                          {solicitud.anexoA?.entidadTipo === "Publica" ? "ENTIDAD PÚBLICA" : "ENTIDAD PRIVADA"}
+                          {solicitud.anexoA?.entidadTipo === "Privada" ? "ENTIDAD PRIVADA" : "ENTIDAD PÚBLICA"}
+                        </Badge>
+                      </div>
+
+                      <div className="bg-muted/50 p-3.5 mb-5 flex items-start sm:items-center justify-between gap-3 rounded-xl border border-border/40">
+                        <div className="flex items-start gap-2.5 min-w-0">
+                          <Building2 className="size-4 text-muted-foreground shrink-0 mt-0.5" />
+                          <div className="min-w-0">
+                            <h3 className="text-sm font-bold font-heading text-foreground leading-snug">
+                              1.1 Naturaleza de la Entidad
+                            </h3>
+                            <p className="text-xs text-muted-foreground mt-0.5">
+                              Información general de la institución requirente y personería jurídica.
+                            </p>
+                          </div>
+                        </div>
+                        <Badge tone="primary" appearance="solid" size="sm" className="shrink-0 self-start sm:self-auto font-bold !text-white shadow-2xs">
+                          ENTIDAD
                         </Badge>
                       </div>
 
@@ -414,30 +429,30 @@ export default function SolicitudDetailPage({ params }: PageProps) {
                         </div>
 
                         <div className="space-y-1.5">
-                          <Label className="text-xs font-semibold text-foreground">Nombre de la Entidad *</Label>
+                          <Label className="text-xs font-semibold text-foreground">Nombre de la Entidad</Label>
                           <InputGroup leftIcon={<Building2 className="size-4 text-muted-foreground" />}>
                             <InputGroupInput
                               value={solicitud.anexoA?.nombreEntidad || solicitud.institucion}
                               disabled
-                              className="bg-muted/30 cursor-not-allowed font-bold text-xs text-foreground"
+                              className="bg-muted/30 cursor-not-allowed font-semibold text-xs text-foreground"
                             />
                           </InputGroup>
                         </div>
 
                         <div className="space-y-1.5">
-                          <Label className="text-xs font-semibold text-foreground">RUC de la Entidad (13 dígitos) *</Label>
+                          <Label className="text-xs font-semibold text-foreground">RUC de la Entidad (13 dígitos)</Label>
                           <InputGroup leftIcon={<FileText className="size-4 text-muted-foreground" />}>
                             <InputGroupInput
                               value={solicitud.anexoA?.rucEntidad || "1768000000001"}
                               disabled
-                              className="bg-muted/30 cursor-not-allowed font-mono text-xs text-foreground"
+                              className="bg-muted/30 cursor-not-allowed font-mono text-xs text-foreground font-semibold"
                             />
                           </InputGroup>
                         </div>
 
                         <div className="sm:col-span-2 space-y-1.5">
-                          <Label className="text-xs font-semibold text-foreground">Dirección de la Entidad *</Label>
-                          <InputGroup leftIcon={<MapPin className="size-4 text-muted-foreground" />}>
+                          <Label className="text-xs font-semibold text-foreground">Dirección de la Entidad</Label>
+                          <InputGroup leftIcon={<Home className="size-4 text-muted-foreground" />}>
                             <InputGroupInput
                               value={solicitud.anexoA?.direccionEntidad || "Av. 6 de Diciembre N25-75 y Av. Colón, Quito"}
                               disabled
@@ -447,23 +462,63 @@ export default function SolicitudDetailPage({ params }: PageProps) {
                         </div>
 
                         <div className="sm:col-span-2 space-y-1.5">
-                          <Label className="text-xs font-semibold text-foreground">Objeto Social y/o Actividad de la Entidad *</Label>
+                          <Label className="text-xs font-semibold text-foreground">Objeto Social y/o Misión Institucional</Label>
                           <Textarea
                             value={solicitud.anexoA?.objetoSocial || "Rectoría y formulación de políticas públicas de telecomunicaciones y gobierno digital."}
                             disabled
-                            rows={2}
+                            rows={3}
                             className="bg-muted/30 cursor-not-allowed text-xs leading-relaxed text-foreground rounded-2xl p-3 border-border/80"
                           />
                         </div>
 
-                        <div className="sm:col-span-2 pt-3 pb-1 border-t border-border/60">
-                          <h3 className="text-xs font-bold text-foreground font-heading">
-                            Máxima autoridad / delegado / representante legal o apoderado
-                          </h3>
+                        {/* Datos del firmante del Anexo A */}
+                        <div className="sm:col-span-2 pt-4">
+                          <div className="bg-muted/50 p-3.5 mb-4 flex items-start sm:items-center justify-between gap-3 rounded-xl border border-border/40">
+                            <div className="flex items-start gap-2.5 min-w-0">
+                              <User className="size-4 text-muted-foreground shrink-0 mt-0.5" />
+                              <div className="min-w-0">
+                                <h3 className="text-sm font-bold font-heading text-foreground leading-snug">
+                                  Datos del firmante del Anexo A
+                                </h3>
+                                <p className="text-xs text-muted-foreground mt-0.5">
+                                  Información de la máxima autoridad o delegado institucional que suscribirá mediante FirmaEC.
+                                </p>
+                              </div>
+                            </div>
+                            <Badge tone="primary" appearance="solid" size="sm" className="shrink-0 self-start sm:self-auto font-bold !text-white shadow-2xs">
+                              FIRMANTE
+                            </Badge>
+                          </div>
+                        </div>
+
+                        <div className="sm:col-span-2 space-y-1.5 pb-2">
+                          <Label className="text-xs font-semibold text-foreground block">¿Quién firmará el Anexo A?</Label>
+                          <div className="flex flex-col sm:flex-row gap-4 pt-1">
+                            <label className="flex items-center gap-2 text-xs font-medium text-foreground cursor-not-allowed">
+                              <input
+                                type="radio"
+                                name="esDelegadoRadio"
+                                checked={!solicitud.anexoA?.esDelegado}
+                                disabled
+                                className="size-4 text-primary accent-primary cursor-not-allowed"
+                              />
+                              <span>Máxima autoridad institucional</span>
+                            </label>
+                            <label className="flex items-center gap-2 text-xs font-medium text-foreground cursor-not-allowed">
+                              <input
+                                type="radio"
+                                name="esDelegadoRadio"
+                                checked={Boolean(solicitud.anexoA?.esDelegado)}
+                                disabled
+                                className="size-4 text-primary accent-primary cursor-not-allowed"
+                              />
+                              <span>Delegado de la máxima autoridad</span>
+                            </label>
+                          </div>
                         </div>
 
                         <div className="space-y-1.5">
-                          <Label className="text-xs font-semibold text-foreground">Nombre de la máxima autoridad o apoderado *</Label>
+                          <Label className="text-xs font-semibold text-foreground">Nombre completo</Label>
                           <InputGroup leftIcon={<User className="size-4 text-muted-foreground" />}>
                             <InputGroupInput
                               value={solicitud.anexoA?.representanteLegalNombre || solicitud.nombreCompleto}
@@ -474,7 +529,7 @@ export default function SolicitudDetailPage({ params }: PageProps) {
                         </div>
 
                         <div className="space-y-1.5">
-                          <Label className="text-xs font-semibold text-foreground">Denominación del Cargo *</Label>
+                          <Label className="text-xs font-semibold text-foreground">Denominación del cargo</Label>
                           <InputGroup leftIcon={<Building2 className="size-4 text-muted-foreground" />}>
                             <InputGroupInput
                               value={solicitud.anexoA?.representanteLegalCargo || "Ministro de Telecomunicaciones (Representante Legal)"}
@@ -485,27 +540,35 @@ export default function SolicitudDetailPage({ params }: PageProps) {
                         </div>
 
                         <div className="sm:col-span-2 space-y-1.5">
-                          <Label className="text-xs font-semibold text-foreground">Correo Electrónico de la Autoridad *</Label>
+                          <Label className="text-xs font-semibold text-foreground">Correo electrónico institucional</Label>
                           <InputGroup leftIcon={<Mail className="size-4 text-muted-foreground" />}>
                             <InputGroupInput
                               value={solicitud.anexoA?.representanteLegalEmail || solicitud.correo || "ministro@mintel.gob.ec"}
                               disabled
-                              className="bg-muted/30 cursor-not-allowed text-xs text-foreground"
+                              className="bg-muted/30 cursor-not-allowed font-mono text-xs text-foreground"
                             />
                           </InputGroup>
                         </div>
 
-                        <div className="sm:col-span-2 p-4 rounded-xl border border-border bg-muted/20 flex items-center gap-3">
-                          <Checkbox checked={solicitud.anexoA?.esDelegado || false} disabled />
-                          <div>
-                            <Label className="text-xs font-semibold text-foreground block">Firma en Calidad de Delegado Oficial</Label>
-                            <span className="text-[11px] text-muted-foreground">
-                              {solicitud.anexoA?.esDelegado
-                                ? "Suscrito bajo Resolución de Delegación / Acción de Personal (Documento habilitante adjunto en Paso 4)."
-                                : "Suscrito directamente por la Máxima Autoridad Institucional."}
-                            </span>
+                        {solicitud.anexoA?.esDelegado && (
+                          <div className="sm:col-span-2 p-3.5 rounded-xl border border-border bg-muted/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <div className="flex items-center gap-2.5 min-w-0">
+                              <FileText className="size-4 text-primary shrink-0" />
+                              <div>
+                                <Label className="text-xs font-semibold text-foreground block">
+                                  Autorización de delegación
+                                </Label>
+                                <span className="text-xs font-semibold text-muted-foreground truncate block">
+                                  {solicitud.anexoA?.archivoSoporteDelegacion || "Resolucion_Delegacion_Firma.pdf"}
+                                </span>
+                              </div>
+                            </div>
+                            <Badge tone="success" appearance="solid" size="sm" className="shrink-0 gap-1 font-bold self-start sm:self-auto !text-white shadow-2xs">
+                              <CheckCircle2 className="size-3 text-white" />
+                              <span>Adjuntado</span>
+                            </Badge>
                           </div>
-                        </div>
+                        )}
                       </div>
 
                       <div className="pt-4 border-t border-border flex justify-end">
@@ -522,157 +585,161 @@ export default function SolicitudDetailPage({ params }: PageProps) {
                     </div>
                   )}
 
-                  {/* PASO 1: COORDINADORES INSTITUCIONALES */}
+                  {/* ── PASO 1: COORDINADORES INSTITUCIONALES ── */}
                   {detailTab === 1 && (
                     <div className="bg-surface border border-border rounded-2xl p-4 sm:p-6 space-y-6 shadow-xs animate-in fade-in duration-200">
                       <div className="space-y-6">
                         {/* Coordinador Titular */}
-                        <div className="space-y-4 border border-border/80 rounded-2xl p-5 bg-surface shadow-2xs">
-                          <div className="bg-muted/50 p-3.5 rounded-xl flex items-center justify-between gap-3 border border-border/40">
-                            <div>
-                              <div className="flex items-center gap-2 font-bold text-sm text-foreground">
-                                <User className="size-4 text-muted-foreground shrink-0" />
-                                <span>1.2 Coordinador Institucional Principal (Titular)</span>
+                        <div className="bg-surface border border-border rounded-2xl p-6 space-y-4">
+                          <div className="bg-muted/50 p-3.5 mb-5 flex items-start sm:items-center justify-between gap-3 rounded-xl">
+                            <div className="flex items-start gap-2.5 min-w-0">
+                              <User className="size-4 text-muted-foreground shrink-0 mt-0.5" />
+                              <div className="min-w-0">
+                                <h3 className="text-sm font-bold font-heading text-foreground leading-snug">
+                                  1.2 Coordinador Institucional Principal (Titular)
+                                </h3>
+                                <p className="text-xs text-muted-foreground mt-0.5">
+                                  Datos del coordinador institucional titular designado por la entidad.
+                                </p>
                               </div>
-                              <p className="text-xs text-muted-foreground mt-0.5">
-                                Ingresa los datos del coordinador institucional titular designado por la entidad.
-                              </p>
                             </div>
-                            <Badge tone="primary" appearance="solid" size="sm" className="font-bold uppercase tracking-wider px-2.5 py-0.5 !text-white shadow-2xs">
+                            <Badge tone="primary" appearance="solid" size="sm" className="shrink-0 self-start sm:self-auto font-bold !text-white shadow-2xs">
                               TITULAR
                             </Badge>
                           </div>
 
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div className="space-y-1">
-                              <Label className="text-xs font-semibold text-foreground">Nombre Completo *</Label>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                            <div className="flex flex-col gap-1.5">
+                              <Label className="text-xs font-semibold text-foreground">Nombre Completo</Label>
                               <InputGroup leftIcon={<User className="size-4 text-muted-foreground" />}>
-                                <InputGroupInput value={solicitud.anexoA?.titularNombreCompleto || "Ing. Esteban Javier Morales Salazar"} disabled className="bg-muted/30 cursor-not-allowed font-semibold text-xs text-foreground" />
+                                <InputGroupInput value={solicitud.anexoA?.titularNombreCompleto || "Ing. Esteban Javier Morales Salazar"} disabled className="bg-muted/30 cursor-not-allowed text-xs font-semibold text-foreground" />
                               </InputGroup>
                             </div>
 
-                            <div className="space-y-1">
-                              <Label className="text-xs font-semibold text-foreground">Cédula de Ciudadanía *</Label>
-                              <InputGroup leftIcon={<CreditCard className="size-4 text-muted-foreground" />}>
-                                <InputGroupInput value={solicitud.anexoA?.titularCedula || "1718956234"} disabled className="bg-muted/30 cursor-not-allowed font-mono text-xs text-foreground" />
+                            <div className="flex flex-col gap-1.5">
+                              <Label className="text-xs font-semibold text-foreground">Cédula de Ciudadanía</Label>
+                              <InputGroup leftIcon={<FileText className="size-4 text-muted-foreground" />}>
+                                <InputGroupInput value={solicitud.anexoA?.titularCedula || "1718956234"} disabled className="bg-muted/30 cursor-not-allowed text-xs font-mono text-foreground font-semibold" />
                               </InputGroup>
                             </div>
 
-                            <div className="space-y-1">
-                              <Label className="text-xs font-semibold text-foreground">Cargo / Rol en la Institución *</Label>
+                            <div className="flex flex-col gap-1.5">
+                              <Label className="text-xs font-semibold text-foreground">Cargo / Rol en la Institución</Label>
                               <InputGroup leftIcon={<Building2 className="size-4 text-muted-foreground" />}>
                                 <InputGroupInput value={solicitud.anexoA?.titularCargo || "Director de Gobierno Digital"} disabled className="bg-muted/30 cursor-not-allowed text-xs text-foreground" />
                               </InputGroup>
                             </div>
 
-                            <div className="space-y-1">
-                              <Label className="text-xs font-semibold text-foreground">Área / Unidad a la que pertenece *</Label>
+                            <div className="flex flex-col gap-1.5">
+                              <Label className="text-xs font-semibold text-foreground">Área / Unidad a la que pertenece</Label>
                               <InputGroup leftIcon={<Building2 className="size-4 text-muted-foreground" />}>
                                 <InputGroupInput value={solicitud.anexoA?.titularAreaUnidad || "Viceministerio de Tecnologías de la Información"} disabled className="bg-muted/30 cursor-not-allowed text-xs text-foreground" />
                               </InputGroup>
                             </div>
 
-                            <div className="space-y-1">
-                              <Label className="text-xs font-semibold text-foreground">Correo Electrónico Institucional *</Label>
+                            <div className="flex flex-col gap-1.5">
+                              <Label className="text-xs font-semibold text-foreground">Correo Electrónico Institucional</Label>
                               <InputGroup leftIcon={<Mail className="size-4 text-muted-foreground" />}>
-                                <InputGroupInput value={solicitud.anexoA?.titularEmail || "esteban.morales@mintel.gob.ec"} disabled className="bg-muted/30 cursor-not-allowed text-xs text-foreground" />
+                                <InputGroupInput value={solicitud.anexoA?.titularEmail || "esteban.morales@mintel.gob.ec"} disabled className="bg-muted/30 cursor-not-allowed text-xs font-mono text-foreground" />
                               </InputGroup>
                             </div>
 
-                            <div className="space-y-1">
-                              <Label className="text-xs font-semibold text-foreground">Teléfono Fijo Institucional *</Label>
+                            <div className="flex flex-col gap-1.5">
+                              <Label className="text-xs font-semibold text-foreground">Teléfono Fijo Institucional</Label>
                               <InputGroup leftIcon={<Phone className="size-4 text-muted-foreground" />}>
                                 <InputGroupInput value={solicitud.anexoA?.titularTelefonoFijo || "022200200 ext 120"} disabled className="bg-muted/30 cursor-not-allowed text-xs text-foreground" />
                               </InputGroup>
                             </div>
 
-                            <div className="space-y-1">
-                              <Label className="text-xs font-semibold text-foreground">Móvil Institucional *</Label>
-                              <InputGroup leftIcon={<Smartphone className="size-4 text-muted-foreground" />}>
-                                <InputGroupInput value={solicitud.anexoA?.titularMovilInstitucional || "0995544332"} disabled className="bg-muted/30 cursor-not-allowed text-xs text-foreground" />
+                            <div className="flex flex-col gap-1.5">
+                              <Label className="text-xs font-semibold text-foreground">Móvil Institucional</Label>
+                              <InputGroup leftIcon={<Phone className="size-4 text-muted-foreground" />}>
+                                <InputGroupInput value={solicitud.anexoA?.titularMovilInstitucional || "0995544332"} disabled className="bg-muted/30 cursor-not-allowed text-xs font-mono text-foreground" />
                               </InputGroup>
                             </div>
 
-                            <div className="space-y-1">
-                              <Label className="text-xs font-semibold text-foreground">Móvil Personal *</Label>
-                              <InputGroup leftIcon={<Smartphone className="size-4 text-muted-foreground" />}>
-                                <InputGroupInput value={solicitud.anexoA?.titularMovilPersonal || "0984433221"} disabled className="bg-muted/30 cursor-not-allowed text-xs text-foreground" />
+                            <div className="flex flex-col gap-1.5">
+                              <Label className="text-xs font-semibold text-foreground">Móvil Personal</Label>
+                              <InputGroup leftIcon={<Phone className="size-4 text-muted-foreground" />}>
+                                <InputGroupInput value={solicitud.anexoA?.titularMovilPersonal || "0984433221"} disabled className="bg-muted/30 cursor-not-allowed text-xs font-mono text-foreground" />
                               </InputGroup>
                             </div>
                           </div>
                         </div>
 
                         {/* Coordinador Suplente */}
-                        <div className="space-y-4 border border-border/80 rounded-2xl p-5 bg-surface shadow-2xs">
-                          <div className="bg-muted/50 p-3.5 rounded-xl flex items-center justify-between gap-3 border border-border/40">
-                            <div>
-                              <div className="flex items-center gap-2 font-bold text-sm text-foreground">
-                                <User className="size-4 text-muted-foreground shrink-0" />
-                                <span>1.3 Coordinador Institucional Suplente</span>
+                        <div className="bg-surface border border-border rounded-2xl p-6 space-y-4">
+                          <div className="bg-muted/50 p-3.5 mb-5 flex items-start sm:items-center justify-between gap-3 rounded-xl">
+                            <div className="flex items-start gap-2.5 min-w-0">
+                              <User className="size-4 text-muted-foreground shrink-0 mt-0.5" />
+                              <div className="min-w-0">
+                                <h3 className="text-sm font-bold font-heading text-foreground leading-snug">
+                                  1.3 Coordinador Institucional Suplente
+                                </h3>
+                                <p className="text-xs text-muted-foreground mt-0.5">
+                                  Datos del coordinador institucional alterno registrado para soporte institucional.
+                                </p>
                               </div>
-                              <p className="text-xs text-muted-foreground mt-0.5">
-                                Ingresa los datos del coordinador institucional suplente designado por la entidad.
-                              </p>
                             </div>
-                            <Badge tone="primary" appearance="solid" size="sm" className="font-bold uppercase tracking-wider px-2.5 py-0.5 !text-white shadow-2xs">
+                            <Badge tone="primary" appearance="solid" size="sm" className="shrink-0 self-start sm:self-auto font-bold !text-white shadow-2xs">
                               SUPLENTE
                             </Badge>
                           </div>
 
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div className="space-y-1">
-                              <Label className="text-xs font-semibold text-foreground">Nombre Completo *</Label>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                            <div className="flex flex-col gap-1.5">
+                              <Label className="text-xs font-semibold text-foreground">Nombre Completo</Label>
                               <InputGroup leftIcon={<User className="size-4 text-muted-foreground" />}>
-                                <InputGroupInput value={solicitud.anexoA?.suplenteNombreCompleto || "Lic. Carmen Elena Vinueza Proaño"} disabled className="bg-muted/30 cursor-not-allowed font-semibold text-xs text-foreground" />
+                                <InputGroupInput value={solicitud.anexoA?.suplenteNombreCompleto || "Lic. Carmen Elena Vinueza Proaño"} disabled className="bg-muted/30 cursor-not-allowed text-xs font-semibold text-foreground" />
                               </InputGroup>
                             </div>
 
-                            <div className="space-y-1">
-                              <Label className="text-xs font-semibold text-foreground">Cédula de Ciudadanía *</Label>
-                              <InputGroup leftIcon={<CreditCard className="size-4 text-muted-foreground" />}>
-                                <InputGroupInput value={solicitud.anexoA?.suplenteCedula || "1714523698"} disabled className="bg-muted/30 cursor-not-allowed font-mono text-xs text-foreground" />
+                            <div className="flex flex-col gap-1.5">
+                              <Label className="text-xs font-semibold text-foreground">Cédula de Ciudadanía</Label>
+                              <InputGroup leftIcon={<FileText className="size-4 text-muted-foreground" />}>
+                                <InputGroupInput value={solicitud.anexoA?.suplenteCedula || "1714523698"} disabled className="bg-muted/30 cursor-not-allowed text-xs font-mono text-foreground font-semibold" />
                               </InputGroup>
                             </div>
 
-                            <div className="space-y-1">
-                              <Label className="text-xs font-semibold text-foreground">Cargo / Rol en la Institución *</Label>
+                            <div className="flex flex-col gap-1.5">
+                              <Label className="text-xs font-semibold text-foreground">Cargo / Rol en la Institución</Label>
                               <InputGroup leftIcon={<Building2 className="size-4 text-muted-foreground" />}>
                                 <InputGroupInput value={solicitud.anexoA?.suplenteCargo || "Especialista de Interoperabilidad Gubernamental"} disabled className="bg-muted/30 cursor-not-allowed text-xs text-foreground" />
                               </InputGroup>
                             </div>
 
-                            <div className="space-y-1">
-                              <Label className="text-xs font-semibold text-foreground">Área / Unidad a la que pertenece *</Label>
+                            <div className="flex flex-col gap-1.5">
+                              <Label className="text-xs font-semibold text-foreground">Área / Unidad a la que pertenece</Label>
                               <InputGroup leftIcon={<Building2 className="size-4 text-muted-foreground" />}>
                                 <InputGroupInput value={solicitud.anexoA?.suplenteAreaUnidad || "Dirección de Gobierno Digital"} disabled className="bg-muted/30 cursor-not-allowed text-xs text-foreground" />
                               </InputGroup>
                             </div>
 
-                            <div className="space-y-1">
-                              <Label className="text-xs font-semibold text-foreground">Correo Electrónico Institucional *</Label>
+                            <div className="flex flex-col gap-1.5">
+                              <Label className="text-xs font-semibold text-foreground">Correo Electrónico Institucional</Label>
                               <InputGroup leftIcon={<Mail className="size-4 text-muted-foreground" />}>
-                                <InputGroupInput value={solicitud.anexoA?.suplenteEmail || "carmen.vinueza@mintel.gob.ec"} disabled className="bg-muted/30 cursor-not-allowed text-xs text-foreground" />
+                                <InputGroupInput value={solicitud.anexoA?.suplenteEmail || "carmen.vinueza@mintel.gob.ec"} disabled className="bg-muted/30 cursor-not-allowed text-xs font-mono text-foreground" />
                               </InputGroup>
                             </div>
 
-                            <div className="space-y-1">
-                              <Label className="text-xs font-semibold text-foreground">Teléfono Fijo Institucional *</Label>
+                            <div className="flex flex-col gap-1.5">
+                              <Label className="text-xs font-semibold text-foreground">Teléfono Fijo Institucional</Label>
                               <InputGroup leftIcon={<Phone className="size-4 text-muted-foreground" />}>
                                 <InputGroupInput value={solicitud.anexoA?.suplenteTelefonoFijo || "022200200 ext 125"} disabled className="bg-muted/30 cursor-not-allowed text-xs text-foreground" />
                               </InputGroup>
                             </div>
 
-                            <div className="space-y-1">
-                              <Label className="text-xs font-semibold text-foreground">Móvil Institucional *</Label>
-                              <InputGroup leftIcon={<Smartphone className="size-4 text-muted-foreground" />}>
-                                <InputGroupInput value={solicitud.anexoA?.suplenteMovilInstitucional || "0991122334"} disabled className="bg-muted/30 cursor-not-allowed text-xs text-foreground" />
+                            <div className="flex flex-col gap-1.5">
+                              <Label className="text-xs font-semibold text-foreground">Móvil Institucional</Label>
+                              <InputGroup leftIcon={<Phone className="size-4 text-muted-foreground" />}>
+                                <InputGroupInput value={solicitud.anexoA?.suplenteMovilInstitucional || "0991122334"} disabled className="bg-muted/30 cursor-not-allowed text-xs font-mono text-foreground" />
                               </InputGroup>
                             </div>
 
-                            <div className="space-y-1">
-                              <Label className="text-xs font-semibold text-foreground">Móvil Personal *</Label>
-                              <InputGroup leftIcon={<Smartphone className="size-4 text-muted-foreground" />}>
-                                <InputGroupInput value={solicitud.anexoA?.suplenteMovilPersonal || "0982233445"} disabled className="bg-muted/30 cursor-not-allowed text-xs text-foreground" />
+                            <div className="flex flex-col gap-1.5">
+                              <Label className="text-xs font-semibold text-foreground">Móvil Personal</Label>
+                              <InputGroup leftIcon={<Phone className="size-4 text-muted-foreground" />}>
+                                <InputGroupInput value={solicitud.anexoA?.suplenteMovilPersonal || "0982233445"} disabled className="bg-muted/30 cursor-not-allowed text-xs font-mono text-foreground" />
                               </InputGroup>
                             </div>
                           </div>
@@ -702,12 +769,12 @@ export default function SolicitudDetailPage({ params }: PageProps) {
                     </div>
                   )}
 
-                  {/* PASO 2: SERVICIOS Y PROCESOS */}
+                  {/* ── PASO 2: SERVICIOS Y PROCESOS DE USO ── */}
                   {detailTab === 2 && (
                     <div className="bg-surface border border-border rounded-2xl p-4 sm:p-6 space-y-6 shadow-xs animate-in fade-in duration-200">
                       <div className="bg-primary-100/20 dark:bg-black/35 border-b border-primary dark:border-primary/40 p-3.5 mb-5 rounded-t-lg">
                         <h2 className="text-sm font-bold font-heading text-primary dark:text-primary-300 flex items-center gap-2">
-                          <FileText className="size-4 text-primary dark:text-primary-300 shrink-0" />
+                          <FileCheck2 className="size-4 text-primary dark:text-primary-300 shrink-0" />
                           <span>Sección II — Servicios y Herramientas Informáticas</span>
                         </h2>
                         <p className="text-xs text-muted-foreground mt-0.5">
@@ -720,7 +787,7 @@ export default function SolicitudDetailPage({ params }: PageProps) {
                         <div className="space-y-3">
                           <div className="bg-muted/50 p-3 rounded-xl border border-border/40">
                             <div className="flex items-center gap-2 font-bold text-xs text-foreground">
-                              <FileText className="size-4 text-muted-foreground shrink-0" />
+                              <FileCheck2 className="size-4 text-muted-foreground shrink-0" />
                               <span>2.1 Servicios y/o herramientas requeridas *</span>
                             </div>
                             <p className="text-[11px] text-muted-foreground mt-0.5">
@@ -729,18 +796,17 @@ export default function SolicitudDetailPage({ params }: PageProps) {
                           </div>
 
                           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                            <div className="p-3.5 rounded-2xl border border-border bg-surface flex items-center gap-2.5 shadow-2xs">
-                              <Checkbox checked disabled />
-                              <span className="text-xs font-bold text-foreground">Interoperabilidad</span>
-                            </div>
-                            <div className="p-3.5 rounded-2xl border border-border bg-surface flex items-center gap-2.5 shadow-2xs">
-                              <Checkbox checked disabled />
-                              <span className="text-xs font-bold text-foreground">Infodigital</span>
-                            </div>
-                            <div className="p-3.5 rounded-2xl border border-border bg-surface flex items-center gap-2.5 shadow-2xs">
-                              <Checkbox checked disabled />
-                              <span className="text-xs font-bold text-foreground">Ficha de Registro Único del Ciudadano</span>
-                            </div>
+                            {["Interoperabilidad", "Infodigital", "Ficha de Registro Único del Ciudadano"].map((s) => {
+                              const isChecked = solicitud.anexoA?.serviciosHerramientas
+                                ? solicitud.anexoA.serviciosHerramientas.includes(s)
+                                : true;
+                              return (
+                                <div key={s} className="p-3.5 rounded-2xl border border-border bg-surface flex items-center gap-2.5 shadow-2xs">
+                                  <Checkbox checked={isChecked} disabled />
+                                  <span className="text-xs font-bold text-foreground">{s}</span>
+                                </div>
+                              );
+                            })}
                           </div>
                         </div>
 
@@ -757,7 +823,7 @@ export default function SolicitudDetailPage({ params }: PageProps) {
                           </div>
 
                           <Textarea
-                            value={solicitud.anexoA?.areasUso || "Dirección de Gobierno Electrónico y Dirección de Datos Públicos"}
+                            value={solicitud.anexoA?.areasUso || "Dirección de Tecnologías de la Información, Dirección de Atención Ciudadana"}
                             disabled
                             rows={2}
                             className="bg-muted/30 cursor-not-allowed text-xs font-medium text-foreground rounded-2xl p-3.5 border-border/80"
@@ -777,7 +843,7 @@ export default function SolicitudDetailPage({ params }: PageProps) {
                           </div>
 
                           <Textarea
-                            value={solicitud.anexoA?.procesosUso || "Verificación de interoperabilidad nacional de trámites ciudadanos en línea del Portal Único gob.ec."}
+                            value={solicitud.anexoA?.procesosUso || "Validación de identidad ciudadana, verificación de registros y simplificación de trámites institucionales."}
                             disabled
                             rows={2}
                             className="bg-muted/30 cursor-not-allowed text-xs font-medium text-foreground rounded-2xl p-3.5 border-border/80"
@@ -808,32 +874,32 @@ export default function SolicitudDetailPage({ params }: PageProps) {
                     </div>
                   )}
 
-                  {/* PASO 3: DOCUMENTACIÓN HABILITANTE */}
+                  {/* ── PASO 3: DECLARACIONES Y FIRMA ── */}
                   {detailTab === 3 && (
                     <div className="bg-surface border border-border rounded-2xl p-4 sm:p-6 space-y-6 shadow-xs animate-in fade-in duration-200">
                       <div className="bg-primary-100/20 dark:bg-black/35 border-b border-primary dark:border-primary/40 p-3.5 mb-5 rounded-t-lg">
                         <h2 className="text-sm font-bold font-heading text-primary dark:text-primary-300 flex items-center gap-2">
                           <ShieldCheck className="size-4 text-primary dark:text-primary-300 shrink-0" />
-                          <span>Sección III — Cláusula Segunda y Tercera: Declaraciones y Firma</span>
+                          <span>Sección III — Declaraciones y Firma</span>
                         </h2>
                         <p className="text-xs text-muted-foreground mt-0.5">
-                          Suscripción digital oficial del instrumento ARP-R01 conforme a la Ley de Comercio Electrónico y Firmas Electrónicas.
+                          Declaraciones correspondientes a la solicitud y formalización mediante la firma de la máxima autoridad o delegado.
                         </p>
                       </div>
 
                       <div className="space-y-5">
                         {/* 2.2 Cláusula Segunda */}
-                        <div className="bg-muted/50 p-4 rounded-xl border border-border/40 space-y-3">
-                          <h3 className="text-xs font-bold text-foreground">2.2 Cláusula Segunda: Declaraciones del Solicitante</h3>
-                          <p className="text-[11px] text-muted-foreground leading-relaxed">
+                        <div className="p-4 sm:p-5 rounded-2xl bg-surface border border-border space-y-4 text-xs">
+                          <h3 className="font-bold text-foreground text-sm">2.2 Cláusula Segunda: Declaraciones del Solicitante</h3>
+                          <p className="text-muted-foreground leading-relaxed">
                             La entidad solicitante declara conocer los servicios provistos por la DINARP, así como los arts. 66 numerales 11 y 19 de la Constitución, art. 6 de la Ley Orgánica del Sistema Nacional de Registros Públicos, Ley de Optimización de Trámites, Ley Orgánica de Protección de Datos Personales, y arts. 178, 180 y 229 del COIP. La institución queda obligada a dar a la información el uso exclusivo para el que le sea concedido y custodiarla con prudencia.
                           </p>
 
-                          <div className="flex items-center gap-2.5 pt-1">
-                            <Checkbox checked disabled />
-                            <span className="text-xs font-bold text-foreground">
+                          <div className="flex items-start gap-3 pt-4 border-t border-border/60">
+                            <Checkbox checked={solicitud.anexoA?.declaracionesAceptadas ?? true} disabled className="shrink-0 mt-0.5 cursor-not-allowed" />
+                            <Label className="text-xs font-bold text-foreground cursor-not-allowed">
                               Acepto expresamente las declaraciones legales, términos y responsabilidades del Anexo A.
-                            </span>
+                            </Label>
                           </div>
                         </div>
 
@@ -850,16 +916,16 @@ export default function SolicitudDetailPage({ params }: PageProps) {
                             </CardBadge>
 
                             <div className="space-y-0.5 mt-2">
-                              <CardTitle className="text-base font-bold font-heading text-secondary">
+                              <CardTitle className="text-base font-bold font-heading text-secondary break-words">
                                 {solicitud.anexoA?.representanteLegalNombre || "Ing. César Antonio Martín Moreno"}
                               </CardTitle>
 
-                              <CardDescription className="text-xs text-secondary-800/80 dark:text-secondary-200/80 font-medium">
+                              <CardDescription className="text-xs text-secondary-800/80 dark:text-secondary-200/80 font-medium break-words">
                                 {solicitud.anexoA?.representanteLegalCargo || "Ministro de Telecomunicaciones (Representante Legal)"}
                               </CardDescription>
                             </div>
 
-                            <CardDecorativeIcon className="-bottom-6 -right-6 opacity-20 group-hover/card:scale-100">
+                            <CardDecorativeIcon className="-bottom-6 -right-6 opacity-20 group-hover/card:scale-100 hidden sm:block">
                               <User className="size-28 text-secondary" />
                             </CardDecorativeIcon>
                           </Card>
@@ -870,25 +936,32 @@ export default function SolicitudDetailPage({ params }: PageProps) {
                             className="bg-secondary-100/30 dark:bg-secondary-900/20 border-0 shadow-none hover:shadow-none hover:translate-y-0 relative overflow-hidden"
                           >
                             <CardBadge className="bg-secondary/20 text-secondary text-[10px] uppercase font-bold tracking-wider px-2.5 py-1 border-0 flex items-center gap-1.5 w-fit">
-                              <MapPin className="size-3.5 text-secondary" />
-                              <span>Lugar y Fecha</span>
+                              <Calendar className="size-3.5 text-secondary" />
+                              <span>Fecha y Ciudad de Suscripción</span>
                             </CardBadge>
 
                             <div className="space-y-0.5 mt-2">
-                              <CardTitle className="text-base font-bold font-heading text-secondary">
-                                {solicitud.anexoA?.ciudadFirma || "Quito D.M."}
+                              <CardTitle className="text-base font-bold font-heading text-secondary break-words">
+                                {solicitud.anexoA?.ciudadFirma || "Quito D.M., Ecuador"}
                               </CardTitle>
 
-                              <CardDescription className="text-xs text-secondary-800/80 dark:text-secondary-200/80 font-mono font-medium flex items-center gap-1.5 mt-0.5">
-                                <Calendar className="size-3.5 text-secondary/80" />
-                                <span>{solicitud.anexoA?.fechaFirma || solicitud.fechaSolicitud || "24/09/2026"}</span>
+                              <CardDescription className="text-xs text-secondary-800/80 dark:text-secondary-200/80 font-medium">
+                                {solicitud.anexoA?.fechaFirma || solicitud.fechaSolicitud || "24/09/2026"}
                               </CardDescription>
                             </div>
 
-                            <CardDecorativeIcon className="-bottom-6 -right-6 opacity-20 group-hover/card:scale-100">
+                            <CardDecorativeIcon className="-bottom-6 -right-6 opacity-20 group-hover/card:scale-100 hidden sm:block">
                               <Calendar className="size-28 text-secondary" />
                             </CardDecorativeIcon>
                           </Card>
+                        </div>
+
+                        {/* Certificación de datos */}
+                        <div className="p-4 rounded-xl border border-border bg-muted/30 flex items-center gap-3">
+                          <Checkbox checked={solicitud.anexoA?.firmadoDigitalmente ?? true} disabled className="cursor-not-allowed" />
+                          <span className="text-xs font-bold text-foreground">
+                            Confirmo que la información ingresada es verídica y corresponde a los antecedentes institucionales.
+                          </span>
                         </div>
 
                         {/* Certificación y Documento Firmado FirmaEC */}
@@ -902,15 +975,15 @@ export default function SolicitudDetailPage({ params }: PageProps) {
                               <div className="space-y-1 min-w-0">
                                 <div className="flex flex-wrap items-center gap-2">
                                   <h4 className="font-mono font-bold text-xs sm:text-sm text-foreground">
-                                    ARP-R01_Solicitud_Acceso_SINARP_{(solicitud.anexoA?.entidadSiglas || "ENTIDAD").toUpperCase()}.pdf
+                                    {solicitud.anexoA?.archivoDocumentoFirmado || `ARP-R01_Solicitud_Acceso_SINARP_${(solicitud.anexoA?.entidadSiglas || "ENTIDAD").toUpperCase()}.pdf`}
                                   </h4>
-                                  <Badge tone="success" appearance="solid" size="sm" className="font-bold text-[10px] uppercase px-2 py-0.5 shrink-0 !text-white shadow-2xs">
-                                    SE FIRMÓ EN FIRMA EC
+                                  <Badge tone="success" appearance="solid" size="sm" className="font-bold text-[10px] px-2 py-0.5 shrink-0 !text-white shadow-2xs">
+                                    Firma verificada en FirmaEC
                                   </Badge>
                                 </div>
 
                                 <p className="text-xs text-muted-foreground leading-relaxed">
-                                  Documento oficial del formulario suscrito digitalmente por el Representante Legal mediante <strong className="text-foreground">FirmaEC</strong> con estampado cronológico y validez jurídica acreditada.
+                                  Documento firmado electrónicamente por el Representante Legal. La firma fue confirmada y validada mediante FirmaEC, incluyendo su estampado cronológico. El documento se encuentra disponible para revisión.
                                 </p>
                               </div>
                             </div>
@@ -934,7 +1007,7 @@ export default function SolicitudDetailPage({ params }: PageProps) {
                           variant="primary"
                           size="sm"
                           onClick={() => {
-                            toast.success(`Descargando documento firmado ARP-R01_Solicitud_Acceso_SINARP_${(solicitud.anexoA?.entidadSiglas || "ENTIDAD").toUpperCase()}.pdf con validación FirmaEC...`);
+                            alert(`Descargando documento firmado ARP-R01_Solicitud_Acceso_SINARP_${(solicitud.anexoA?.entidadSiglas || "ENTIDAD").toUpperCase()}.pdf con validación FirmaEC...`);
                           }}
                           className="w-full sm:w-auto h-9 px-4 text-xs font-semibold gap-2 shadow-xs"
                         >
