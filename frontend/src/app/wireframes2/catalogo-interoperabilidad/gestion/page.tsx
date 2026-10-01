@@ -637,9 +637,14 @@ export default function GestionCatalogoPage() {
                             <TooltipProvider delayDuration={0}>
                               <Tooltip>
                                 <TooltipTrigger asChild>
-                                  <Button variant="ghost" size="icon-sm" asChild className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10">
+                                  <Button
+                                    variant="ghost"
+                                    size="icon-sm"
+                                    asChild
+                                    
+                                  >
                                     <Link href={`/wireframes2/catalogo-interoperabilidad/gestion/fuente/${fuente.id}`}>
-                                      <Eye   className="size-4" />
+                                      <Eye  />
                                     </Link>
                                   </Button>
                                 </TooltipTrigger>
@@ -651,8 +656,12 @@ export default function GestionCatalogoPage() {
                               {(MOCK_USERS_BY_ROLE.DGR.role === "COORDINADOR_SINARP" || MOCK_USERS_BY_ROLE.DGR.role === "DTD") && (
                                 <Tooltip>
                                   <TooltipTrigger asChild>
-                                    <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10">
-                                      <Edit   className="size-4" />
+                                    <Button
+                                      variant="ghost"
+                                      size="icon-sm"
+                                      
+                                    >
+                                      <Edit  />
                                     </Button>
                                   </TooltipTrigger>
                                   <TooltipContent side="top">
@@ -664,8 +673,12 @@ export default function GestionCatalogoPage() {
                               {MOCK_USERS_BY_ROLE.DGR.role === "DPI" && (
                                 <Tooltip>
                                   <TooltipTrigger asChild>
-                                    <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10">
-                                      <ShieldAlert   className="size-4" />
+                                    <Button
+                                      variant="ghost"
+                                      size="icon-sm"
+                                      
+                                    >
+                                      <ShieldAlert  />
                                     </Button>
                                   </TooltipTrigger>
                                   <TooltipContent side="top">

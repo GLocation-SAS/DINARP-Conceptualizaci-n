@@ -697,32 +697,8 @@ export default function GestionUsuariosPage() {
               </p>
             </div>
 
-            {/* Acciones de Cabecera: Accesos rápidos y Crear cuenta */}
+            {/* Acciones de Cabecera: Crear cuenta */}
             <div className="flex flex-wrap items-center justify-end gap-2 shrink-0 sm:self-center">
-              <Button
-                variant="outline"
-                size="default"
-                asChild
-                className="gap-2 shadow-xs cursor-pointer font-semibold text-xs whitespace-nowrap"
-              >
-                <Link href="/wireframes2/usuarios/recuperacion-acceso">
-                  <KeyRound className="size-4 text-primary" />
-                  <span>Recuperación de acceso</span>
-                </Link>
-              </Button>
-
-              <Button
-                variant="outline"
-                size="default"
-                asChild
-                className="gap-2 shadow-xs cursor-pointer font-semibold text-xs whitespace-nowrap"
-              >
-                <Link href="/wireframes2/usuarios/coordinadores/USR-CRD-001/cuenta">
-                  <ShieldCheck className="size-4 text-primary" />
-                  <span>Cuenta del coordinador</span>
-                </Link>
-              </Button>
-
               <Button
                 variant="primary"
                 size="default"
@@ -1204,8 +1180,8 @@ export default function GestionUsuariosPage() {
                 {paginatedUsuarios.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={8} className="text-center py-12">
-                      <div className="flex flex-col items-center justify-center gap-3 text-muted-foreground">
-                        <Users   className="size-4" />
+                      <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
+                        <Users className="size-8 stroke-[1.5] text-muted-foreground/60" />
                         <p className="text-sm font-medium">No se encontraron cuentas de usuario</p>
                         <p className="text-xs">
                           Ajusta los filtros de búsqueda o registra un nuevo usuario interno.
@@ -1243,11 +1219,11 @@ export default function GestionUsuariosPage() {
                       </TableCell>
 
                       {/* Correo */}
-                      <TableCell className="text-center px-3 py-2.5 overflow-hidden">
+                      <TableCell className="px-3 py-2.5 overflow-hidden">
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <div className="flex items-center gap-1.5 text-xs text-foreground/80 min-w-0 cursor-default">
-                              <Mail   className="size-4" />
+                              <Mail className="size-3 text-muted-foreground shrink-0" />
                               <span className="truncate">{u.correo}</span>
                             </div>
                           </TooltipTrigger>
@@ -1300,12 +1276,19 @@ export default function GestionUsuariosPage() {
 
                       {/* Acciones */}
                       <TableCell className="px-3 py-2.5 text-center whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
-                        <div className="flex items-center justify-center gap-3 ">
+                        <div className="flex items-center justify-center gap-3 shrink-0">
                           {/* Ver detalle y auditoría */}
                           <Tooltip>
                             <TooltipTrigger asChild>
-                              <Button variant="ghost" size="icon-sm" type="button" onClick={() => handleOpenDetalle(u)} aria-label={`Ver detalle de ${u.nombreCompleto}`} className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10">
-                                <Eye   className="size-4" />
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="icon-sm"
+                                onClick={() => handleOpenDetalle(u)}
+                                className="size-7 rounded-lg border-border/80 text-foreground hover:bg-muted shadow-2xs"
+                                aria-label={`Ver detalle de ${u.nombreCompleto}`}
+                              >
+                                <Eye className="size-3.5 text-muted-foreground" />
                               </Button>
                             </TooltipTrigger>
                             <TooltipContent side="top">Ver detalle y expediente</TooltipContent>
@@ -1315,8 +1298,15 @@ export default function GestionUsuariosPage() {
                           {u.estado !== "RETIRADO" && (
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <Button variant="ghost" size="icon-sm" type="button" onClick={() => handleOpenEditar(u)} aria-label={`Editar cuenta interna de ${u.nombreCompleto}`} className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10">
-                                  <Edit2   className="size-4" />
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="icon-sm"
+                                  onClick={() => handleOpenEditar(u)}
+                                  className="size-7 rounded-lg border-border/80 text-foreground hover:bg-primary/10 hover:border-primary/40 shadow-2xs"
+                                  aria-label={`Editar cuenta interna de ${u.nombreCompleto}`}
+                                >
+                                  <Edit2 className="size-3.5 text-primary" />
                                 </Button>
                               </TooltipTrigger>
                               <TooltipContent side="top">Editar cuenta interna</TooltipContent>
@@ -1327,8 +1317,15 @@ export default function GestionUsuariosPage() {
                           {u.estado === "ACTIVO" && (
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <Button variant="ghost" size="icon-sm" type="button" onClick={() => handleOpenSuspender(u)} aria-label={`Suspender cuenta interna de ${u.nombreCompleto}`} className="text-muted-foreground hover:text-warning hover:bg-warning/10">
-                                  <Ban   className="size-4" />
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="icon-sm"
+                                  onClick={() => handleOpenSuspender(u)}
+                                  className="size-7 rounded-lg border-border/80 text-warning hover:bg-warning/10 hover:border-warning/40 shadow-2xs"
+                                  aria-label={`Suspender cuenta interna de ${u.nombreCompleto}`}
+                                >
+                                  <Ban className="size-3.5 text-warning" />
                                 </Button>
                               </TooltipTrigger>
                               <TooltipContent side="top">Suspender cuenta interna</TooltipContent>
@@ -1339,8 +1336,15 @@ export default function GestionUsuariosPage() {
                           {u.estado === "SUSPENDIDO" && (
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <Button variant="ghost" size="icon-sm" type="button" onClick={() => handleOpenReactivar(u)} aria-label={`Reactivar cuenta interna de ${u.nombreCompleto}`} className="text-muted-foreground hover:text-success hover:bg-success/10">
-                                  <RotateCcw   className="size-4" />
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="icon-sm"
+                                  onClick={() => handleOpenReactivar(u)}
+                                  className="size-7 rounded-lg border-border/80 text-success hover:bg-success/10 hover:border-success/40 shadow-2xs"
+                                  aria-label={`Reactivar cuenta interna de ${u.nombreCompleto}`}
+                                >
+                                  <RotateCcw className="size-3.5 text-success" />
                                 </Button>
                               </TooltipTrigger>
                               <TooltipContent side="top">Reactivar cuenta interna</TooltipContent>
@@ -1351,8 +1355,15 @@ export default function GestionUsuariosPage() {
                           {u.estado !== "RETIRADO" && (
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <Button variant="ghost" size="icon-sm" type="button" onClick={() => handleOpenBaja(u)} aria-label={`Dar de baja a cuenta interna de ${u.nombreCompleto}`} className="text-muted-foreground hover:text-danger hover:bg-danger/10">
-                                  <UserX   className="size-4" />
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="icon-sm"
+                                  onClick={() => handleOpenBaja(u)}
+                                  className="size-7 rounded-lg border-border/80 text-danger hover:bg-danger/10 hover:border-danger/40 shadow-2xs"
+                                  aria-label={`Dar de baja a cuenta interna de ${u.nombreCompleto}`}
+                                >
+                                  <UserX className="size-3.5 text-danger" />
                                 </Button>
                               </TooltipTrigger>
                               <TooltipContent side="top">Dar de baja a cuenta interna</TooltipContent>

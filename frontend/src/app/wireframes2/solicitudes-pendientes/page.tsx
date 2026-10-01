@@ -2165,7 +2165,7 @@ export default function GestionIngresosPage() {
                               onClick={() => handleSelectSolicitud(row)}
                             >
                               {/* 1. Trámite */}
-                              <TableCell className="text-center  font-mono text-xs overflow-hidden">
+                              <TableCell className="px-2 font-mono text-xs overflow-hidden">
                                 <Tooltip>
                                   <TooltipTrigger asChild>
                                     <div className="flex items-center gap-1.5 truncate cursor-pointer">
@@ -2183,7 +2183,7 @@ export default function GestionIngresosPage() {
                               </TableCell>
 
                               {/* 2. Proceso / Anexo */}
-                              <TableCell className="text-center  overflow-hidden">
+                              <TableCell className="px-2 overflow-hidden">
                                 {(() => {
                                   const procesoLabel =
                                     row.tipoTramite === "PROCESO_A_REGISTRO_INSTITUCION"
@@ -2242,7 +2242,7 @@ export default function GestionIngresosPage() {
                               </TableCell>
 
                               {/* 3. Solicitante */}
-                              <TableCell className="text-center  overflow-hidden">
+                              <TableCell className="px-2 overflow-hidden">
                                 <Tooltip>
                                   <TooltipTrigger asChild>
                                     <div className="flex flex-col min-w-0 group/sol cursor-pointer">
@@ -2267,7 +2267,7 @@ export default function GestionIngresosPage() {
                               </TableCell>
 
                               {/* 4. Institución */}
-                              <TableCell className="text-center  text-muted-foreground text-xs font-medium overflow-hidden">
+                              <TableCell className="px-2 text-muted-foreground text-xs font-medium overflow-hidden">
                                 <Tooltip>
                                   <TooltipTrigger asChild>
                                     <div className="flex flex-col truncate cursor-pointer group/inst">
@@ -2297,7 +2297,7 @@ export default function GestionIngresosPage() {
                               </TableCell>
 
                               {/* 5. Fecha de asignación */}
-                              <TableCell className="text-center  text-muted-foreground font-mono text-xs overflow-hidden">
+                              <TableCell className="px-2 text-muted-foreground font-mono text-xs overflow-hidden">
                                 <Tooltip>
                                   <TooltipTrigger asChild>
                                     <span className="block truncate cursor-pointer hover:text-foreground transition-colors">
@@ -2324,8 +2324,18 @@ export default function GestionIngresosPage() {
                                 <div className="flex items-center justify-center gap-3">
                                   <Tooltip>
                                     <TooltipTrigger asChild>
-                                      <Button variant="ghost" size="icon-sm" type="button" onClick={(e) => { e.stopPropagation(); handleSelectSolicitud(row); }} aria-label={`Ver detalle y gestionar trámite ${row.id}`} className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10">
-                                        <Eye   className="size-4" />
+                                      <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="icon-sm"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleSelectSolicitud(row);
+                                        }}
+                                        
+                                        aria-label={`Ver detalle y gestionar trámite ${row.id}`}
+                                      >
+                                        <Eye  />
                                       </Button>
                                     </TooltipTrigger>
                                     <TooltipContent side="top">Ver detalle y gestionar</TooltipContent>

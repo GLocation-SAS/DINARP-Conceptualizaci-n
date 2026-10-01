@@ -317,7 +317,7 @@ export default function GestionIngresosPage() {
   observaciones?: string) =>
   {
     const area = currentUser.role === "DIR_NORMATIVA" ? "NORMATIVIDAD" : "GESTION";
-    const dir = asignadoPor || (currentUser.role === "DIR_NORMATIVA" ? "Director —rea de Normatividad" : "Director —rea de Gesti—n");
+    const dir = asignadoPor || (currentUser.role === "DIR_NORMATIVA" ? "Director �rea de Normatividad" : "Director �rea de Gesti�n");
     store.asignarRevisorMasivo(solicitudIds, revisorNombre, area, dir, observaciones);
     toast.success(`${solicitudIds.length} solicitudes asignadas exitosamente a ${revisorNombre}`);
     setSelectedIds([]);
@@ -355,7 +355,7 @@ export default function GestionIngresosPage() {
 
   const procesoOptions = useMemo(() => [
   { value: "TODOS", label: "Todos" },
-  { value: "PROCESO_A_REGISTRO_INSTITUCION", label: "Instituci—n" },
+  { value: "PROCESO_A_REGISTRO_INSTITUCION", label: "Instituci�n" },
   { value: "PROCESO_B_ENROLAMIENTO_COORDINADOR", label: "Coordinador" },
   { value: "PROCESO_C_CAMBIO_COORDINADOR", label: "Cambio de coordinador" }],
   []);
@@ -364,7 +364,7 @@ export default function GestionIngresosPage() {
     if (currentUser.role === "EQ_GESTION") {
       return [
       { value: "Todos", label: "Estado: Todos" },
-      { value: "PENDIENTES", label: "Pendiente de revisi—n" },
+      { value: "PENDIENTES", label: "Pendiente de revisi�n" },
       { value: "Aprobada", label: "Aprobada" },
       { value: "Rechazada", label: "Rechazada" }];
 
@@ -374,25 +374,25 @@ export default function GestionIngresosPage() {
       { value: "Todos", label: "Todos" },
       { value: "SIN_ASIGNAR", label: "Sin Asignar" },
       { value: "ASIGNADOS", label: "Asignados" },
-      { value: "PENDIENTE_ASIGNACION_NORMATIVIDAD", label: "Pendiente de Asignaci—n — Normatividad" },
-      { value: "PENDIENTE_GENERAR_RESOLUCION", label: "Pendiente de Generar Resoluci—n" },
-      { value: "EN_GENERACION_RESOLUCION", label: "En Generaci—n de Resoluci—n" },
-      { value: "GENERACION_PENDIENTE", label: "Generaci—n Pendiente" },
-      { value: "RESOLUCION_GENERADA", label: "Resoluci—n Generada" },
+      { value: "PENDIENTE_ASIGNACION_NORMATIVIDAD", label: "Pendiente de Asignaci�n � Normatividad" },
+      { value: "PENDIENTE_GENERAR_RESOLUCION", label: "Pendiente de Generar Resoluci�n" },
+      { value: "EN_GENERACION_RESOLUCION", label: "En Generaci�n de Resoluci�n" },
+      { value: "GENERACION_PENDIENTE", label: "Generaci�n Pendiente" },
+      { value: "RESOLUCION_GENERADA", label: "Resoluci�n Generada" },
       { value: "Rechazada", label: "Rechazada" },
       { value: "Cancelada", label: "Cancelada" }];
 
     }
     return [
     { value: "Todos", label: "Todos" },
-    { value: "PENDIENTE_ENVIO", label: "Pendiente de Env—o" },
+    { value: "PENDIENTE_ENVIO", label: "Pendiente de Env�o" },
     { value: "SIN_ASIGNAR", label: "Sin Asignar" },
     { value: "ASIGNADOS", label: "Asignados" },
-    { value: "EN_REVISION", label: "En Revisi—n" },
-    { value: "PENDIENTE_ASIGNACION_GESTION", label: "Pendiente Asignaci—n" },
-    { value: "EN_REVISION_GESTION", label: "En Revisi—n" },
+    { value: "EN_REVISION", label: "En Revisi�n" },
+    { value: "PENDIENTE_ASIGNACION_GESTION", label: "Pendiente Asignaci�n" },
+    { value: "EN_REVISION_GESTION", label: "En Revisi�n" },
     { value: "PENDIENTE_ASIGNACION_NORMATIVIDAD", label: "Pendiente Normatividad" },
-    { value: "EN_REVISION_NORMATIVIDAD", label: "En Revisi—n Normatividad" },
+    { value: "EN_REVISION_NORMATIVIDAD", label: "En Revisi�n Normatividad" },
     { value: "APROBADO_FINAL", label: "Aprobado Final" },
     { value: "Aprobada", label: "Aprobada" },
     { value: "Rechazada", label: "Rechazada" },
@@ -406,8 +406,8 @@ export default function GestionIngresosPage() {
   [institucionesList]);
 
   const sortOptions = useMemo(() => [
-  { value: "fecha-desc", label: "M—s recientes" },
-  { value: "fecha-asc", label: "M—s antiguas" },
+  { value: "fecha-desc", label: "M�s recientes" },
+  { value: "fecha-asc", label: "M�s antiguas" },
   { value: "nombre-asc", label: "Nombre (A - Z)" },
   { value: "estado-prioridad", label: "Pendientes primero" }],
   []);
@@ -514,7 +514,7 @@ export default function GestionIngresosPage() {
   const filteredData = useMemo(() => {
     const q = searchQuery.toLowerCase().trim();
     let result = solicitudes.filter((item) => {
-      // Filtro de pestaña de tr—mite
+      // Filtro de pesta�a de tr�mite
       if (filterTramite !== "TODOS" && item.tipoTramite !== filterTramite) {
         return false;
       }
@@ -565,7 +565,7 @@ export default function GestionIngresosPage() {
           return false;
         }
 
-        // El revisor de gesti—n SOLO ve las solicitudes que le han sido asignadas
+        // El revisor de gesti�n SOLO ve las solicitudes que le han sido asignadas
         const revisorDelTramite = item.revisorGestion || item.revisor;
         if (revisorDelTramite !== currentUser.name) {
           return false;
@@ -609,7 +609,7 @@ export default function GestionIngresosPage() {
       const matchesEstado = (() => {
         if (filterEstado === "Todos") return true;
         if (currentUser.role === "EQ_GESTION") {
-          if (filterEstado === "PENDIENTES" || filterEstado === "Pendiente de revisi—n") {
+          if (filterEstado === "PENDIENTES" || filterEstado === "Pendiente de revisi�n") {
             return (
               item.estado === "EN_REVISION_GESTION" ||
               item.estado === "PENDIENTE_ASIGNACION_GESTION" ||
@@ -764,7 +764,7 @@ export default function GestionIngresosPage() {
 
   const handleConfirmReject = (sol: SolicitudIngreso, motivo: string) => {
     store.rechazarSolicitud(sol.id, motivo, currentUser.name);
-    toast.success("Solicitud rechazada. La instituci—n ser— notificada por correo.");
+    toast.success("Solicitud rechazada. La instituci�n ser� notificada por correo.");
     if (selectedSolicitud && selectedSolicitud.id === sol.id) {
       setSelectedSolicitud((prev) =>
       prev ?
@@ -796,7 +796,7 @@ export default function GestionIngresosPage() {
           </Badge>
         </TooltipTrigger>
         <TooltipContent side="top" variant="surface" className="p-2.5 max-w-xs flex flex-col items-start gap-0.5">
-          <p className="font-bold text-xs text-foreground">Estado del tr—mite</p>
+          <p className="font-bold text-xs text-foreground">Estado del tr�mite</p>
           <p className="text-[11px] text-muted-foreground">{label}</p>
         </TooltipContent>
       </Tooltip>);
@@ -827,7 +827,7 @@ export default function GestionIngresosPage() {
         }
       },
       {
-        label: selectedSolicitud.tituloTramite || "Solicitud de Registro de Instituci—n",
+        label: selectedSolicitud.tituloTramite || "Solicitud de Registro de Instituci�n",
         onClick: (e: React.MouseEvent) => {
           e.preventDefault();
           setSelectedSolicitud(null);
@@ -858,7 +858,7 @@ export default function GestionIngresosPage() {
                 <span>Volver a la bandeja</span>
               </Button>
 
-              {/* Botones de acci—n en la cabecera */}
+              {/* Botones de acci�n en la cabecera */}
               <div className="flex items-center gap-2 self-start sm:self-auto">
                 {currentUser.role === "EQ_GESTION" && selectedSolicitud.estado === "EN_REVISION_GESTION" ?
               <>
@@ -876,13 +876,13 @@ export default function GestionIngresosPage() {
                   variant="primary"
                   onClick={() => {
                     store.aprobarGestion(selectedSolicitud.id, currentUser.name);
-                    toast.success("Tr—mite aprobado por Gesti—n y enviado a Normatividad");
+                    toast.success("Tr�mite aprobado por Gesti�n y enviado a Normatividad");
                     setSelectedSolicitud(null);
                   }}
                   className="h-10 px-4 text-xs font-semibold gap-2 shadow-xs">
                   
                       <CheckCircle2 className="size-4" />
-                      <span>Aprobar revisi—n</span>
+                      <span>Aprobar revisi�n</span>
                     </Button>
                   </> :
               currentUser.role === "EQ_NORMATIVA" && selectedSolicitud.estado === "EN_REVISION_NORMATIVIDAD" ?
@@ -891,13 +891,13 @@ export default function GestionIngresosPage() {
                 variant="primary"
                 onClick={() => {
                   store.aprobarNormatividad(selectedSolicitud.id, currentUser.name, "RES-DINARP-2026-001");
-                  toast.success("Resoluci—n generada. Tr—mite finalizado exitosamente.");
+                  toast.success("Resoluci�n generada. Tr�mite finalizado exitosamente.");
                   setSelectedSolicitud(null);
                 }}
                 className="h-10 px-4 text-xs font-semibold gap-2 shadow-xs">
                 
                     <FileSignature className="size-4" />
-                    <span>Generar resoluci—n y finalizar</span>
+                    <span>Generar resoluci�n y finalizar</span>
                   </Button> :
               selectedSolicitud.estado === "Cancelada" ?
               <Badge tone="danger" appearance="soft" size="md" className="font-semibold py-1.5 px-3">
@@ -913,7 +913,7 @@ export default function GestionIngresosPage() {
               </div>
             </div>
 
-            {/* Encabezado del Tr—mite en Card Featured estilo UI Kit con Badge Primary e Icono (como registro-institucion) */}
+            {/* Encabezado del Tr�mite en Card Featured estilo UI Kit con Badge Primary e Icono (como registro-institucion) */}
             <Card
             variant="featured"
             disableHover={true}
@@ -922,7 +922,7 @@ export default function GestionIngresosPage() {
               <div className="flex flex-wrap items-center justify-between gap-3 mb-2">
                 <div className="flex items-center gap-2">
                   <CardBadge className="bg-primary/20 text-primary text-[10px] uppercase font-extrabold tracking-wider px-2.5 py-0.5 border-0">
-                    FORMULARIO OFICIAL {selectedSolicitud.codigoDocumental} — {selectedSolicitud.id}
+                    FORMULARIO OFICIAL {selectedSolicitud.codigoDocumental} � {selectedSolicitud.id}
                   </CardBadge>
                 </div>
                 {renderEstadoBadge(selectedSolicitud.estado, selectedSolicitud.revisionIniciada)}
@@ -933,7 +933,7 @@ export default function GestionIngresosPage() {
               </CardTitle>
 
               <CardDescription className="text-xs text-primary-800/80 dark:text-primary-200/80 font-medium mt-1">
-                Registrado el {selectedSolicitud.fechaSolicitud} — {selectedSolicitud.institucion} — Solicitante: {selectedSolicitud.nombreCompleto} (C.I. {selectedSolicitud.cedula})
+                Registrado el {selectedSolicitud.fechaSolicitud} � {selectedSolicitud.institucion} � Solicitante: {selectedSolicitud.nombreCompleto} (C.I. {selectedSolicitud.cedula})
               </CardDescription>
 
               <CardDecorativeIcon className="-bottom-10 -right-10 opacity-20 pointer-events-none">
@@ -941,7 +941,7 @@ export default function GestionIngresosPage() {
               </CardDecorativeIcon>
             </Card>
 
-            {/* Banners contextuales seg—n estado */}
+            {/* Banners contextuales seg�n estado */}
             {(selectedSolicitud.estado === "EN_REVISION_GESTION" || selectedSolicitud.estado === "EN_REVISION_NORMATIVIDAD") &&
           <div className="p-4 rounded-2xl bg-primary/5 border border-primary/20 text-foreground space-y-2 animate-in fade-in duration-150 mb-4">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
@@ -951,15 +951,15 @@ export default function GestionIngresosPage() {
                     </div>
                     <div>
                       <h3 className="font-heading font-bold text-sm text-foreground">
-                        Solicitud en revisi—n
+                        Solicitud en revisi�n
                       </h3>
                       <p className="text-xs text-muted-foreground mt-0.5">
-                        La revisi—n t—cnica y documental se encuentra en curso bajo la responsabilidad del revisor asignado.
+                        La revisi�n t�cnica y documental se encuentra en curso bajo la responsabilidad del revisor asignado.
                       </p>
                     </div>
                   </div>
                   <Badge tone="primary" appearance="soft" size="md" className="font-bold text-xs shrink-0 self-start sm:self-auto">
-                    EN REVISI—N
+                    EN REVISI�N
                   </Badge>
                 </div>
 
@@ -968,11 +968,11 @@ export default function GestionIngresosPage() {
                     <span className="text-muted-foreground">Tipo de solicitud:</span>
                     <strong className="text-foreground font-semibold">
                       {selectedSolicitud.tipoTramite === "PROCESO_A_REGISTRO_INSTITUCION" ?
-                  "Anexo A — Solicitud de Registro de Instituci—n" :
+                  "Anexo A � Solicitud de Registro de Instituci�n" :
                   selectedSolicitud.tipoTramite === "PROCESO_B_ENROLAMIENTO_COORDINADOR" ?
-                  "Anexo B — Solicitud de Registro de Coordinador" :
+                  "Anexo B � Solicitud de Registro de Coordinador" :
                   selectedSolicitud.tipoTramite === "PROCESO_C_CAMBIO_COORDINADOR" ?
-                  "Anexo C — Solicitud de Cambio de Coordinador" :
+                  "Anexo C � Solicitud de Cambio de Coordinador" :
                   "Solicitud de Ingreso"}
                     </strong>
                   </div>
@@ -995,10 +995,10 @@ export default function GestionIngresosPage() {
                     </div>
                     <div>
                       <h3 className="text-sm font-bold font-heading text-danger">
-                        Tr—mite Cancelado y Solicitud Cerrada Definitivamente
+                        Tr�mite Cancelado y Solicitud Cerrada Definitivamente
                       </h3>
                       <p className="text-xs text-muted-foreground mt-0.5">
-                        Esta solicitud no super— la revisi—n t—cnica obligatoria del —rea de Gesti—n.
+                        Esta solicitud no super� la revisi�n t�cnica obligatoria del �rea de Gesti�n.
                       </p>
                     </div>
                   </div>
@@ -1011,28 +1011,28 @@ export default function GestionIngresosPage() {
                   <div className="p-3.5 bg-surface rounded-xl border border-border space-y-1">
                     <span className="font-bold text-foreground flex items-center gap-1.5 text-danger">
                       <XCircle className="size-3.5 text-danger shrink-0" />
-                      Motivo de la Cancelaci—n (Revisi—n No Conforme):
+                      Motivo de la Cancelaci�n (Revisi�n No Conforme):
                     </span>
                     <p className="text-muted-foreground text-xs leading-relaxed">
-                      {selectedSolicitud.motivoRechazo || "Se identificaron observaciones insubsanables en la documentaci—n y firmas digitales registradas."}
+                      {selectedSolicitud.motivoRechazo || "Se identificaron observaciones insubsanables en la documentaci�n y firmas digitales registradas."}
                     </p>
                   </div>
 
                   <div className="p-3.5 bg-surface rounded-xl border border-border space-y-1">
                     <span className="font-bold text-foreground flex items-center gap-1.5 text-primary">
                       <RotateCcw className="size-3.5 text-primary shrink-0" />
-                      Acci—n Requerida para la Instituci—n:
+                      Acci�n Requerida para la Instituci�n:
                     </span>
                     <p className="text-muted-foreground text-xs leading-relaxed">
-                      El tr—mite se encuentra cerrado. La instituci—n requirente debe <strong>volver a realizar y enviar una nueva solicitud de registro de instituci—n (Anexo A)</strong> desde cero a trav—s del portal, adjuntando la documentaci—n vigente y la firma electrónica debidamente validada.
+                      El tr�mite se encuentra cerrado. La instituci�n requirente debe <strong>volver a realizar y enviar una nueva solicitud de registro de instituci�n (Anexo A)</strong> desde cero a trav�s del portal, adjuntando la documentaci�n vigente y la firma electr�nica debidamente validada.
                     </p>
                   </div>
                 </div>
 
                 <div className="pt-2 border-t border-danger/20 flex flex-wrap items-center justify-between gap-2 text-[11px] text-muted-foreground">
                   <div className="flex items-center gap-4">
-                    <span>Fecha de cancelaci—n y cierre: <strong className="text-foreground">{selectedSolicitud.fechaRevision || "20/09/2026 16:45"}</strong></span>
-                    <span>Revisor responsable: <strong className="text-foreground">{selectedSolicitud.revisor || "Ana Torres (—rea de Gesti—n)"}</strong></span>
+                    <span>Fecha de cancelaci�n y cierre: <strong className="text-foreground">{selectedSolicitud.fechaRevision || "20/09/2026 16:45"}</strong></span>
+                    <span>Revisor responsable: <strong className="text-foreground">{selectedSolicitud.revisor || "Ana Torres (�rea de Gesti�n)"}</strong></span>
                   </div>
                   <span className="font-semibold text-danger">Estado BPM: Cancelada (Cierre de ciclo)</span>
                 </div>
@@ -1043,20 +1043,20 @@ export default function GestionIngresosPage() {
                 <div className="flex items-center gap-2 font-bold text-sm text-foreground">
                   <CheckCircle2 className="size-4 shrink-0 text-foreground" />
                   <span>
-                    {selectedSolicitud.tipoTramite === "PROCESO_A_REGISTRO_INSTITUCION" && "Instituci—n aprobada: Coordinadores prerregistrados e invitados al Proceso B"}
+                    {selectedSolicitud.tipoTramite === "PROCESO_A_REGISTRO_INSTITUCION" && "Instituci�n aprobada: Coordinadores prerregistrados e invitados al Proceso B"}
                     {selectedSolicitud.tipoTramite === "PROCESO_B_ENROLAMIENTO_COORDINADOR" && "Acuerdo de Confidencialidad aprobado: Coordinador institucional ACTIVO"}
                     {selectedSolicitud.tipoTramite === "PROCESO_C_CAMBIO_COORDINADOR" && "Cambio aprobado: Nuevo coordinador prerregistrado e invitado al Proceso B"}
                   </span>
                 </div>
                 <div className="pt-2 mt-2 border-t border-border/80 grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
                   <div>
-                    <span className="text-muted-foreground">Fecha de resoluci—n: </span>
+                    <span className="text-muted-foreground">Fecha de resoluci�n: </span>
                     <strong className="text-foreground">{selectedSolicitud.fechaRevision || "Reciente"}</strong>
                   </div>
                   <div>
                     <span className="text-muted-foreground">{currentUser.role === "DIR_NORMATIVA" || currentUser.role === "EQ_NORMATIVA" || selectedSolicitud.estado.includes("NORMATIVIDAD") || selectedSolicitud.estado.includes("RESOLUCION") ? "Responsable de Normatividad: " : "Revisado por: "}</span>
                     <strong className="text-foreground">
-                      {currentUser.role === "DIR_NORMATIVA" || currentUser.role === "EQ_NORMATIVA" || selectedSolicitud.estado.includes("NORMATIVIDAD") || selectedSolicitud.estado.includes("RESOLUCION") ? selectedSolicitud.revisorNormatividad || "Sin asignar" : selectedSolicitud.revisorGestion || selectedSolicitud.revisor || "Direcci—n de Gesti—n y Registro"}
+                      {currentUser.role === "DIR_NORMATIVA" || currentUser.role === "EQ_NORMATIVA" || selectedSolicitud.estado.includes("NORMATIVIDAD") || selectedSolicitud.estado.includes("RESOLUCION") ? selectedSolicitud.revisorNormatividad || "Sin asignar" : selectedSolicitud.revisorGestion || selectedSolicitud.revisor || "Direcci�n de Gesti�n y Registro"}
                     </strong>
                   </div>
                 </div>
@@ -1067,32 +1067,32 @@ export default function GestionIngresosPage() {
           <div className="p-4 rounded-2xl bg-muted/40 border border-border text-foreground space-y-2">
                 <div className="flex items-center gap-2 font-bold text-sm text-foreground">
                   <XCircle className="size-4 shrink-0 text-muted-foreground" />
-                  <span>Tr—mite Denegado / Observado</span>
+                  <span>Tr�mite Denegado / Observado</span>
                 </div>
                 <div className="p-3 bg-surface rounded-xl border border-border text-xs">
                   <span className="font-semibold text-foreground block mb-1">
-                    Motivo registrado para notificaci—n:
+                    Motivo registrado para notificaci�n:
                   </span>
                   <p className="text-foreground leading-relaxed">
-                    {selectedSolicitud.motivoRechazo || "No se especific— motivo de rechazo."}
+                    {selectedSolicitud.motivoRechazo || "No se especific� motivo de rechazo."}
                   </p>
                 </div>
                 <div className="pt-2 border-t border-border/80 grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
                   <div>
-                    <span className="text-muted-foreground">Fecha de resoluci—n: </span>
+                    <span className="text-muted-foreground">Fecha de resoluci�n: </span>
                     <strong className="text-foreground">{selectedSolicitud.fechaRevision || "Reciente"}</strong>
                   </div>
                   <div>
                     <span className="text-muted-foreground">{currentUser.role === "DIR_NORMATIVA" || currentUser.role === "EQ_NORMATIVA" || selectedSolicitud.estado.includes("NORMATIVIDAD") || selectedSolicitud.estado.includes("RESOLUCION") ? "Responsable de Normatividad: " : "Revisado por: "}</span>
                     <strong className="text-foreground">
-                      {currentUser.role === "DIR_NORMATIVA" || currentUser.role === "EQ_NORMATIVA" || selectedSolicitud.estado.includes("NORMATIVIDAD") || selectedSolicitud.estado.includes("RESOLUCION") ? selectedSolicitud.revisorNormatividad || "Sin asignar" : selectedSolicitud.revisorGestion || selectedSolicitud.revisor || "Direcci—n de Gesti—n y Registro"}
+                      {currentUser.role === "DIR_NORMATIVA" || currentUser.role === "EQ_NORMATIVA" || selectedSolicitud.estado.includes("NORMATIVIDAD") || selectedSolicitud.estado.includes("RESOLUCION") ? selectedSolicitud.revisorNormatividad || "Sin asignar" : selectedSolicitud.revisorGestion || selectedSolicitud.revisor || "Direcci�n de Gesti�n y Registro"}
                     </strong>
                   </div>
                 </div>
               </div>
           }
 
-            {/* Encabezado del Tr—mite en Card Featured estilo UI Kit con Badge Primary e Icono */}
+            {/* Encabezado del Tr�mite en Card Featured estilo UI Kit con Badge Primary e Icono */}
             <Card
             variant="featured"
             disableHover={true}
@@ -1108,24 +1108,24 @@ export default function GestionIngresosPage() {
                       <button
                       type="button"
                       className="inline-flex items-center justify-center size-5 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors cursor-help focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                      aria-label="Informaci—n del Formulario Oficial">
+                      aria-label="Informaci�n del Formulario Oficial">
                       
                         <Info className="size-3.5" />
                       </button>
                     </TooltipTrigger>
                     <TooltipContent side="top" variant="primary" className="max-w-xs text-xs leading-relaxed">
-                      Anexo A: Formulario diligenciado por la instituci—n solicitante para iniciar su proceso de registro en el SINARP.
+                      Anexo A: Formulario diligenciado por la instituci�n solicitante para iniciar su proceso de registro en el SINARP.
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
               </div>
 
               <CardTitle className="text-lg sm:text-xl font-bold font-heading text-primary">
-                Anexo A — Solicitud de Registro de Instituci—n
+                Anexo A � Solicitud de Registro de Instituci�n
               </CardTitle>
 
               <CardDescription className="text-xs text-primary-800/80 dark:text-primary-200/80 font-medium">
-                Proceso A — Enrolamiento institucional al SINARP
+                Proceso A � Enrolamiento institucional al SINARP
               </CardDescription>
 
               <CardDecorativeIcon className="-bottom-10 -right-10 opacity-20 group-hover/card:scale-100">
@@ -1133,7 +1133,7 @@ export default function GestionIngresosPage() {
               </CardDecorativeIcon>
             </Card>
 
-            {/* -- NAVEGACI—N PESTAÑAS PÍLDORA CÁPSULA (UI KIT CON ICONOS) -- */}
+            {/* -- NAVEGACI�N PESTA�AS P�LDORA C�PSULA (UI KIT CON ICONOS) -- */}
             <div className="overflow-x-auto py-1">
               <Tabs
               defaultValue="tab-0"
@@ -1149,14 +1149,14 @@ export default function GestionIngresosPage() {
                     className="px-5 py-2 text-xs font-bold gap-2 data-[state=active]:bg-primary-300 data-[state=active]:text-white data-[state=active]:[&_svg]:text-white dark:data-[state=active]:bg-primary-300 dark:data-[state=active]:text-white dark:data-[state=active]:[&_svg]:text-white whitespace-nowrap">
                     
                         <FileText className="size-4 shrink-0" />
-                        <span>Informaci—n del tr—mite</span>
+                        <span>Informaci�n del tr�mite</span>
                       </TabsTrigger>
                       <TabsTrigger
                     value="tab-6"
                     className="px-5 py-2 text-xs font-bold gap-2 data-[state=active]:bg-primary-300 data-[state=active]:text-white data-[state=active]:[&_svg]:text-white dark:data-[state=active]:bg-primary-300 dark:data-[state=active]:text-white dark:data-[state=active]:[&_svg]:text-white whitespace-nowrap">
                     
                         <FileSignature className="size-4 shrink-0" />
-                        <span>Resoluci—n</span>
+                        <span>Resoluci�n</span>
                       </TabsTrigger>
                       <TabsTrigger
                     value="tab-4"
@@ -1221,17 +1221,17 @@ export default function GestionIngresosPage() {
                   <div>
                     <h2 className="text-base font-bold font-heading text-primary dark:text-primary-300 flex items-center gap-2">
                       <Building2 className="size-5 text-primary dark:text-primary-300 shrink-0" />
-                      <span>Secci—n I — Datos de la Instituci—n y M—xima Autoridad</span>
+                      <span>Secci�n I � Datos de la Instituci�n y M�xima Autoridad</span>
                     </h2>
                     <p className="text-xs text-muted-foreground mt-0.5">
-                      Informaci—n de identificaci—n de la instituci—n solicitante y de su m—xima autoridad o delegado.
+                      Informaci�n de identificaci�n de la instituci�n solicitante y de su m�xima autoridad o delegado.
                     </p>
                   
                 </div>
 
                 <div className="p-6 sm:p-8 space-y-6">
 <Badge tone="primary" appearance="solid" size="sm" className="font-bold uppercase tracking-wider shrink-0 self-start sm:self-auto !text-white shadow-xs rounded-full px-3 py-1">
-                    {selectedSolicitud.anexoA?.entidadTipo === "Privada" ? "ENTIDAD PRIVADA" : "ENTIDAD P—BLICA"}
+                    {selectedSolicitud.anexoA?.entidadTipo === "Privada" ? "ENTIDAD PRIVADA" : "ENTIDAD P�BLICA"}
                   </Badge>
                 </div>
 
@@ -1243,7 +1243,7 @@ export default function GestionIngresosPage() {
                         1.1 Naturaleza de la Entidad
                       </h3>
                       <p className="text-xs text-muted-foreground mt-0.5">
-                        Informaci—n general de la instituci—n requirente y personerña jurídica.
+                        Informaci�n general de la instituci�n requirente y personer�a jur�dica.
                       </p>
                     </div>
                   </div>
@@ -1264,7 +1264,7 @@ export default function GestionIngresosPage() {
                         disabled
                         className="size-4 text-primary accent-primary cursor-not-allowed" />
                       
-                        <span>Instituci—n pública</span>
+                        <span>Instituci�n p�blica</span>
                       </label>
                       <label className="flex items-center gap-2 text-xs font-medium text-foreground cursor-not-allowed">
                         <input
@@ -1274,7 +1274,7 @@ export default function GestionIngresosPage() {
                         disabled
                         className="size-4 text-primary accent-primary cursor-not-allowed" />
                       
-                        <span>Instituci—n privada</span>
+                        <span>Instituci�n privada</span>
                       </label>
                     </div>
                   </div>
@@ -1291,7 +1291,7 @@ export default function GestionIngresosPage() {
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-semibold text-foreground">RUC de la Entidad (13 d—gitos) *</Label>
+                    <Label className="text-xs font-semibold text-foreground">RUC de la Entidad (13 d�gitos) *</Label>
                     <InputGroup leftIcon={<FileText className="size-4 text-muted-foreground" />}>
                       <InputGroupInput
                       value={selectedSolicitud.anexoA?.rucEntidad || "1768000000001"}
@@ -1302,10 +1302,10 @@ export default function GestionIngresosPage() {
                   </div>
 
                   <div className="sm:col-span-2 space-y-1.5">
-                    <Label className="text-xs font-semibold text-foreground">Direcci—n de la Entidad *</Label>
+                    <Label className="text-xs font-semibold text-foreground">Direcci�n de la Entidad *</Label>
                     <InputGroup leftIcon={<MapPin className="size-4 text-muted-foreground" />}>
                       <InputGroupInput
-                      value={selectedSolicitud.anexoA?.direccionEntidad || "Av. 6 de Diciembre N25-75 y Av. Col—n, Quito"}
+                      value={selectedSolicitud.anexoA?.direccionEntidad || "Av. 6 de Diciembre N25-75 y Av. Col�n, Quito"}
                       disabled
                       className="bg-muted/30 cursor-not-allowed text-xs text-foreground" />
                     
@@ -1315,7 +1315,7 @@ export default function GestionIngresosPage() {
                   <div className="sm:col-span-2 space-y-1.5">
                     <Label className="text-xs font-semibold text-foreground">Objeto Social y/o Actividad de la Entidad *</Label>
                     <Textarea
-                    value={selectedSolicitud.anexoA?.objetoSocial || "Rectorña y formulaci—n de políticas públicas de telecomunicaciones y gobierno digital."}
+                    value={selectedSolicitud.anexoA?.objetoSocial || "Rector�a y formulaci�n de pol�ticas p�blicas de telecomunicaciones y gobierno digital."}
                     disabled
                     rows={2}
                     className="bg-muted/30 cursor-not-allowed text-xs leading-relaxed text-foreground rounded-2xl p-3 border-border/80" />
@@ -1330,7 +1330,7 @@ export default function GestionIngresosPage() {
                           Datos del firmante del Anexo A
                         </h3>
                         <p className="text-xs text-muted-foreground mt-0.5">
-                          Informaci—n de la m—xima autoridad o delegado institucional que suscribir— mediante FirmaEC.
+                          Informaci�n de la m�xima autoridad o delegado institucional que suscribir� mediante FirmaEC.
                         </p>
                       </div>
                     </div>
@@ -1340,7 +1340,7 @@ export default function GestionIngresosPage() {
                   </div>
 
                   <div className="sm:col-span-2 space-y-1.5">
-                    <Label className="text-xs font-semibold text-foreground block">—Quién firmar— el Anexo A? *</Label>
+                    <Label className="text-xs font-semibold text-foreground block">�Qui�n firmar� el Anexo A? *</Label>
                     <div className="flex items-center gap-6 pt-1">
                       <label className="flex items-center gap-2 text-xs font-medium text-foreground cursor-not-allowed">
                         <input
@@ -1350,7 +1350,7 @@ export default function GestionIngresosPage() {
                         disabled
                         className="size-4 text-primary accent-primary cursor-not-allowed" />
                       
-                        <span>M—xima autoridad institucional</span>
+                        <span>M�xima autoridad institucional</span>
                       </label>
                       <label className="flex items-center gap-2 text-xs font-medium text-foreground cursor-not-allowed">
                         <input
@@ -1360,7 +1360,7 @@ export default function GestionIngresosPage() {
                         disabled
                         className="size-4 text-primary accent-primary cursor-not-allowed" />
                       
-                        <span>Delegado de la m—xima autoridad</span>
+                        <span>Delegado de la m�xima autoridad</span>
                       </label>
                     </div>
                   </div>
@@ -1377,7 +1377,7 @@ export default function GestionIngresosPage() {
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-semibold text-foreground">Denominaci—n del cargo *</Label>
+                    <Label className="text-xs font-semibold text-foreground">Denominaci�n del cargo *</Label>
                     <InputGroup leftIcon={<Building2 className="size-4 text-muted-foreground" />}>
                       <InputGroupInput
                       value={selectedSolicitud.anexoA?.representanteLegalCargo || "Ministro de Telecomunicaciones (Representante Legal)"}
@@ -1388,7 +1388,7 @@ export default function GestionIngresosPage() {
                   </div>
 
                   <div className="sm:col-span-2 space-y-1.5">
-                    <Label className="text-xs font-semibold text-foreground">Correo electrónico *</Label>
+                    <Label className="text-xs font-semibold text-foreground">Correo electr�nico *</Label>
                     <InputGroup leftIcon={<Mail className="size-4 text-muted-foreground" />}>
                       <InputGroupInput
                       value={selectedSolicitud.anexoA?.representanteLegalEmail || selectedSolicitud.correo || "ministro@mintel.gob.ec"}
@@ -1402,10 +1402,10 @@ export default function GestionIngresosPage() {
                 <div className="sm:col-span-2 p-4 rounded-xl border border-border bg-muted/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                       <div className="space-y-1">
                         <Label className="text-xs font-semibold text-foreground block">
-                          Autorizaci—n de delegaci—n adjunta
+                          Autorizaci�n de delegaci�n adjunta
                         </Label>
                         <p className="text-[11px] text-muted-foreground">
-                          Documento habilitante de delegaci—n de firma oficial cargado en el expediente.
+                          Documento habilitante de delegaci�n de firma oficial cargado en el expediente.
                         </p>
                       </div>
                       <Badge tone="primary" appearance="soft" size="sm" className="font-mono text-xs shrink-0 self-start sm:self-auto">
@@ -1441,14 +1441,14 @@ export default function GestionIngresosPage() {
                       <span>Coordinadores Institucionales del SINARP</span>
                     </h2>
                     <p className="text-xs text-muted-foreground mt-0.5">
-                      Designaci—n de coordinadores titular y suplente para la gesti—n operativa institucional.
+                      Designaci�n de coordinadores titular y suplente para la gesti�n operativa institucional.
                     </p>
                   
                 </div>
 
                 <div className="p-6 sm:p-8 space-y-6">
 <Badge tone="primary" appearance="solid" size="sm" className="font-bold uppercase tracking-wider shrink-0 self-start sm:self-auto !text-white shadow-xs rounded-full px-3 py-1">
-                    COORDINACI—N
+                    COORDINACI�N
                   </Badge>
                 </div>
                 <div className="space-y-6">
@@ -1478,49 +1478,49 @@ export default function GestionIngresosPage() {
                       </div>
 
                       <div className="space-y-1">
-                        <Label className="text-xs font-semibold text-foreground">Cédula de Ciudadanña *</Label>
+                        <Label className="text-xs font-semibold text-foreground">C�dula de Ciudadan�a *</Label>
                         <InputGroup leftIcon={<CreditCard className="size-4 text-muted-foreground" />}>
                           <InputGroupInput value={selectedSolicitud.anexoA?.titularCedula || "1718956234"} disabled className="bg-muted/30 cursor-not-allowed font-mono text-xs text-foreground" />
                         </InputGroup>
                       </div>
 
                       <div className="space-y-1">
-                        <Label className="text-xs font-semibold text-foreground">Cargo / Rol en la Instituci—n *</Label>
+                        <Label className="text-xs font-semibold text-foreground">Cargo / Rol en la Instituci�n *</Label>
                         <InputGroup leftIcon={<Building2 className="size-4 text-muted-foreground" />}>
                           <InputGroupInput value={selectedSolicitud.anexoA?.titularCargo || "Director de Gobierno Digital"} disabled className="bg-muted/30 cursor-not-allowed text-xs text-foreground" />
                         </InputGroup>
                       </div>
 
                       <div className="space-y-1">
-                        <Label className="text-xs font-semibold text-foreground">—rea / Unidad a la que pertenece *</Label>
+                        <Label className="text-xs font-semibold text-foreground">�rea / Unidad a la que pertenece *</Label>
                         <InputGroup leftIcon={<Building2 className="size-4 text-muted-foreground" />}>
-                          <InputGroupInput value={selectedSolicitud.anexoA?.titularAreaUnidad || "Viceministerio de Tecnologñas de la Informaci—n"} disabled className="bg-muted/30 cursor-not-allowed text-xs text-foreground" />
+                          <InputGroupInput value={selectedSolicitud.anexoA?.titularAreaUnidad || "Viceministerio de Tecnolog�as de la Informaci�n"} disabled className="bg-muted/30 cursor-not-allowed text-xs text-foreground" />
                         </InputGroup>
                       </div>
 
                       <div className="space-y-1">
-                        <Label className="text-xs font-semibold text-foreground">Correo Electrónico Institucional *</Label>
+                        <Label className="text-xs font-semibold text-foreground">Correo Electr�nico Institucional *</Label>
                         <InputGroup leftIcon={<Mail className="size-4 text-muted-foreground" />}>
                           <InputGroupInput value={selectedSolicitud.anexoA?.titularEmail || "esteban.morales@mintel.gob.ec"} disabled className="bg-muted/30 cursor-not-allowed text-xs text-foreground" />
                         </InputGroup>
                       </div>
 
                       <div className="space-y-1">
-                        <Label className="text-xs font-semibold text-foreground">Tel—fono Fijo Institucional *</Label>
+                        <Label className="text-xs font-semibold text-foreground">Tel�fono Fijo Institucional *</Label>
                         <InputGroup leftIcon={<Phone className="size-4 text-muted-foreground" />}>
                           <InputGroupInput value={selectedSolicitud.anexoA?.titularTelefonoFijo || "023814400 ext 123"} disabled className="bg-muted/30 cursor-not-allowed text-xs text-foreground" />
                         </InputGroup>
                       </div>
 
                       <div className="space-y-1">
-                        <Label className="text-xs font-semibold text-foreground">M—vil Institucional *</Label>
+                        <Label className="text-xs font-semibold text-foreground">M�vil Institucional *</Label>
                         <InputGroup leftIcon={<Smartphone className="size-4 text-muted-foreground" />}>
                           <InputGroupInput value={selectedSolicitud.anexoA?.titularMovilInstitucional || "0991234567"} disabled className="bg-muted/30 cursor-not-allowed text-xs text-foreground" />
                         </InputGroup>
                       </div>
 
                       <div className="space-y-1">
-                        <Label className="text-xs font-semibold text-foreground">M—vil Personal *</Label>
+                        <Label className="text-xs font-semibold text-foreground">M�vil Personal *</Label>
                         <InputGroup leftIcon={<Smartphone className="size-4 text-muted-foreground" />}>
                           <InputGroupInput value={selectedSolicitud.anexoA?.titularMovilPersonal || "0987654321"} disabled className="bg-muted/30 cursor-not-allowed text-xs text-foreground" />
                         </InputGroup>
@@ -1549,54 +1549,54 @@ export default function GestionIngresosPage() {
                       <div className="space-y-1">
                         <Label className="text-xs font-semibold text-foreground">Nombre Completo *</Label>
                         <InputGroup leftIcon={<User className="size-4 text-muted-foreground" />}>
-                          <InputGroupInput value={selectedSolicitud.anexoA?.suplenteNombreCompleto || "Lic. Carmen Elena Vinueza Proa—o"} disabled className="bg-muted/30 cursor-not-allowed font-semibold text-xs text-foreground" />
+                          <InputGroupInput value={selectedSolicitud.anexoA?.suplenteNombreCompleto || "Lic. Carmen Elena Vinueza Proa�o"} disabled className="bg-muted/30 cursor-not-allowed font-semibold text-xs text-foreground" />
                         </InputGroup>
                       </div>
 
                       <div className="space-y-1">
-                        <Label className="text-xs font-semibold text-foreground">Cédula de Ciudadanña *</Label>
+                        <Label className="text-xs font-semibold text-foreground">C�dula de Ciudadan�a *</Label>
                         <InputGroup leftIcon={<CreditCard className="size-4 text-muted-foreground" />}>
                           <InputGroupInput value={selectedSolicitud.anexoA?.suplenteCedula || "1714523698"} disabled className="bg-muted/30 cursor-not-allowed font-mono text-xs text-foreground" />
                         </InputGroup>
                       </div>
 
                       <div className="space-y-1">
-                        <Label className="text-xs font-semibold text-foreground">Cargo / Rol en la Instituci—n *</Label>
+                        <Label className="text-xs font-semibold text-foreground">Cargo / Rol en la Instituci�n *</Label>
                         <InputGroup leftIcon={<Building2 className="size-4 text-muted-foreground" />}>
                           <InputGroupInput value={selectedSolicitud.anexoA?.suplenteCargo || "Especialista de Infraestructura"} disabled className="bg-muted/30 cursor-not-allowed text-xs text-foreground" />
                         </InputGroup>
                       </div>
 
                       <div className="space-y-1">
-                        <Label className="text-xs font-semibold text-foreground">—rea / Unidad a la que pertenece *</Label>
+                        <Label className="text-xs font-semibold text-foreground">�rea / Unidad a la que pertenece *</Label>
                         <InputGroup leftIcon={<Building2 className="size-4 text-muted-foreground" />}>
-                          <InputGroupInput value={selectedSolicitud.anexoA?.suplenteAreaUnidad || "Direcci—n de Tecnologñas de Informaci—n"} disabled className="bg-muted/30 cursor-not-allowed text-xs text-foreground" />
+                          <InputGroupInput value={selectedSolicitud.anexoA?.suplenteAreaUnidad || "Direcci�n de Tecnolog�as de Informaci�n"} disabled className="bg-muted/30 cursor-not-allowed text-xs text-foreground" />
                         </InputGroup>
                       </div>
 
                       <div className="space-y-1">
-                        <Label className="text-xs font-semibold text-foreground">Correo Electrónico Institucional *</Label>
+                        <Label className="text-xs font-semibold text-foreground">Correo Electr�nico Institucional *</Label>
                         <InputGroup leftIcon={<Mail className="size-4 text-muted-foreground" />}>
                           <InputGroupInput value={selectedSolicitud.anexoA?.suplenteEmail || "suplente@institucion.gob.ec"} disabled className="bg-muted/30 cursor-not-allowed text-xs text-foreground" />
                         </InputGroup>
                       </div>
 
                       <div className="space-y-1">
-                        <Label className="text-xs font-semibold text-foreground">Tel—fono Fijo Institucional *</Label>
+                        <Label className="text-xs font-semibold text-foreground">Tel�fono Fijo Institucional *</Label>
                         <InputGroup leftIcon={<Phone className="size-4 text-muted-foreground" />}>
                           <InputGroupInput value={selectedSolicitud.anexoA?.suplenteTelefonoFijo || "023814400 ext 124"} disabled className="bg-muted/30 cursor-not-allowed text-xs text-foreground" />
                         </InputGroup>
                       </div>
 
                       <div className="space-y-1">
-                        <Label className="text-xs font-semibold text-foreground">M—vil Institucional *</Label>
+                        <Label className="text-xs font-semibold text-foreground">M�vil Institucional *</Label>
                         <InputGroup leftIcon={<Smartphone className="size-4 text-muted-foreground" />}>
                           <InputGroupInput value={selectedSolicitud.anexoA?.suplenteMovilInstitucional || "0998877665"} disabled className="bg-muted/30 cursor-not-allowed text-xs text-foreground" />
                         </InputGroup>
                       </div>
 
                       <div className="space-y-1">
-                        <Label className="text-xs font-semibold text-foreground">M—vil Personal *</Label>
+                        <Label className="text-xs font-semibold text-foreground">M�vil Personal *</Label>
                         <InputGroup leftIcon={<Smartphone className="size-4 text-muted-foreground" />}>
                           <InputGroupInput value={selectedSolicitud.anexoA?.suplenteMovilPersonal || "0981122334"} disabled className="bg-muted/30 cursor-not-allowed text-xs text-foreground" />
                         </InputGroup>
@@ -1637,10 +1637,10 @@ export default function GestionIngresosPage() {
                   <div>
                     <h2 className="text-base font-bold font-heading text-primary dark:text-primary-300 flex items-center gap-2">
                       <FileCheck2 className="size-5 text-primary dark:text-primary-300 shrink-0" />
-                      <span>Secci—n II — Servicios y Herramientas Informíticas</span>
+                      <span>Secci�n II � Servicios y Herramientas Inform�ticas</span>
                     </h2>
                     <p className="text-xs text-muted-foreground mt-0.5">
-                      Procesos y —reas en las que se van a utilizar los servicios y/o herramientas provistos por la DINARP.
+                      Procesos y �reas en las que se van a utilizar los servicios y/o herramientas provistos por la DINARP.
                     </p>
                   
                 </div>
@@ -1665,7 +1665,7 @@ export default function GestionIngresosPage() {
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                      {["Interoperabilidad", "Infodigital", "Ficha de Registro ónico del Ciudadano"].map((s) => {
+                      {["Interoperabilidad", "Infodigital", "Ficha de Registro �nico del Ciudadano"].map((s) => {
                       const isChecked = selectedSolicitud.anexoA?.serviciosHerramientas ?
                       selectedSolicitud.anexoA.serviciosHerramientas.includes(s) :
                       true;
@@ -1679,20 +1679,20 @@ export default function GestionIngresosPage() {
                     </div>
                   </div>
 
-                  {/* 2.2 —reas */}
+                  {/* 2.2 �reas */}
                   <div className="space-y-3">
                     <div className="bg-muted/50 p-3 rounded-xl border border-border/40">
                       <div className="flex items-center gap-2 font-bold text-xs text-foreground">
                         <Building2 className="size-4 text-muted-foreground shrink-0" />
-                        <span>2.2 —reas de uso institucional *</span>
+                        <span>2.2 �reas de uso institucional *</span>
                       </div>
                       <p className="text-[11px] text-muted-foreground mt-0.5">
-                        Indica las —reas administrativas o t—cnicas de la instituci—n que utilizar—n el servicio.
+                        Indica las �reas administrativas o t�cnicas de la instituci�n que utilizar�n el servicio.
                       </p>
                     </div>
 
                     <Textarea
-                    value={selectedSolicitud.anexoA?.areasUso || "Direcci—n de Tecnologñas de la Informaci—n, Direcci—n de Atenci—n Ciudadana"}
+                    value={selectedSolicitud.anexoA?.areasUso || "Direcci�n de Tecnolog�as de la Informaci�n, Direcci�n de Atenci�n Ciudadana"}
                     disabled
                     rows={2}
                     className="bg-muted/30 cursor-not-allowed text-xs font-medium text-foreground rounded-2xl p-3.5 border-border/80" />
@@ -1704,15 +1704,15 @@ export default function GestionIngresosPage() {
                     <div className="bg-muted/50 p-3 rounded-xl border border-border/40">
                       <div className="flex items-center gap-2 font-bold text-xs text-foreground">
                         <FileText className="size-4 text-muted-foreground shrink-0" />
-                        <span>2.3 Procesos para los cuales utilizar— los servicios *</span>
+                        <span>2.3 Procesos para los cuales utilizar� los servicios *</span>
                       </div>
                       <p className="text-[11px] text-muted-foreground mt-0.5">
-                        Describe los procesos internos, tr—mites o plataformas para los cuales se consumir—n los datos.
+                        Describe los procesos internos, tr�mites o plataformas para los cuales se consumir�n los datos.
                       </p>
                     </div>
 
                     <Textarea
-                    value={selectedSolicitud.anexoA?.procesosUso || "Validaci—n de identidad ciudadana, verificaci—n de registros y simplificaci—n de tr—mites institucionales."}
+                    value={selectedSolicitud.anexoA?.procesosUso || "Validaci�n de identidad ciudadana, verificaci�n de registros y simplificaci�n de tr�mites institucionales."}
                     disabled
                     rows={2}
                     className="bg-muted/30 cursor-not-allowed text-xs font-medium text-foreground rounded-2xl p-3.5 border-border/80" />
@@ -1752,32 +1752,32 @@ export default function GestionIngresosPage() {
                   <div>
                     <h2 className="text-base font-bold font-heading text-primary dark:text-primary-300 flex items-center gap-2">
                       <ShieldCheck className="size-5 text-primary dark:text-primary-300 shrink-0" />
-                      <span>Secci—n III — Declaraciones y Firma</span>
+                      <span>Secci�n III � Declaraciones y Firma</span>
                     </h2>
                     <p className="text-xs text-muted-foreground mt-0.5">
-                      Declaraciones correspondientes a la solicitud y formalizaci—n mediante la firma de la m—xima autoridad o delegado.
+                      Declaraciones correspondientes a la solicitud y formalizaci�n mediante la firma de la m�xima autoridad o delegado.
                     </p>
                   
                 </div>
 
                 <div className="p-6 sm:p-8 space-y-6">
 <Badge tone="primary" appearance="solid" size="sm" className="font-bold uppercase tracking-wider shrink-0 self-start sm:self-auto !text-white shadow-xs rounded-full px-3 py-1">
-                    FORMALIZACI—N
+                    FORMALIZACI�N
                   </Badge>
                 </div>
 
                 <div className="space-y-5">
-                  {/* 2.2 Cl—usula Segunda */}
+                  {/* 2.2 Cl�usula Segunda */}
                   <div className="bg-muted/50 p-4 rounded-xl border border-border/40 space-y-3">
-                    <h3 className="text-xs font-bold text-foreground">2.2 Cl—usula Segunda: Declaraciones del Solicitante</h3>
+                    <h3 className="text-xs font-bold text-foreground">2.2 Cl�usula Segunda: Declaraciones del Solicitante</h3>
                     <p className="text-[11px] text-muted-foreground leading-relaxed">
-                      La entidad solicitante declara conocer los servicios provistos por la DINARP, as— como los arts. 66 numerales 11 y 19 de la Constituci—n, art. 6 de la Ley Orgónica del Sistema Nacional de Registros P—blicos, Ley de Optimizaci—n de Tr—mites, Ley Orgónica de Protecci—n de Datos Personales, y arts. 178, 180 y 229 del COIP. La instituci—n queda obligada a dar a la informaci—n el uso exclusivo para el que le sea concedido y custodiarla con prudencia.
+                      La entidad solicitante declara conocer los servicios provistos por la DINARP, as� como los arts. 66 numerales 11 y 19 de la Constituci�n, art. 6 de la Ley Org�nica del Sistema Nacional de Registros P�blicos, Ley de Optimizaci�n de Tr�mites, Ley Org�nica de Protecci�n de Datos Personales, y arts. 178, 180 y 229 del COIP. La instituci�n queda obligada a dar a la informaci�n el uso exclusivo para el que le sea concedido y custodiarla con prudencia.
                     </p>
 
                     <div className="flex items-center gap-2.5 pt-1">
                       <Checkbox checked={selectedSolicitud.anexoA?.declaracionesAceptadas ?? true} disabled />
                       <span className="text-xs font-bold text-foreground">
-                        Acepto expresamente las declaraciones legales, t—rminos y responsabilidades del Anexo A.
+                        Acepto expresamente las declaraciones legales, t�rminos y responsabilidades del Anexo A.
                       </span>
                     </div>
                   </div>
@@ -1796,7 +1796,7 @@ export default function GestionIngresosPage() {
 
                       <div className="space-y-0.5 mt-2">
                         <CardTitle className="text-base font-bold font-heading text-secondary">
-                          {selectedSolicitud.anexoA?.representanteLegalNombre || "Ing. C—sar Antonio Mart—n Moreno"}
+                          {selectedSolicitud.anexoA?.representanteLegalNombre || "Ing. C�sar Antonio Mart�n Moreno"}
                         </CardTitle>
 
                         <CardDescription className="text-xs text-secondary-800/80 dark:text-secondary-200/80 font-medium">
@@ -1836,15 +1836,15 @@ export default function GestionIngresosPage() {
                     </Card>
                   </div>
 
-                  {/* Certificaci—n de datos */}
+                  {/* Certificaci�n de datos */}
                   <div className="p-4 rounded-xl border border-border bg-muted/30 flex items-center gap-3">
                     <Checkbox checked={selectedSolicitud.anexoA?.firmadoDigitalmente ?? true} disabled />
                     <span className="text-xs font-bold text-foreground">
-                      Confirmo que la informaci—n del Anexo A est— completa y es correcta.
+                      Confirmo que la informaci�n del Anexo A est� completa y es correcta.
                     </span>
                   </div>
 
-                  {/* Certificaci—n y Documento Firmado FirmaEC */}
+                  {/* Certificaci�n y Documento Firmado FirmaEC */}
                   <div className="p-5 rounded-2xl border border-success/30 bg-success/5 space-y-4 shadow-2xs">
                     <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                       <div className="flex items-start gap-3.5 min-w-0">
@@ -1863,7 +1863,7 @@ export default function GestionIngresosPage() {
                           </div>
 
                           <p className="text-xs text-muted-foreground leading-relaxed">
-                            Documento firmado electrónicamente por el Representante Legal. La firma fue confirmada y validada mediante FirmaEC, incluyendo su estampado cronol—gico. El documento se encuentra disponible para revisi—n.
+                            Documento firmado electr�nicamente por el Representante Legal. La firma fue confirmada y validada mediante FirmaEC, incluyendo su estampado cronol�gico. El documento se encuentra disponible para revisi�n.
                           </p>
                         </div>
                       </div>
@@ -1887,7 +1887,7 @@ export default function GestionIngresosPage() {
                   variant="primary"
                   size="sm"
                   onClick={() => {
-                    alert(`Descargando documento firmado ARP-R01_Solicitud_Acceso_SINARP_${(selectedSolicitud.anexoA?.entidadSiglas || "ENTIDAD").toUpperCase()}.pdf con validaci—n FirmaEC...`);
+                    alert(`Descargando documento firmado ARP-R01_Solicitud_Acceso_SINARP_${(selectedSolicitud.anexoA?.entidadSiglas || "ENTIDAD").toUpperCase()}.pdf con validaci�n FirmaEC...`);
                   }}
                   className="h-9 px-4 text-xs font-semibold gap-2 shadow-xs">
                   
@@ -1900,17 +1900,17 @@ export default function GestionIngresosPage() {
           }
 
             
-            {/* -- PASO 5: INFORMACI—N DEL TR—MITE (NORMATIVIDAD) -- */}
+            {/* -- PASO 5: INFORMACI�N DEL TR�MITE (NORMATIVIDAD) -- */}
             {detailTab === 5 &&
           <div className="bg-surface border border-border rounded-2xl overflow-hidden shadow-xs animate-in fade-in duration-200">
                 <div className="bg-primary/10 dark:bg-primary/20 border-b border-primary p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
                     <h2 className="text-base font-bold font-heading text-primary flex items-center gap-2">
                       <FileText className="size-5 shrink-0" />
-                      <span>Antecedentes del Tr—mite</span>
+                      <span>Antecedentes del Tr�mite</span>
                     </h2>
                     <p className="text-xs text-muted-foreground mt-0.5">
-                      Expediente validado por Gesti—n y Registro. Incluye el Anexo A formalizado.
+                      Expediente validado por Gesti�n y Registro. Incluye el Anexo A formalizado.
                     </p>
                   </div>
                 </div>
@@ -1944,17 +1944,17 @@ export default function GestionIngresosPage() {
               </div>
           }
 
-            {/* -- PASO 6: RESOLUCI—N INSTITUCIONAL (NORMATIVIDAD) -- */}
+            {/* -- PASO 6: RESOLUCI�N INSTITUCIONAL (NORMATIVIDAD) -- */}
             {detailTab === 6 &&
           <div className="bg-surface border border-border rounded-2xl overflow-hidden shadow-xs animate-in fade-in duration-200">
                 <div className="bg-primary/10 dark:bg-primary/20 border-b border-primary p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
                     <h2 className="text-base font-bold font-heading text-primary flex items-center gap-2">
                       <FileSignature className="size-5 shrink-0" />
-                      <span>Formulaci—n de Resoluci—n Institucional</span>
+                      <span>Formulaci�n de Resoluci�n Institucional</span>
                     </h2>
                     <p className="text-xs text-muted-foreground mt-0.5">
-                      {selectedSolicitud.resolucion ? "Resoluci—n generada y vinculada." : "El expediente requiere la generaci—n del documento habilitante."}
+                      {selectedSolicitud.resolucion ? "Resoluci�n generada y vinculada." : "El expediente requiere la generaci�n del documento habilitante."}
                     </p>
                   </div>
                 </div>
@@ -1965,9 +1965,9 @@ export default function GestionIngresosPage() {
                       <div className="size-16 rounded-full bg-success/15 text-success flex items-center justify-center mb-2">
                         <CheckCircle2 className="size-8" />
                       </div>
-                      <h3 className="font-heading font-bold text-lg text-foreground">Resoluci—n {selectedSolicitud.resolucion}</h3>
+                      <h3 className="font-heading font-bold text-lg text-foreground">Resoluci�n {selectedSolicitud.resolucion}</h3>
                       <p className="text-sm text-muted-foreground max-w-md mx-auto">
-                        La resoluci—n ha sido generada correctamente por el equipo de Normatividad y se encuentra en etapa de suscripci—n por la m—xima autoridad de la DINARP.
+                        La resoluci�n ha sido generada correctamente por el equipo de Normatividad y se encuentra en etapa de suscripci�n por la m�xima autoridad de la DINARP.
                       </p>
                     </> :
 
@@ -1975,9 +1975,9 @@ export default function GestionIngresosPage() {
                       <div className="size-16 rounded-full bg-primary/10 text-primary flex items-center justify-center mb-2">
                         <FileSignature className="size-8" />
                       </div>
-                      <h3 className="font-heading font-bold text-lg text-foreground">Generaci—n Pendiente</h3>
+                      <h3 className="font-heading font-bold text-lg text-foreground">Generaci�n Pendiente</h3>
                       <p className="text-sm text-muted-foreground max-w-md mx-auto">
-                        El funcionario responsable deber— redactar y adjuntar la resoluci—n institucional fundamentada en la aprobaci—n del Anexo A para concluir el tr—mite normativo.
+                        El funcionario responsable deber� redactar y adjuntar la resoluci�n institucional fundamentada en la aprobaci�n del Anexo A para concluir el tr�mite normativo.
                       </p>
                     </>
               }
@@ -1985,7 +1985,7 @@ export default function GestionIngresosPage() {
               </div>
           }
 
-              {/* -- PASO 4: HISTORIAL COMPLETO Y REGLAS BPM DEL TR—MITE -- */}
+              {/* -- PASO 4: HISTORIAL COMPLETO Y REGLAS BPM DEL TR�MITE -- */}
             {detailTab === 4 &&
           <div className="space-y-4 animate-in fade-in duration-200">
                 {/* Encabezado Trazabilidad en Card Featured variante Info (Arriba del contenedor) */}
@@ -2002,11 +2002,11 @@ export default function GestionIngresosPage() {
                   </div>
 
                   <CardTitle className="text-lg sm:text-xl font-bold font-heading text-info mt-1">
-                    Trazabilidad y Línea de Tiempo del Tr—mite
+                    Trazabilidad y L�nea de Tiempo del Tr�mite
                   </CardTitle>
 
                   <CardDescription className="text-xs text-info-800/80 dark:text-info-200/80 font-medium">
-                    Historial cronol—gico completo de env—os, asignaciones, revisiones t—cnicas y resoluciones emitidas.
+                    Historial cronol�gico completo de env�os, asignaciones, revisiones t�cnicas y resoluciones emitidas.
                   </CardDescription>
 
                   <CardDecorativeIcon className="-bottom-10 -right-10 opacity-20 group-hover/card:scale-100">
@@ -2014,14 +2014,14 @@ export default function GestionIngresosPage() {
                   </CardDecorativeIcon>
                 </Card>
 
-                {/* Contenedor principal de la secci—n */}
+                {/* Contenedor principal de la secci�n */}
                 <div className="bg-surface border border-border rounded-2xl p-6 sm:p-8 space-y-6 shadow-xs">
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                  {/* Cronologña Completa (2 cols) */}
+                  {/* Cronolog�a Completa (2 cols) */}
                   <div className="lg:col-span-2 space-y-4">
                     <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
                       <History className="size-4 text-foreground" />
-                      Cronologña Registrada
+                      Cronolog�a Registrada
                     </h3>
 
                     <div className="pt-2">
@@ -2033,12 +2033,12 @@ export default function GestionIngresosPage() {
                   <div className="space-y-4">
                     <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
                       <Activity className="size-4 text-foreground" />
-                      Trazabilidad del Tr—mite
+                      Trazabilidad del Tr�mite
                     </h3>
 
                     <div className="p-4 rounded-2xl border border-border bg-muted/20 space-y-3 text-xs">
                       <div>
-                        <span className="text-muted-foreground block text-[11px]">N.º de Tr—mite Unificado:</span>
+                        <span className="text-muted-foreground block text-[11px]">N.� de Tr�mite Unificado:</span>
                         <strong className="font-mono text-foreground text-sm">{selectedSolicitud.id}</strong>
                       </div>
                       <div>
@@ -2046,7 +2046,7 @@ export default function GestionIngresosPage() {
                         <strong className="text-foreground">{getEstadoBadgeProps(selectedSolicitud.estado).label}</strong>
                       </div>
                       <div>
-                        <span className="text-muted-foreground block text-[11px]">Revisor de Gesti—n:</span>
+                        <span className="text-muted-foreground block text-[11px]">Revisor de Gesti�n:</span>
                         <strong className="text-foreground">{selectedSolicitud.revisorGestion || selectedSolicitud.revisor || "Sin asignar"}</strong>
                       </div>
                       <div>
@@ -2056,7 +2056,7 @@ export default function GestionIngresosPage() {
 
                       <div className="pt-2 border-t border-border/60">
                         <p className="text-[11px] text-muted-foreground leading-relaxed">
-                          El historial se conserva durante todo el ciclo de vida del tr—mite con persistencia autom—tica en el almac—n de la simulaci—n.
+                          El historial se conserva durante todo el ciclo de vida del tr�mite con persistencia autom�tica en el almac�n de la simulaci�n.
                         </p>
                       </div>
                     </div>
@@ -2068,7 +2068,7 @@ export default function GestionIngresosPage() {
           </Card> : (
 
         /* ----------------------------------------------------------
-            VISTA 2: LISTADO DE TR—MITES (FILTROS POR PROCESO + TABLA)
+            VISTA 2: LISTADO DE TR�MITES (FILTROS POR PROCESO + TABLA)
            ---------------------------------------------------------- */
         <Card
           className="bg-surface rounded-2xl border border-border shadow-xs flex-1 min-h-0 overflow-hidden flex flex-col my-0"
@@ -2081,26 +2081,26 @@ export default function GestionIngresosPage() {
             const isDirNormativa = currentUser.role === "DIR_NORMATIVA";
             const isEqNormativa = currentUser.role === "EQ_NORMATIVA";
 
-            let badgeText = "Direcci—n de Gesti—n y Registro — DINARP";
-            let titleText = "Asignaci—n de solicitudes";
-            let subtitleText = "Gestiona y asigna las solicitudes pendientes a los revisores del —rea correspondiente.";
+            let badgeText = "Direcci�n de Gesti�n y Registro � DINARP";
+            let titleText = "Asignaci�n de solicitudes";
+            let subtitleText = "Gestiona y asigna las solicitudes pendientes a los revisores del �rea correspondiente.";
 
             if (isEqGestion) {
-              badgeText = "Equipo de Gesti—n y Registro — DINARP";
-              titleText = "Solicitudes pendientes de revisi—n";
-              subtitleText = "Consulta y revisa las solicitudes asignadas para su aprobaci—n o rechazo.";
+              badgeText = "Equipo de Gesti�n y Registro � DINARP";
+              titleText = "Solicitudes pendientes de revisi�n";
+              subtitleText = "Consulta y revisa las solicitudes asignadas para su aprobaci�n o rechazo.";
             } else if (isDirNormativa) {
-              badgeText = "Direcci—n de Normatividad — DINARP";
-              titleText = "Gesti—n de resoluciones";
-              subtitleText = "Asignaci—n de solicitudes para generar resoluciones a instituciones aprobadas.";
+              badgeText = "Direcci�n de Normatividad � DINARP";
+              titleText = "Gesti�n de resoluciones";
+              subtitleText = "Asignaci�n de solicitudes para generar resoluciones a instituciones aprobadas.";
             } else if (isEqNormativa) {
-              badgeText = "Equipo de Normatividad — DINARP";
-              titleText = "Bandeja de En revisi—n - Normatividad";
-              subtitleText = "Análisis normativo y resoluci—n jurídica de solicitudes asignadas a tu usuario.";
+              badgeText = "Equipo de Normatividad � DINARP";
+              titleText = "Bandeja de En revisi�n - Normatividad";
+              subtitleText = "An�lisis normativo y resoluci�n jur�dica de solicitudes asignadas a tu usuario.";
             } else if (isDirGestion) {
-              badgeText = "Direcci—n de Gesti—n y Registro — DINARP";
-              titleText = "Asignaci—n de solicitudes";
-              subtitleText = "Gestiona y asigna las solicitudes pendientes a los revisores del —rea correspondiente.";
+              badgeText = "Direcci�n de Gesti�n y Registro � DINARP";
+              titleText = "Asignaci�n de solicitudes";
+              subtitleText = "Gestiona y asigna las solicitudes pendientes a los revisores del �rea correspondiente.";
             }
             return (
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -2119,7 +2119,7 @@ export default function GestionIngresosPage() {
 
             {/* -- 2. Resumen Superior (Tarjetas Interactivas con Layout Horizontal Optimizado) -- */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3 lg:gap-4 w-full">
-              {/* Card 1: Sin Asignar / Pendientes de revisi—n */}
+              {/* Card 1: Sin Asignar / Pendientes de revisi�n */}
               <Card
               variant="featured"
               role="button"
@@ -2161,7 +2161,7 @@ export default function GestionIngresosPage() {
                     <div className="min-w-0 space-y-0.5">
                       <div className="flex items-center gap-1.5 flex-wrap">
                         <h3 className="text-sm font-bold text-foreground group-hover:text-warning transition-colors truncate">
-                          {currentUser.role === "EQ_GESTION" ? "Pendientes de revisi—n" : "Pendientes de asignaci—n"}
+                          {currentUser.role === "EQ_GESTION" ? "Pendientes de revisi�n" : "Pendientes de asignaci�n"}
                         </h3>
                         {(currentUser.role === "EQ_GESTION" ? filterEstado === "PENDIENTES" : filterEstado === "SIN_ASIGNAR") &&
                       <span className="text-[10px] font-semibold px-1.5 py-0.2 rounded-full bg-warning/20 text-warning border border-warning/30 shrink-0">
@@ -2170,7 +2170,7 @@ export default function GestionIngresosPage() {
                       }
                       </div>
                       <p className="text-xs text-muted-foreground font-normal truncate">
-                        {currentUser.role === "EQ_GESTION" ? "Requieren tu revisi—n" : "Requieren asignar un revisor"}
+                        {currentUser.role === "EQ_GESTION" ? "Requieren tu revisi�n" : "Requieren asignar un revisor"}
                       </p>
                     </div>
                   </div>
@@ -2186,7 +2186,7 @@ export default function GestionIngresosPage() {
                 </div>
               </Card>
 
-              {/* Card 2: En Revisi—n (Director) / Aprobadas (Revisor) */}
+              {/* Card 2: En Revisi�n (Director) / Aprobadas (Revisor) */}
               <Card
               variant="featured"
               role="button"
@@ -2243,7 +2243,7 @@ export default function GestionIngresosPage() {
                         "text-sm font-bold text-foreground transition-colors truncate",
                         currentUser.role === "EQ_GESTION" ? "group-hover:text-success" : "group-hover:text-primary"
                       )}>
-                          {currentUser.role === "EQ_GESTION" ? "Aprobadas" : currentUser.role === "DIR_NORMATIVA" || currentUser.role === "EQ_NORMATIVA" ? "Asignadas" : "En revisi—n"}
+                          {currentUser.role === "EQ_GESTION" ? "Aprobadas" : currentUser.role === "DIR_NORMATIVA" || currentUser.role === "EQ_NORMATIVA" ? "Asignadas" : "En revisi�n"}
                         </h3>
                         {(currentUser.role === "EQ_GESTION" ? filterEstado === "Aprobada" : filterEstado === "EN_REVISION") &&
                       <span className={cn(
@@ -2257,7 +2257,7 @@ export default function GestionIngresosPage() {
                       }
                       </div>
                       <p className="text-xs text-muted-foreground font-normal truncate">
-                        {currentUser.role === "EQ_GESTION" ? "Solicitudes aprobadas" : currentUser.role === "DIR_NORMATIVA" || currentUser.role === "EQ_NORMATIVA" ? "En gesti—n de resoluci—n" : "Actualmente en an—lisis"}
+                        {currentUser.role === "EQ_GESTION" ? "Solicitudes aprobadas" : currentUser.role === "DIR_NORMATIVA" || currentUser.role === "EQ_NORMATIVA" ? "En gesti�n de resoluci�n" : "Actualmente en an�lisis"}
                       </p>
                     </div>
                   </div>
@@ -2347,7 +2347,7 @@ export default function GestionIngresosPage() {
                       }
                       </div>
                       <p className="text-xs text-muted-foreground font-normal truncate">
-                        {currentUser.role === "EQ_GESTION" ? "Solicitudes rechazadas" : currentUser.role === "DIR_NORMATIVA" || currentUser.role === "EQ_NORMATIVA" ? "Resoluciones emitidas" : "Tr—mites concluidos"}
+                        {currentUser.role === "EQ_GESTION" ? "Solicitudes rechazadas" : currentUser.role === "DIR_NORMATIVA" || currentUser.role === "EQ_NORMATIVA" ? "Resoluciones emitidas" : "Tr�mites concluidos"}
                       </p>
                     </div>
                   </div>
@@ -2367,7 +2367,7 @@ export default function GestionIngresosPage() {
               </Card>
             </div>
 
-            {/* -- Línea separadora entre KPI Cards y Filtros -- */}
+            {/* -- L�nea separadora entre KPI Cards y Filtros -- */}
             <div className="w-full h-[1.5px] bg-border my-4 shrink-0" />
 
             {/* -- 4. Buscador y Filtros por Combobox en Una Fila Sin Caja -- */}
@@ -2376,7 +2376,7 @@ export default function GestionIngresosPage() {
                 {/* Buscador amplio y flexible */}
                 <div className="flex-1 min-w-[240px] sm:min-w-[280px]">
                   <Search
-                  placeholder="Buscar por cédula, nombre, c—digo, correo o entidad..."
+                  placeholder="Buscar por c�dula, nombre, c�digo, correo o entidad..."
                   value={searchQuery}
                   onChange={(e) => {
                     setSearchQuery(e.target.value);
@@ -2416,9 +2416,9 @@ export default function GestionIngresosPage() {
                 
 
                   <FilterCombobox
-                  label="Instituci—n"
-                  placeholder="Instituci—n..."
-                  groupLabel="Instituci—n Solicitante"
+                  label="Instituci�n"
+                  placeholder="Instituci�n..."
+                  groupLabel="Instituci�n Solicitante"
                   options={institucionOptions}
                   value={filterInstitucion}
                   onChange={(val) => {
@@ -2453,7 +2453,7 @@ export default function GestionIngresosPage() {
                 appearance="soft"
                 className="gap-1.5 px-3 py-1 font-semibold text-xs rounded-full border border-border">
                 
-                      <span>Búsqueda: &quot;{searchQuery}&quot;</span>
+                      <span>B�squeda: &quot;{searchQuery}&quot;</span>
                       <X
                   className="size-3.5 cursor-pointer hover:text-foreground/80 transition-colors"
                   onClick={() => setSearchQuery("")} />
@@ -2498,7 +2498,7 @@ export default function GestionIngresosPage() {
                 appearance="soft"
                 className="gap-1.5 px-3 py-1 font-semibold text-xs rounded-full border border-border">
                 
-                      <span>Instituci—n: {filterInstitucion}</span>
+                      <span>Instituci�n: {filterInstitucion}</span>
                       <X
                   className="size-3.5 cursor-pointer hover:text-foreground/80 transition-colors"
                   onClick={() => setFilterInstitucion("Todas")} />
@@ -2519,7 +2519,7 @@ export default function GestionIngresosPage() {
             }
             </div>
 
-            {/* -- 5. Tabla de Solicitudes y Tr—mites -- */}
+            {/* -- 5. Tabla de Solicitudes y Tr�mites -- */}
             {(() => {
             const assignableRows = paginatedData.filter((r) => {
               const { puedeReasignar } = puedeReasignarSolicitud(r, currentUser.role);
@@ -2557,11 +2557,11 @@ export default function GestionIngresosPage() {
                             disabled={assignableRows.length === 0}
                             checked={isAllAssignableSelected}
                             onCheckedChange={toggleSelectAll}
-                            aria-label="Seleccionar todos los tr—mites asignables" />
+                            aria-label="Seleccionar todos los tr�mites asignables" />
                           
                         </TableHead>
                         <TableHead className="w-[130px] px-2 py-2.5 whitespace-nowrap">
-                          TR—MITE
+                          TR�MITE
                         </TableHead>
                         <TableHead className="w-[160px] px-2 py-2.5 whitespace-nowrap">
                             PROCESO
@@ -2570,7 +2570,7 @@ export default function GestionIngresosPage() {
                             SOLICITANTE
                           </TableHead>
                         <TableHead className="w-[210px] px-2 py-2.5 whitespace-nowrap">
-                          INSTITUCI—N
+                          INSTITUCI�N
                         </TableHead>
                         <TableHead className="w-[110px] px-2 py-2.5 whitespace-nowrap">
                           FECHA
@@ -2581,7 +2581,7 @@ export default function GestionIngresosPage() {
                         <TableHead className="w-[150px] px-2 py-2.5 whitespace-nowrap">
                           ASIGNADO
                         </TableHead>
-                        <TableHead className="w-24 text-center">Acciones</TableHead>
+                        <TableHead className="w-16 text-center">Acciones</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -2593,10 +2593,10 @@ export default function GestionIngresosPage() {
                                 <SearchIcon className="size-4 size-6" />
                               </div>
                               <h3 className="font-heading font-bold text-base text-foreground">
-                                No hay tr—mites registrados
+                                No hay tr�mites registrados
                               </h3>
                               <p className="text-xs text-muted-foreground leading-relaxed">
-                                No se encontraron tr—mites que coincidan con los filtros seleccionados.
+                                No se encontraron tr�mites que coincidan con los filtros seleccionados.
                               </p>
                             </div>
                           </TableCell>
@@ -2627,12 +2627,12 @@ export default function GestionIngresosPage() {
                                 disabled={!isAssignable}
                                 checked={isSelected}
                                 onCheckedChange={() => toggleSelectRow(row.id)}
-                                aria-label={`Seleccionar tr—mite ${row.id}`} />
+                                aria-label={`Seleccionar tr�mite ${row.id}`} />
                               
                               </TableCell>
 
-                              {/* N.º Tr—mite */}
-                              <TableCell className="text-center  font-mono text-xs overflow-hidden">
+                              {/* N.� Tr�mite */}
+                              <TableCell className="px-2 font-mono text-xs overflow-hidden">
                                 <Tooltip>
                                   <TooltipTrigger asChild>
                                     <div className="flex flex-col truncate cursor-pointer">
@@ -2641,7 +2641,7 @@ export default function GestionIngresosPage() {
                                     </div>
                                   </TooltipTrigger>
                                   <TooltipContent side="top" variant="surface" className="p-2.5 max-w-xs flex flex-col items-start gap-0.5">
-                                    <p className="font-bold text-xs text-foreground font-sans">Identificador de tr—mite</p>
+                                    <p className="font-bold text-xs text-foreground font-sans">Identificador de tr�mite</p>
                                     <p className="font-mono text-xs text-primary font-bold">{row.id}</p>
                                     {row.codigoDocumental &&
                                   <p className="font-mono text-[10px] text-muted-foreground">Documento: {row.codigoDocumental}</p>
@@ -2651,16 +2651,16 @@ export default function GestionIngresosPage() {
                               </TableCell>
 
                               {/* Proceso */}
-                              <TableCell className="text-center  overflow-hidden">
+                              <TableCell className="px-2 overflow-hidden">
                                 {(() => {
                                 const procesoLabel =
                                 row.tipoTramite === "PROCESO_A_REGISTRO_INSTITUCION" ?
-                                "Anexo A — Registro Instituci—n" :
+                                "Anexo A � Registro Instituci�n" :
                                 row.tipoTramite === "PROCESO_B_ENROLAMIENTO_COORDINADOR" ?
-                                "Anexo B — Enrolamiento Coordinador" :
+                                "Anexo B � Enrolamiento Coordinador" :
                                 row.tipoTramite === "PROCESO_C_CAMBIO_COORDINADOR" ?
-                                "Anexo C — Cambio de Coordinador" :
-                                row.tituloTramite || "Otro tr—mite";
+                                "Anexo C � Cambio de Coordinador" :
+                                row.tituloTramite || "Otro tr�mite";
 
                                 const procesoShort =
                                 row.tipoTramite === "PROCESO_A_REGISTRO_INSTITUCION" ?
@@ -2669,11 +2669,11 @@ export default function GestionIngresosPage() {
                                 "Anexo B" :
                                 row.tipoTramite === "PROCESO_C_CAMBIO_COORDINADOR" ?
                                 "Anexo C" :
-                                "Tr—mite";
+                                "Tr�mite";
 
                                 const subtitulo =
                                 row.tipoTramite === "PROCESO_A_REGISTRO_INSTITUCION" ?
-                                "Registro Instituci—n" :
+                                "Registro Instituci�n" :
                                 row.tipoTramite === "PROCESO_B_ENROLAMIENTO_COORDINADOR" ?
                                 "Enrolamiento Coordinador" :
                                 row.tipoTramite === "PROCESO_C_CAMBIO_COORDINADOR" ?
@@ -2700,7 +2700,7 @@ export default function GestionIngresosPage() {
                                         <p className="text-[11px] text-muted-foreground">{subtitulo}</p>
                                         {row.codigoDocumental &&
                                       <p className="font-mono text-[10px] text-primary mt-1 border-t border-border/60 pt-1">
-                                            C—digo: {row.codigoDocumental}
+                                            C�digo: {row.codigoDocumental}
                                           </p>
                                       }
                                       </TooltipContent>
@@ -2710,7 +2710,7 @@ export default function GestionIngresosPage() {
                               </TableCell>
 
                               {/* Solicitante */}
-                              <TableCell className="text-center  overflow-hidden">
+                              <TableCell className="px-2 overflow-hidden">
                                   <Tooltip>
                                     <TooltipTrigger asChild>
                                       <div className="flex flex-col min-w-0 group/sol cursor-pointer">
@@ -2734,8 +2734,8 @@ export default function GestionIngresosPage() {
                                   </Tooltip>
                                 </TableCell>
 
-                              {/* Instituci—n */}
-                              <TableCell className="text-center  overflow-hidden">
+                              {/* Instituci�n */}
+                              <TableCell className="px-2 overflow-hidden">
                                 <Tooltip>
                                   <TooltipTrigger asChild>
                                     <div className="flex flex-col min-w-0 group/inst cursor-pointer">
@@ -2765,7 +2765,7 @@ export default function GestionIngresosPage() {
                               </TableCell>
 
                               {/* Fecha */}
-                              <TableCell className="text-center  text-muted-foreground font-mono text-xs overflow-hidden">
+                              <TableCell className="px-2 text-muted-foreground font-mono text-xs overflow-hidden">
                                 <Tooltip>
                                   <TooltipTrigger asChild>
                                     <span className="block truncate cursor-pointer hover:text-foreground transition-colors">
@@ -2787,7 +2787,7 @@ export default function GestionIngresosPage() {
                               </TableCell>
 
                               {/* Asignado */}
-                              <TableCell className="text-center  text-xs overflow-hidden">
+                              <TableCell className="px-2 text-xs overflow-hidden">
                                 <Tooltip>
                                   <TooltipTrigger asChild>
                                     <div className="flex items-center min-w-0 cursor-pointer">
@@ -2804,10 +2804,10 @@ export default function GestionIngresosPage() {
                                   </TooltipTrigger>
                                   <TooltipContent side="top" variant="surface" className="p-2.5 max-w-xs flex flex-col items-start gap-0.5">
                                     <p className="font-bold text-xs text-foreground font-sans">
-                                      {revisorAsignado ? currentUser.role === "DIR_NORMATIVA" || currentUser.role === "EQ_NORMATIVA" ? "Revisor de Normatividad" : "Revisor de Gesti—n" : "Estado de asignaci—n"}
+                                      {revisorAsignado ? currentUser.role === "DIR_NORMATIVA" || currentUser.role === "EQ_NORMATIVA" ? "Revisor de Normatividad" : "Revisor de Gesti�n" : "Estado de asignaci�n"}
                                     </p>
                                     <p className="text-[11px] text-muted-foreground">
-                                      {revisorAsignado ? revisorAsignado : "Tr—mite pendiente de asignar"}
+                                      {revisorAsignado ? revisorAsignado : "Tr�mite pendiente de asignar"}
                                     </p>
                                   </TooltipContent>
                                 </Tooltip>
@@ -2816,12 +2816,12 @@ export default function GestionIngresosPage() {
                               {/* Acciones */}
                               <TableCell className="text-center" onClick={(e) => e.stopPropagation()}>
                                 <div className="flex items-center justify-center gap-3">
-                                  {/* Si es Personal de Normatividad (EQ_NORMATIVA), acci—n principal directa: 'Gestionar resoluci—n' */}
+                                  {/* Si es Personal de Normatividad (EQ_NORMATIVA), acci�n principal directa: 'Gestionar resoluci�n' */}
                                   {currentUser.role === "EQ_NORMATIVA" ?
                                 <Tooltip>
                                       <TooltipTrigger asChild>
-                                        <Button variant="ghost" size="icon-sm" type="button" onClick={(e) => {e.stopPropagation();handleSelectSolicitud(row);}} aria-label={`Gestionar resoluci—n para tr—mite ${row.id}`} className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10">
-                                          <FileSignature   className="size-4" />
+                                        <Button variant="ghost" size="icon-sm" type="button" onClick={(e) => {e.stopPropagation();handleSelectSolicitud(row);}}  aria-label={`Gestionar resoluci�n para tr�mite ${row.id}`}>
+                                          <FileSignature className="size-4 size-4" />
                                         </Button>
                                       </TooltipTrigger>
                                       <TooltipContent side="top">
@@ -2833,19 +2833,19 @@ export default function GestionIngresosPage() {
                                       {isAssignable ?
                                   <Tooltip>
                                           <TooltipTrigger asChild>
-                                            <Button variant="ghost" size="icon-sm" type="button" onClick={(e) => {e.stopPropagation();handleOpenAssign(row);}} aria-label={esReasignacion ? `Reasignar revisor a tr—mite ${row.id}` : `Asignar revisor a tr—mite ${row.id}`} className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10">
-                                              {esReasignacion ? <RotateCcw   className="size-4" /> : <UserPlus   className="size-4" />}
+                                            <Button type="button" variant={esReasignacion ? "neutral" : "primary"} size="sm" onClick={(e) => {e.stopPropagation();handleOpenAssign(row);}} className={cn("size-7 rounded-lg shadow-2xs", esReasignacion && "border border-border text-foreground hover:bg-muted")} aria-label={esReasignacion ? `Reasignar revisor a tr�mite ${row.id}` : `Asignar revisor a tr�mite ${row.id}`} >
+                                              {esReasignacion ? <RotateCcw className="size-4 size-4" /> : <UserPlus className="size-4 size-4" />}
                                             </Button>
                                           </TooltipTrigger>
                                           <TooltipContent side="top">
-                                            {esReasignacion ? `Reasignar revisor (tr—mite aún no iniciado por ${revisorAsignado})` : "Asignar"}
+                                            {esReasignacion ? `Reasignar revisor (tr�mite a�n no iniciado por ${revisorAsignado})` : "Asignar"}
                                           </TooltipContent>
                                         </Tooltip> :
                                   motivoBloqueo && revisorAsignado && !["Aprobada", "APROBADO_FINAL", "Finalizado", "Rechazada", "Cancelada", "Cerrada"].includes(row.estado) ?
                                   <Tooltip>
                                           <TooltipTrigger asChild>
-                                            <div className="size-7 rounded-lg flex items-center justify-center text-muted-foreground/40 cursor-not-allowed border border-dashed border-border/50 gap-3">
-                                              <Lock   className="size-4" />
+                                            <div className="size-7 rounded-lg flex items-center justify-center text-muted-foreground/40 cursor-not-allowed border border-dashed border-border/50">
+                                              <Lock className="size-4 size-4" />
                                             </div>
                                           </TooltipTrigger>
                                           <TooltipContent side="top" className="size-4 max-w-xs text-xs">
@@ -2856,8 +2856,8 @@ export default function GestionIngresosPage() {
 
                                       <Tooltip>
                                         <TooltipTrigger asChild>
-                                          <Button variant="ghost" size="icon-sm" type="button" onClick={(e) => {e.stopPropagation();handleSelectSolicitud(row);}} aria-label={`Ver detalle de tr—mite ${row.id}`} className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10">
-                                            <Eye   className="size-4" />
+                                          <Button variant="ghost" size="icon-sm" type="button" onClick={(e) => {e.stopPropagation();handleSelectSolicitud(row);}}  aria-label={`Ver detalle de tr�mite ${row.id}`}>
+                                            <Eye className="size-4 size-4" />
                                           </Button>
                                         </TooltipTrigger>
                                         <TooltipContent side="top">Ver detalle</TooltipContent>
@@ -2882,10 +2882,10 @@ export default function GestionIngresosPage() {
                         <SearchIcon className="size-6" />
                       </div>
                       <h3 className="font-heading font-bold text-base text-foreground">
-                        No hay tr—mites registrados
+                        No hay tr�mites registrados
                       </h3>
                       <p className="text-xs text-muted-foreground leading-relaxed">
-                        No se encontraron tr—mites que coincidan con los filtros seleccionados.
+                        No se encontraron tr�mites que coincidan con los filtros seleccionados.
                       </p>
                     </div> :
 
@@ -2901,12 +2901,12 @@ export default function GestionIngresosPage() {
 
                       const procesoLabel =
                       row.tipoTramite === "PROCESO_A_REGISTRO_INSTITUCION" ?
-                      "Anexo A — Registro Instituci—n" :
+                      "Anexo A � Registro Instituci�n" :
                       row.tipoTramite === "PROCESO_B_ENROLAMIENTO_COORDINADOR" ?
-                      "Anexo B — Enrolamiento Coordinador" :
+                      "Anexo B � Enrolamiento Coordinador" :
                       row.tipoTramite === "PROCESO_C_CAMBIO_COORDINADOR" ?
-                      "Anexo C — Cambio de Coordinador" :
-                      row.tituloTramite || "Otro tr—mite";
+                      "Anexo C � Cambio de Coordinador" :
+                      row.tituloTramite || "Otro tr�mite";
 
                       return (
                         <div
@@ -2917,14 +2917,14 @@ export default function GestionIngresosPage() {
                             isSelected && "ring-2 ring-primary/40 bg-primary/5 border-primary/30"
                           )}>
                           
-                            {/* Cabecera: Checkbox + ID + C—digo + Badge de Estado */}
+                            {/* Cabecera: Checkbox + ID + C�digo + Badge de Estado */}
                             <div className="flex items-center justify-between gap-2 pb-2 border-b border-border/50 min-w-0">
                               <div className="flex items-center gap-2.5 min-w-0 shrink-0" onClick={(e) => e.stopPropagation()}>
                                 <Checkbox
                                 disabled={!isAssignable}
                                 checked={isSelected}
                                 onCheckedChange={() => toggleSelectRow(row.id)}
-                                aria-label={`Seleccionar tr—mite ${row.id}`} />
+                                aria-label={`Seleccionar tr�mite ${row.id}`} />
                               
                                 <div className="flex flex-col min-w-0">
                                   <span className="font-bold text-xs font-mono text-primary whitespace-nowrap">{row.id}</span>
@@ -2938,14 +2938,14 @@ export default function GestionIngresosPage() {
                               </div>
                             </div>
 
-                            {/* Cuerpo: Proceso + Instituci—n con RUC + Solicitante con Cédula y Correo */}
+                            {/* Cuerpo: Proceso + Instituci�n con RUC + Solicitante con C�dula y Correo */}
                             <div className="space-y-2 py-0.5">
                               <div>
                                 <p className="font-bold text-sm text-foreground leading-snug">{procesoLabel}</p>
                               </div>
 
                               <div className="space-y-1.5 text-xs">
-                                {/* Instituci—n */}
+                                {/* Instituci�n */}
                                 <div className="flex items-start gap-2 text-foreground font-medium">
                                   <Building2 className="size-3.5 text-primary shrink-0 mt-0.5" />
                                   <div className="flex flex-col min-w-0">
@@ -2963,7 +2963,7 @@ export default function GestionIngresosPage() {
                                     <span className="text-foreground font-medium break-words leading-tight">{row.nombreCompleto}</span>
                                     <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[10px] text-muted-foreground font-mono mt-0.5">
                                       <span>C.I. {row.cedula}</span>
-                                      <span>—</span>
+                                      <span>�</span>
                                       <span className="font-sans text-primary break-all">{row.correo}</span>
                                     </div>
                                   </div>
@@ -2971,7 +2971,7 @@ export default function GestionIngresosPage() {
                               </div>
                             </div>
 
-                            {/* Pie: Fecha + Asignaci—n + Acciones */}
+                            {/* Pie: Fecha + Asignaci�n + Acciones */}
                             <div className="flex items-center justify-between pt-2.5 border-t border-border/60 gap-2 flex-wrap sm:flex-nowrap">
                               <div className="flex flex-col min-w-0">
                                 <span className="text-[10px] text-muted-foreground">Fecha ingreso:</span>
@@ -2998,7 +2998,7 @@ export default function GestionIngresosPage() {
                                   handleSelectSolicitud(row);
                                 }}
                                 className="size-7 rounded-lg shadow-2xs"
-                                aria-label={`Gestionar resoluci—n para tr—mite ${row.id}`}>
+                                aria-label={`Gestionar resoluci�n para tr�mite ${row.id}`}>
                                 
                                     <FileSignature className="size-3" />
                                   </Button> :
@@ -3033,7 +3033,7 @@ export default function GestionIngresosPage() {
                                     handleSelectSolicitud(row);
                                   }}
                                   className="h-7 px-2 text-xs font-semibold rounded-lg border-border/80 text-foreground hover:bg-muted shadow-2xs gap-1"
-                                  aria-label={`Ver detalle de tr—mite ${row.id}`}>
+                                  aria-label={`Ver detalle de tr�mite ${row.id}`}>
                                   
                                       <Eye className="size-3" />
                                       <span>Detalle</span>
@@ -3049,7 +3049,7 @@ export default function GestionIngresosPage() {
                   }
                 </div>
 
-                {/* Barra Flotante Contextual para Asignaci—n Masiva */}
+                {/* Barra Flotante Contextual para Asignaci�n Masiva */}
                 {selectedIds.length > 0 &&
                 <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-foreground text-background dark:bg-card dark:text-card-foreground px-4 sm:px-6 py-3 sm:py-3.5 rounded-2xl shadow-xl border border-border flex items-center justify-between gap-3 sm:gap-5 w-[calc(100%-2rem)] max-w-md sm:w-auto animate-slide-up">
                     <div className="flex items-center gap-2 text-xs font-bold">
@@ -3087,9 +3087,9 @@ export default function GestionIngresosPage() {
 
           })()}
 
-            {/* -- 6. Paginaci—n y Contador de filas -- */}
+            {/* -- 6. Paginaci�n y Contador de filas -- */}
             <div className="flex flex-col md:flex-row items-center justify-center md:justify-between gap-3 sm:gap-4 pt-4 pb-2 w-full border-t border-border/50">
-              {/* Informaci—n y Selector de filas */}
+              {/* Informaci�n y Selector de filas */}
               <div className="flex flex-col sm:flex-row items-center justify-center md:justify-start gap-2.5 sm:gap-4 w-full md:w-auto text-center md:text-left">
                 <p className="text-xs text-muted-foreground font-medium text-center md:text-left">
                   Mostrando{" "}
@@ -3103,10 +3103,10 @@ export default function GestionIngresosPage() {
                   <span className="font-bold text-foreground">
                     {filteredData.length}
                   </span>{" "}
-                  tr—mites
+                  tr�mites
                 </p>
 
-                {/* Selector de filas por p—gina */}
+                {/* Selector de filas por p�gina */}
                 <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
                   <span>Filas:</span>
                   <div className="inline-flex rounded-full border border-border/80 p-0.5 bg-surface shadow-2xs">
@@ -3132,7 +3132,7 @@ export default function GestionIngresosPage() {
                 </div>
               </div>
 
-              {/* Controles de paginaci—n */}
+              {/* Controles de paginaci�n */}
               <div className="w-full md:w-auto flex items-center justify-center md:justify-end overflow-x-auto py-1">
                 <Pagination className="mx-auto md:mx-0 w-auto justify-center">
                   <PaginationContent className="gap-1 sm:gap-1.5 flex-nowrap justify-center">
@@ -3243,14 +3243,14 @@ export default function GestionIngresosPage() {
                       <span className="font-mono font-bold text-foreground">{previewDoc.archivo}</span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-muted-foreground">Tama—o:</span>
+                      <span className="text-muted-foreground">Tama�o:</span>
                       <span className="font-semibold text-foreground">{previewDoc.tamano}</span>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-muted-foreground">Firma digital:</span>
                       <Badge tone="neutral" appearance="soft" size="sm" className="gap-1 text-[10px] border border-border text-foreground">
                         <Check className="size-2.5" />
-                        V—lida y Vigente
+                        V�lida y Vigente
                       </Badge>
                     </div>
                     <div className="flex items-center justify-between">
@@ -3286,7 +3286,7 @@ export default function GestionIngresosPage() {
           </DialogContent>
         </Dialog>
 
-        {/* -- Modales de Acci—n (Aprobar y Rechazar) -- */}
+        {/* -- Modales de Acci�n (Aprobar y Rechazar) -- */}
         <AprobarSolicitudDialog
           solicitud={solicitudToApprove}
           open={isApproveOpen}

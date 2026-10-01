@@ -717,7 +717,7 @@ export default function AccesoInteroperabilidadPage() {
 
                     return (
                       <TableRow key={s.id} className={cn(isEnRevision && "bg-primary/[0.02]")}>
-                        <TableCell className="text-center font-semibold text-foreground">
+                        <TableCell className="font-semibold text-foreground">
                           <div className="flex items-center gap-1.5">
                             {isEnRevision && <span className="size-2 rounded-full bg-primary animate-pulse" />}
                             <span>{s.id}</span>
@@ -739,9 +739,14 @@ export default function AccesoInteroperabilidadPage() {
                             <TooltipProvider delayDuration={0}>
                               <Tooltip>
                                 <TooltipTrigger asChild>
-                                  <Button variant="ghost" size="icon-sm" asChild className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10">
+                                  <Button
+                                    variant="ghost"
+                                    size="icon-sm"
+                                    asChild
+                                    
+                                  >
                                     <Link href={`/wireframes2/acceso-interoperabilidad/solicitudes/${s.id}`}>
-                                      <Eye   className="size-4" />
+                                      <Eye  />
                                     </Link>
                                   </Button>
                                 </TooltipTrigger>
@@ -755,8 +760,13 @@ export default function AccesoInteroperabilidadPage() {
                               {s.estado === "Acceso generado" && (
                                 <Tooltip>
                                   <TooltipTrigger asChild>
-                                    <Button variant="ghost" size="icon-sm" onClick={() => setModalCredenciales(s)} className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10">
-                                      <KeyRound   className="size-4" />
+                                    <Button
+                                      variant="ghost"
+                                      size="icon-sm"
+                                      onClick={() => setModalCredenciales(s)}
+                                      
+                                    >
+                                      <KeyRound  />
                                       <span>Ver credenciales</span>
                                     </Button>
                                   </TooltipTrigger>
@@ -769,7 +779,12 @@ export default function AccesoInteroperabilidadPage() {
                               {isRechazada && (
                                 <Tooltip>
                                   <TooltipTrigger asChild>
-                                    <Button variant="ghost" size="icon-sm" asChild className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10">
+                                    <Button
+                                      variant="ghost"
+                                      size="icon-sm"
+                                      asChild
+                                      
+                                    >
                                       <Link
                                         href={`/wireframes2/acceso-interoperabilidad/solicitudes/${s.id}?edit=true&step=${
                                           (`${s.motivoRechazo ||""} ${s.observaciones ||""}`.toLowerCase().includes("eliminar campo") ||
@@ -780,7 +795,7 @@ export default function AccesoInteroperabilidadPage() {
                                             : 2
                                         }`}
                                       >
-                                        <Edit   className="size-4" />
+                                        <Edit  />
                                       </Link>
                                     </Button>
                                   </TooltipTrigger>
@@ -800,7 +815,7 @@ export default function AccesoInteroperabilidadPage() {
                     const isPendiente = s.estado === "Por revisar" || s.estado === "En revisión" || s.estado === "Pendiente de aprobación" || s.estado === "Reenviada";
                     return (
                       <TableRow key={s.id} className={cn(isPendiente && "bg-primary/[0.02]")}>
-                        <TableCell className="text-center font-semibold text-foreground">
+                        <TableCell className="font-semibold text-foreground">
                           <div className="flex items-center gap-1.5">
                             {isPendiente && <span className="size-2 rounded-full bg-primary animate-pulse" />}
                             <span>{s.id}</span>
@@ -816,9 +831,14 @@ export default function AccesoInteroperabilidadPage() {
                             <TooltipProvider delayDuration={0}>
                               <Tooltip>
                                 <TooltipTrigger asChild>
-                                  <Button variant="ghost" size="icon-sm" asChild className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10">
+                                  <Button
+                                    variant="ghost"
+                                    size="icon-sm"
+                                    asChild
+                                    
+                                  >
                                     <Link href={`/wireframes2/acceso-interoperabilidad/solicitudes/${s.id}`}>
-                                      <Eye   className="size-4" />
+                                      <Eye  />
                                     </Link>
                                   </Button>
                                 </TooltipTrigger>
@@ -830,8 +850,13 @@ export default function AccesoInteroperabilidadPage() {
                               {s.estado === "Acceso generado" && (
                                 <Tooltip>
                                   <TooltipTrigger asChild>
-                                    <Button variant="ghost" size="icon-sm" onClick={() => setModalCredenciales(s)} className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10">
-                                      <KeyRound   className="size-4" />
+                                    <Button
+                                      variant="ghost"
+                                      size="icon-sm"
+                                      onClick={() => setModalCredenciales(s)}
+                                      
+                                    >
+                                      <KeyRound  />
                                       <span>Ver credenciales</span>
                                     </Button>
                                   </TooltipTrigger>
@@ -866,9 +891,14 @@ export default function AccesoInteroperabilidadPage() {
                             <TooltipProvider delayDuration={0}>
                               <Tooltip>
                                 <TooltipTrigger asChild>
-                                  <Button variant="ghost" size="icon-sm" asChild className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10">
+                                  <Button
+                                    variant="ghost"
+                                    size="icon-sm"
+                                    asChild
+                                    
+                                  >
                                     <Link href={`/wireframes2/acceso-interoperabilidad/solicitudes/${s.id}`}>
-                                      <Eye   className="size-4" />
+                                      <Eye  />
                                     </Link>
                                   </Button>
                                 </TooltipTrigger>
@@ -880,8 +910,13 @@ export default function AccesoInteroperabilidadPage() {
                               {s.estado === "Acceso generado" && (
                                 <Tooltip>
                                   <TooltipTrigger asChild>
-                                    <Button variant="ghost" size="icon-sm" onClick={() => setModalCredenciales(s)} className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10">
-                                      <KeyRound   className="size-4" />
+                                    <Button
+                                      variant="ghost"
+                                      size="icon-sm"
+                                      onClick={() => setModalCredenciales(s)}
+                                      
+                                    >
+                                      <KeyRound  />
                                       <span>Ver credenciales</span>
                                     </Button>
                                   </TooltipTrigger>
@@ -896,8 +931,13 @@ export default function AccesoInteroperabilidadPage() {
                               {(s.estado === "Pendiente de validación de pago" || s.estado === "Pago en validación") && (
                                 <Tooltip>
                                   <TooltipTrigger asChild>
-                                    <Button variant="ghost" size="icon-sm" onClick={() => handleOpenValidar(s)} className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10">
-                                      <CheckCircle2   className="size-4" />
+                                    <Button
+                                      variant="ghost"
+                                      size="icon-sm"
+                                      onClick={() => handleOpenValidar(s)}
+                                      
+                                    >
+                                      <CheckCircle2  />
                                     </Button>
                                   </TooltipTrigger>
                                   <TooltipContent side="top">
@@ -909,8 +949,13 @@ export default function AccesoInteroperabilidadPage() {
                               {(s.estado === "Pago validado" || s.estado === "Pago verificado") && (
                                 <Tooltip>
                                   <TooltipTrigger asChild>
-                                    <Button variant="ghost" size="icon-sm" onClick={() => setModalCur(s)} className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10">
-                                      <FileCheck2   className="size-4" />
+                                    <Button
+                                      variant="ghost"
+                                      size="icon-sm"
+                                      onClick={() => setModalCur(s)}
+                                      
+                                    >
+                                      <FileCheck2  />
                                     </Button>
                                   </TooltipTrigger>
                                   <TooltipContent side="top">
