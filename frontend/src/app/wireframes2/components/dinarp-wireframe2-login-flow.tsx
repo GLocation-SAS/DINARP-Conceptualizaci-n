@@ -242,7 +242,7 @@ export function DinarpWireframe2LoginFlow({
       });
       const loggedUser = login(cedula);
       if (loggedUser?.role === "ADMIN") {
-        router.push("/wireframes2/usuarios");
+        router.push("/wireframes2/cuentas-internas");
       } else {
         router.push("/wireframes2/catalogo-interoperabilidad");
       }
@@ -430,15 +430,16 @@ export function DinarpWireframe2LoginFlow({
                       </CardDescription>
                     </div>
                   </div>
-                  <Button
-                    type="button"
-                    onClick={() => setActiveTab("enrolamiento")}
-                    variant="secondary"
-                    className="w-full mt-1 text-xs h-9 px-3 relative z-20 shadow-xs justify-center"
-                  >
-                    <span className="font-semibold">Completar prerregistro</span>
-                    <ArrowRight className="size-4 ml-2 opacity-80" />
-                  </Button>
+                  <Link href="/wireframes2/enrolamiento-coordinador" className="w-full mt-1">
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      className="w-full text-xs h-9 px-3 relative z-20 shadow-xs justify-center"
+                    >
+                      <span className="font-semibold">Completar prerregistro</span>
+                      <ArrowRight className="size-4 ml-2 opacity-80" />
+                    </Button>
+                  </Link>
                   <Users className="absolute -bottom-4 -right-3 size-24 text-secondary/5 opacity-50 group-hover:opacity-100 group-hover:scale-110 transition-all duration-500 -z-10 pointer-events-none" />
                 </div>
               </div>
