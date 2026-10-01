@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
@@ -430,7 +430,7 @@ export function DinarpWireframe2LoginFlow({
                       </CardDescription>
                     </div>
                   </div>
-                  <Link href="/wireframes2/enrolamiento-coordinador" className="w-full mt-1">
+                  <Link href="/wireframes2/registro-institucion" className="w-full mt-1">
                     <Button
                       type="button"
                       variant="secondary"
@@ -721,3 +721,5 @@ export function DinarpWireframe2LoginFlow({
     </div>
   );
 }
+
+
