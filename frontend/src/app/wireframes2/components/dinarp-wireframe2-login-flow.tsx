@@ -361,6 +361,14 @@ export function DinarpWireframe2LoginFlow({
                 </TooltipContent>
               </Tooltip>
             </InputGroup>
+            <div className="flex justify-end pt-1">
+              <Link
+                href="/wireframes2/recuperar-contrasena"
+                className="text-xs font-medium text-primary hover:text-primary-400 active:text-primary-400 hover:underline transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring rounded-xs"
+              >
+                ¿Olvidaste tu contraseña?
+              </Link>
+            </div>
           </FormField>
 
           <Button
