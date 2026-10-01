@@ -1069,17 +1069,12 @@ export default function CambioCoordinadorPage() {
                           <TableCell className="text-xs text-muted-foreground">
                             {sol.revisorGestion || sol.revisor || "Sin asignar"}
                           </TableCell>
-                          <TableCell className="text-xs text-right">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="text-xs gap-1.5 h-8"
-                              onClick={() => {
+                          <TableCell className="text-xs text-center">
+                            <Button onClick={() => {
                                 setAssignModalSol(sol);
                                 setSelectedRevisor(REVISORES_GESTION[0].nombre);
-                              }}
-                            >
-                              <UserPlus className="size-3.5" />
+                              }} variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10">
+                              <UserPlus className="size-4" />
                               <span>Asignar revisor</span>
                             </Button>
                           </TableCell>
@@ -1173,14 +1168,9 @@ export default function CambioCoordinadorPage() {
                               <span>{badge.label}</span>
                             </Badge>
                           </TableCell>
-                          <TableCell className="text-xs text-right">
-                            <Button
-                              variant="primary"
-                              size="sm"
-                              className="text-xs gap-1.5 h-8"
-                              onClick={() => setDetailModalSol(sol)}
-                            >
-                              <Eye className="size-3.5" />
+                          <TableCell className="text-xs text-center">
+                            <Button onClick={() => setDetailModalSol(sol)} variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10">
+                              <Eye className="size-4" />
                               <span>Ver detalle</span>
                             </Button>
                           </TableCell>

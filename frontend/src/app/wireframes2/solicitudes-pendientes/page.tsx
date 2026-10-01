@@ -2324,18 +2324,11 @@ export default function GestionIngresosPage() {
                                 <div className="flex items-center justify-center gap-3">
                                   <Tooltip>
                                     <TooltipTrigger asChild>
-                                      <Button
-                                        type="button"
-                                        variant="ghost"
-                                        size="icon-sm"
-                                        onClick={(e) => {
+                                      <Button type="button" onClick={(e) => {
                                           e.stopPropagation();
                                           handleSelectSolicitud(row);
-                                        }}
-                                        
-                                        aria-label={`Ver detalle y gestionar trámite ${row.id}`}
-                                      >
-                                        <Eye  />
+                                        }} aria-label={`Ver detalle y gestionar trámite ${row.id}`} variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10">
+                                        <Eye className="size-4" />
                                       </Button>
                                     </TooltipTrigger>
                                     <TooltipContent side="top">Ver detalle y gestionar</TooltipContent>

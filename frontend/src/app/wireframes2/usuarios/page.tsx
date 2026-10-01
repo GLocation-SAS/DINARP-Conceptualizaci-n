@@ -1275,20 +1275,13 @@ export default function GestionUsuariosPage() {
                       </TableCell>
 
                       {/* Acciones */}
-                      <TableCell className="px-3 py-2.5 text-center whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
-                        <div className="flex items-center justify-center gap-3 shrink-0">
+                      <TableCell className="py-2.5 text-center whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex items-center justify-center gap-3">
                           {/* Ver detalle y auditoría */}
                           <Tooltip>
                             <TooltipTrigger asChild>
-                              <Button
-                                type="button"
-                                variant="outline"
-                                size="icon-sm"
-                                onClick={() => handleOpenDetalle(u)}
-                                className="size-7 rounded-lg border-border/80 text-foreground hover:bg-muted shadow-2xs"
-                                aria-label={`Ver detalle de ${u.nombreCompleto}`}
-                              >
-                                <Eye className="size-3.5 text-muted-foreground" />
+                              <Button type="button" onClick={() => handleOpenDetalle(u)} aria-label={`Ver detalle de ${u.nombreCompleto}`} variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10">
+                                <Eye className="size-4" />
                               </Button>
                             </TooltipTrigger>
                             <TooltipContent side="top">Ver detalle y expediente</TooltipContent>
@@ -1298,15 +1291,8 @@ export default function GestionUsuariosPage() {
                           {u.estado !== "RETIRADO" && (
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <Button
-                                  type="button"
-                                  variant="outline"
-                                  size="icon-sm"
-                                  onClick={() => handleOpenEditar(u)}
-                                  className="size-7 rounded-lg border-border/80 text-foreground hover:bg-primary/10 hover:border-primary/40 shadow-2xs"
-                                  aria-label={`Editar cuenta interna de ${u.nombreCompleto}`}
-                                >
-                                  <Edit2 className="size-3.5 text-primary" />
+                                <Button type="button" onClick={() => handleOpenEditar(u)} aria-label={`Editar cuenta interna de ${u.nombreCompleto}`} variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10">
+                                  <Edit2 className="size-4" />
                                 </Button>
                               </TooltipTrigger>
                               <TooltipContent side="top">Editar cuenta interna</TooltipContent>
@@ -1317,15 +1303,8 @@ export default function GestionUsuariosPage() {
                           {u.estado === "ACTIVO" && (
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <Button
-                                  type="button"
-                                  variant="outline"
-                                  size="icon-sm"
-                                  onClick={() => handleOpenSuspender(u)}
-                                  className="size-7 rounded-lg border-border/80 text-warning hover:bg-warning/10 hover:border-warning/40 shadow-2xs"
-                                  aria-label={`Suspender cuenta interna de ${u.nombreCompleto}`}
-                                >
-                                  <Ban className="size-3.5 text-warning" />
+                                <Button type="button" onClick={() => handleOpenSuspender(u)} aria-label={`Suspender cuenta interna de ${u.nombreCompleto}`} variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-warning hover:bg-warning/10">
+                                  <Ban className="size-4" />
                                 </Button>
                               </TooltipTrigger>
                               <TooltipContent side="top">Suspender cuenta interna</TooltipContent>
@@ -1336,15 +1315,8 @@ export default function GestionUsuariosPage() {
                           {u.estado === "SUSPENDIDO" && (
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <Button
-                                  type="button"
-                                  variant="outline"
-                                  size="icon-sm"
-                                  onClick={() => handleOpenReactivar(u)}
-                                  className="size-7 rounded-lg border-border/80 text-success hover:bg-success/10 hover:border-success/40 shadow-2xs"
-                                  aria-label={`Reactivar cuenta interna de ${u.nombreCompleto}`}
-                                >
-                                  <RotateCcw className="size-3.5 text-success" />
+                                <Button type="button" onClick={() => handleOpenReactivar(u)} aria-label={`Reactivar cuenta interna de ${u.nombreCompleto}`} variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-success hover:bg-success/10">
+                                  <RotateCcw className="size-4" />
                                 </Button>
                               </TooltipTrigger>
                               <TooltipContent side="top">Reactivar cuenta interna</TooltipContent>
@@ -1355,15 +1327,8 @@ export default function GestionUsuariosPage() {
                           {u.estado !== "RETIRADO" && (
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <Button
-                                  type="button"
-                                  variant="outline"
-                                  size="icon-sm"
-                                  onClick={() => handleOpenBaja(u)}
-                                  className="size-7 rounded-lg border-border/80 text-danger hover:bg-danger/10 hover:border-danger/40 shadow-2xs"
-                                  aria-label={`Dar de baja a cuenta interna de ${u.nombreCompleto}`}
-                                >
-                                  <UserX className="size-3.5 text-danger" />
+                                <Button type="button" onClick={() => handleOpenBaja(u)} aria-label={`Dar de baja a cuenta interna de ${u.nombreCompleto}`} variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-danger hover:bg-danger/10">
+                                  <UserX className="size-4" />
                                 </Button>
                               </TooltipTrigger>
                               <TooltipContent side="top">Dar de baja a cuenta interna</TooltipContent>

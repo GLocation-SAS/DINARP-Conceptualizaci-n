@@ -763,19 +763,16 @@ export function AsignarRevisorPanel({
                         </TableCell>
 
                         {/* Acción con Tooltip del UI Kit */}
-                        <TableCell className="py-2.5 px-4 h-auto text-center">
-                          <div
-                            className="flex items-center justify-center"
-                            onClick={(e) => e.stopPropagation()}
-                          >
+                        <TableCell className="py-2.5 h-auto text-center">
+                          <div className="flex items-center justify-center gap-3" onClick={(e) => e.stopPropagation()}>
                             <TooltipProvider>
                               <Tooltip>
                                 <TooltipTrigger asChild>
-                                  <Button  size="icon-sm" type="button" variant={isSelected ? "primary" : "ghost"} disabled={yaEmpezoRevision} onClick={() => setSelectedRevisor(rev)} className={cn("size-8 rounded-lg transition-colors", isSelected ? "bg-primary text-primary-foreground shadow-2xs" : "text-muted-foreground hover:text-primary hover:bg-primary/10 border border-border/70 hover:border-primary/40", !isSelected && "hover:text-primary-300 hover:bg-primary-300/10")} aria-label={`Seleccionar a ${rev.nombre}`}>
+                                  <Button type="button" disabled={yaEmpezoRevision} onClick={() => setSelectedRevisor(rev)} aria-label={`Seleccionar a ${rev.nombre}`} variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10">
                                     {isSelected ? (
-                                      <Check className="size-4 size-4" />
+                                      <Check className="size-4" />
                                     ) : (
-                                      <UserPlus className="size-4 size-4" />
+                                      <UserPlus className="size-4" />
                                     )}
                                   </Button>
                                 </TooltipTrigger>

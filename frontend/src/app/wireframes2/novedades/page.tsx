@@ -140,10 +140,10 @@ export default function NovedadesListPage() {
                         {novedad.estado}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="text-center">
                       <Link href="/wireframes2/novedades/detalle">
-                        <Button variant="ghost" size="sm" className="h-8 gap-1">
-                          <Eye className="h-4 w-4" />
+                        <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10">
+                          <Eye className="size-4" />
                           <span className="hidden sm:inline-block">Ver</span>
                         </Button>
                       </Link>

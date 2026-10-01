@@ -324,13 +324,14 @@ export default function SolicitudDetailPage({ params, searchParams }: PageProps)
     return "Gestión de solicitudes";
   };
 
+  const estadoStr = String(solicitud.estado);
   const isAprobadorPending =
     role === "APROBADOR" &&
-    (solicitud.estado === "Por revisar" ||
-      solicitud.estado === "En revisión" ||
-      solicitud.estado === "Pendiente de aprobación" ||
-      solicitud.estado === "Reenviada" ||
-      solicitud.estado === "Reenviada para aprobación");
+    (estadoStr === "Por revisar" ||
+      estadoStr === "En revisión" ||
+      estadoStr === "Pendiente de aprobación" ||
+      estadoStr === "Reenviada" ||
+      estadoStr === "Reenviada para aprobación");
 
   const isRechazada = solicitud.estado === "Rechazada" || solicitud.estado === "Con observaciones";
 
@@ -460,7 +461,7 @@ export default function SolicitudDetailPage({ params, searchParams }: PageProps)
           )}
 
           {/* Banner de Solicitud Reenviada tras Subsanación */}
-          {(solicitud.estado === "Reenviada" || solicitud.estado === "Reenviada para aprobación") && (
+          {(estadoStr === "Reenviada" || estadoStr === "Reenviada para aprobación") && (
             <div className="p-4 rounded-xl border border-blue-500/40 bg-blue-500/10 flex items-start gap-3">
               <CheckCircle2 className="size-5 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
               <div>

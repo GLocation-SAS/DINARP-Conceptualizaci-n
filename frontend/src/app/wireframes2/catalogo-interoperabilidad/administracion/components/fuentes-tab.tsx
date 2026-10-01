@@ -339,16 +339,11 @@ export function FuentesTab({ activeRole }: { activeRole?: string }) {
                     <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
                       {fuente.ultimaActualizacion}
                     </TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="text-center">
                       <TooltipProvider delayDuration={0}>
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon-sm"
-                              asChild
-                              className="size-8 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted"
-                            >
+                            <Button asChild variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10">
                               <Link href={`/wireframes2/catalogo-interoperabilidad/administracion/fuentes/${fuente.id}`}>
                                 <Eye className="size-4" />
                               </Link>

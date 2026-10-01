@@ -501,18 +501,13 @@ export function ProcesosTab({ activeRole, onStartTour }: ProcesosTabProps) {
                         {exp.ultimaActualizacion}
                       </TableCell>
                       <TableCell className="text-center">
-                        <div className="flex items-center justify-center gap-3.5" data-tour="tour-expediente">
+                        <div className="flex items-center justify-center gap-3" data-tour="tour-expediente">
                           <TooltipProvider delayDuration={0}>
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <Button
-                                  variant={isMyTask ?"primary" :"ghost"}
-                                  size="icon-sm"
-                                  asChild
-                                  className={isMyTask ?"size-8 rounded-lg shadow-sm font-semibold" :"size-8 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted"}
-                                >
+                                <Button asChild variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10">
                                   <Link href={`/wireframes2/catalogo-interoperabilidad/administracion/incorporaciones/${exp.id}`}>
-                                    {isMyTask ? <ArrowRight  /> : <Eye  />}
+                                    {isMyTask ? <ArrowRight className="size-4" /> : <Eye className="size-4" />}
                                   </Link>
                                 </Button>
                               </TooltipTrigger>

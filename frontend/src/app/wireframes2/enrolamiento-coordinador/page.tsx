@@ -1801,20 +1801,14 @@ function EnrolamientoContent() {
                                 {badgeProps.label}
                               </Badge>
                             </TableCell>
-                            <TableCell className="text-right">
+                            <TableCell className="text-center">
                               <Tooltip>
                                 <TooltipTrigger asChild>
-                                  <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => {
+                                  <Button type="button" onClick={() => {
                                       setSelectedSolicitudDetalle(sol);
                                       setIsSheetDetailOpen(true);
-                                    }}
-                                    className="size-8 p-0"
-                                  >
-                                    <Eye className="size-4 text-foreground" />
+                                    }} variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10">
+                                    <Eye className="size-4" />
                                   </Button>
                                 </TooltipTrigger>
                                 <TooltipContent side="top">Ver detalle</TooltipContent>

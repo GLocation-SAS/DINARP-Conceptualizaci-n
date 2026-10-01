@@ -2581,7 +2581,7 @@ export default function GestionIngresosPage() {
                         <TableHead className="w-[150px] px-2 py-2.5 whitespace-nowrap">
                           ASIGNADO
                         </TableHead>
-                        <TableHead className="w-16 text-center">Acciones</TableHead>
+                        <TableHead className="w-24 text-center">Acciones</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -2820,8 +2820,8 @@ export default function GestionIngresosPage() {
                                   {currentUser.role === "EQ_NORMATIVA" ?
                                 <Tooltip>
                                       <TooltipTrigger asChild>
-                                        <Button variant="ghost" size="icon-sm" type="button" onClick={(e) => {e.stopPropagation();handleSelectSolicitud(row);}}  aria-label={`Gestionar resoluci�n para tr�mite ${row.id}`}>
-                                          <FileSignature className="size-4 size-4" />
+                                        <Button type="button" onClick={(e) => {e.stopPropagation();handleSelectSolicitud(row);}} aria-label={`Gestionar resoluci�n para tr�mite ${row.id}`} variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10">
+                                          <FileSignature className="size-4" />
                                         </Button>
                                       </TooltipTrigger>
                                       <TooltipContent side="top">
@@ -2833,8 +2833,8 @@ export default function GestionIngresosPage() {
                                       {isAssignable ?
                                   <Tooltip>
                                           <TooltipTrigger asChild>
-                                            <Button type="button" variant={esReasignacion ? "neutral" : "primary"} size="sm" onClick={(e) => {e.stopPropagation();handleOpenAssign(row);}} className={cn("size-7 rounded-lg shadow-2xs", esReasignacion && "border border-border text-foreground hover:bg-muted")} aria-label={esReasignacion ? `Reasignar revisor a tr�mite ${row.id}` : `Asignar revisor a tr�mite ${row.id}`} >
-                                              {esReasignacion ? <RotateCcw className="size-4 size-4" /> : <UserPlus className="size-4 size-4" />}
+                                            <Button type="button" onClick={(e) => {e.stopPropagation();handleOpenAssign(row);}} aria-label={esReasignacion ? `Reasignar revisor a tr�mite ${row.id}` : `Asignar revisor a tr�mite ${row.id}`} variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10">
+                                              {esReasignacion ? <RotateCcw className="size-4" /> : <UserPlus className="size-4" />}
                                             </Button>
                                           </TooltipTrigger>
                                           <TooltipContent side="top">
@@ -2844,8 +2844,8 @@ export default function GestionIngresosPage() {
                                   motivoBloqueo && revisorAsignado && !["Aprobada", "APROBADO_FINAL", "Finalizado", "Rechazada", "Cancelada", "Cerrada"].includes(row.estado) ?
                                   <Tooltip>
                                           <TooltipTrigger asChild>
-                                            <div className="size-7 rounded-lg flex items-center justify-center text-muted-foreground/40 cursor-not-allowed border border-dashed border-border/50">
-                                              <Lock className="size-4 size-4" />
+                                            <div className="size-7 rounded-lg flex items-center justify-center text-muted-foreground/40 cursor-not-allowed border border-dashed border-border/50 gap-3">
+                                              <Lock className="size-4" />
                                             </div>
                                           </TooltipTrigger>
                                           <TooltipContent side="top" className="size-4 max-w-xs text-xs">
@@ -2856,8 +2856,8 @@ export default function GestionIngresosPage() {
 
                                       <Tooltip>
                                         <TooltipTrigger asChild>
-                                          <Button variant="ghost" size="icon-sm" type="button" onClick={(e) => {e.stopPropagation();handleSelectSolicitud(row);}}  aria-label={`Ver detalle de tr�mite ${row.id}`}>
-                                            <Eye className="size-4 size-4" />
+                                          <Button type="button" onClick={(e) => {e.stopPropagation();handleSelectSolicitud(row);}} aria-label={`Ver detalle de tr�mite ${row.id}`} variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-primary-300 hover:bg-primary-300/10">
+                                            <Eye className="size-4" />
                                           </Button>
                                         </TooltipTrigger>
                                         <TooltipContent side="top">Ver detalle</TooltipContent>
